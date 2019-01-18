@@ -1,0 +1,10 @@
+#ifndef PROJECT_PATH
+#define PROJECT_PATH
+
+namespace fs {
+inline constexpr const char* projectPath() {
+    return "@PROJECT_PATH@";
+}
+}
+
+#endif

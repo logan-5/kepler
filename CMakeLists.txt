@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.11)
+
+project(deferred)
+
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
+
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${SRC})
+set(SRC ${SRC} ${SRC_DIR}/fs.cpp)
+set(SRC ${SRC} ${SRC_DIR}/main.cpp)
+set(SRC ${SRC} ${SRC_DIR}/shader.cpp)
+set(SRC ${SRC} ${SRC_DIR}/types.cpp)
+set(SRC ${SRC} ${SRC_DIR}/window.cpp)
+
+set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${GENERATED_DIR})
+
+set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/project_path_template.hpp.in
+    ${GENERATED_DIR}/project_path.hpp
+    )
+
+# GLFW
+set(GLFW_DIR ${LIB_DIR}/glfw)
+set(GLFW_BUILD_EXAMPLES OFF CACHE INTERNAL "Build the GLFW example programs")
+set(GLFW_BUILD_TESTS OFF CACHE INTERNAL "Build the GLFW test programs")
+set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "Build the GLFW documentation")
+set(GLFW_INSTALL OFF CACHE INTERNAL "Generate installation target")
+add_subdirectory("${GLFW_DIR}")
+set(LINK_LIBS ${LINK_LIBS} glfw ${GLFW_LIBRARIES})
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${GLFW_DIR}/include)
+set(COMPILE_DEFINITIONS ${COMPILE_DEFS} GLFW_INCLUDE_NONE)
+
+# GLAD
+set(GLAD_DIR ${LIB_DIR}/glad)
+set(GLAD_INCLUDE ${GLAD_DIR}/include)
+add_library(glad ${GLAD_DIR}/src/glad.c)
+target_include_directories(glad PRIVATE ${GLAD_INCLUDE})
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${GLAD_INCLUDE})
+set(LINK_LIBS ${LINK_LIBS} glad)
+
+# GLM
+set(GLM_DIR ${LIB_DIR}/glm)
+set(GLM_INCLUDE ${LIB_DIR}/glm)
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${GLM_INCLUDE})
+
+add_executable(${PROJECT_NAME} ${SRC})
+target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
+target_compile_definitions(${PROJECT_NAME} PRIVATE ${COMPILE_DEFS})
+set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)
