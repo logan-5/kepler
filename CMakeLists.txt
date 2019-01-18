@@ -31,6 +31,7 @@ add_subdirectory("${GLFW_DIR}")
 set(LINK_LIBS ${LINK_LIBS} glfw ${GLFW_LIBRARIES})
 set(INCLUDE_DIRS ${INCLUDE_DIRS} ${GLFW_DIR}/include)
 set(COMPILE_DEFINITIONS ${COMPILE_DEFS} GLFW_INCLUDE_NONE)
+target_compile_options(glfw PRIVATE -Wno-deprecated-declarations) # OpenGL is deprecated on MacOS...
 
 # GLAD
 set(GLAD_DIR ${LIB_DIR}/glad)
@@ -49,4 +50,5 @@ add_executable(${PROJECT_NAME} ${SRC})
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE ${COMPILE_DEFS})
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -pedantic -Werror)
 set_property(TARGET ${PROJECT_NAME} PROPERTY CXX_STANDARD 14)

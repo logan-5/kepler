@@ -12,7 +12,7 @@ void errorCallback(int error, const char* description) {
 }
 }  // namespace
 
-int main(int argc, char* argv[]) {
+int main() {
     Window window{{1280, 720}, "deferred shading demo", errorCallback};
 
     // Set the clear color to a nice green
