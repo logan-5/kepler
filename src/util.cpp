@@ -26,6 +26,10 @@ static_assert(
 
 struct Empty {};
 
+static_assert(std::is_literal_type<wrap<int>>::value, "");
+static_assert(std::is_literal_type<wrap<Empty>>::value, "");
+static_assert(!std::is_literal_type<wrap<std::string>>::value, "");
+
 constexpr int test_some_stuff() {
     {
         constexpr compressed_pair<int, int> pair{1, 2};

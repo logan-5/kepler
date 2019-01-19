@@ -1,15 +1,27 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
-#include <glm/glm.hpp>
+#include "util.hpp"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/euler_angles.hpp>
+#include <glm/gtx/string_cast.hpp>
+#undef GLM_ENABLE_EXPERIMENTAL
+
+#include <ostream>
 #include <type_traits>
 
 template <typename T>
-struct Rep : protected T {
-    using T::T;
-    constexpr T& rep() noexcept { return *this; }
-    constexpr const T& rep() const noexcept { return *this; }
+struct Rep : private util::wrap<T> {
+   private:
+    using base = util::wrap<T>;
+
+   public:
+    using base::base;
+    constexpr T& rep() noexcept { return base::get(); }
+    constexpr const T& rep() const noexcept { return base::get(); }
 };
 
 struct Point : public Rep<glm::vec3> {
@@ -65,6 +77,10 @@ struct Vertex {
 
 static_assert(std::is_standard_layout<Vertex>::value, "");
 
+struct AspectRatio : public Rep<float> {
+    using Rep::Rep;
+};
+
 struct Resolution : public Rep<glm::i32vec2> {
    private:
     using int_type = glm::i32vec2::value_type;
@@ -76,6 +92,111 @@ struct Resolution : public Rep<glm::i32vec2> {
     constexpr int_type width() const noexcept { return rep().x; }
     constexpr int_type& height() noexcept { return rep().y; }
     constexpr int_type height() const noexcept { return rep().y; }
+
+    constexpr AspectRatio getAspectRatio() const {
+        return static_cast<float>(width()) / height();
+    }
 };
+
+struct Radians;
+
+struct Degrees : public Rep<float> {
+    using Rep::Rep;
+    Degrees(Radians rad);
+
+    constexpr float& count() noexcept { return rep(); }
+    constexpr float count() const noexcept { return rep(); }
+};
+
+struct Radians : public Rep<float> {
+    using Rep::Rep;
+    Radians(Degrees deg);
+
+    constexpr float& count() noexcept { return rep(); }
+    constexpr float count() const noexcept { return rep(); }
+};
+
+inline Degrees::Degrees(Radians rad) : Degrees{glm::degrees(rad.count())} {}
+inline Radians::Radians(Degrees deg) : Radians{glm::radians(deg.count())} {}
+
+namespace glm_ext {
+inline glm::mat4 identity() {
+    return glm::mat4{1.f};
+}
+}  // namespace glm_ext
+
+struct Euler : Rep<glm::vec3> {
+   private:
+    using float_type = glm::vec3::value_type;
+
+   public:
+    constexpr Euler() : Rep{0.f, 0.f, 0.f} {}
+    constexpr Euler(Radians pitch, Radians yaw, Radians roll)
+        : Rep{pitch.count(), yaw.count(), roll.count()} {}
+    constexpr float_type& pitch() { return rep().x; }
+    constexpr float_type pitch() const { return rep().x; }
+    constexpr float_type& yaw() { return rep().y; }
+    constexpr float_type yaw() const { return rep().y; }
+    constexpr float_type& roll() { return rep().z; }
+    constexpr float_type roll() const { return rep().z; }
+
+    glm::mat4 getMatrix() const {
+        const auto p =
+            glm::rotate(glm_ext::identity(), pitch(), glm::vec3{0.f, 1.f, 0.f});
+        const auto y =
+            glm::rotate(glm_ext::identity(), yaw(), glm::vec3{1.f, 0.f, 0.f});
+        const auto r =
+            glm::rotate(glm_ext::identity(), roll(), glm::vec3{0.f, 0.f, 1.f});
+        return p * y * r;
+    }
+};
+
+struct Scale : Rep<glm::vec3> {
+   private:
+    using float_type = glm::vec3::value_type;
+
+   public:
+    constexpr Scale() : Rep{1.f, 1.f, 1.f} {}
+    using Rep::Rep;
+    constexpr float_type& x() { return rep().x; }
+    constexpr float_type x() const { return rep().x; }
+    constexpr float_type& y() { return rep().y; }
+    constexpr float_type y() const { return rep().x; }
+    constexpr float_type& z() { return rep().z; }
+    constexpr float_type z() const { return rep().z; }
+};
+
+struct Transform {
+    Point position;
+    Euler angle;
+    Scale scale;
+};
+
+struct Transformed {
+   public:
+    Transformed() = default;
+    Transformed(const Transform& t) : _transform{t} {}
+    virtual ~Transformed() = default;
+
+    Transform& transform() { return _transform; }
+    const Transform& transform() const { return _transform; }
+
+    glm::mat4 getModelMatrix() const {
+        const auto rotation = transform().angle.getMatrix();
+        const auto translation =
+            glm::translate(glm_ext::identity(), transform().position.rep());
+        const auto scale =
+            glm::scale(glm_ext::identity(), transform().scale.rep());
+        return translation * rotation * scale;
+    }
+
+   private:
+    Transform _transform;
+};
+
+template <typename T>
+std::ostream& operator<<(std::ostream& ostr, const Rep<T>& t) {
+    return ostr << glm::to_string(t.rep());
+}
 
 #endif

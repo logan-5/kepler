@@ -64,33 +64,49 @@ struct NoOp {
     constexpr void operator()(const Ts&...) const {}
 };
 
-namespace detail {
-template <typename T>
-struct can_ebo
-    : std::integral_constant<bool,
-                             std::is_class<T>::value &&
-                                 std::is_empty<T>::value &&
-                                 !std::is_final<T>::value> {};
-
-template <typename T, bool = detail::can_ebo<T>::value>
-struct ebo {
-    constexpr ebo(T t) : t{std::move(t)} {}
+template <typename T, bool = std::is_class<T>::value>
+struct wrap {
+    constexpr wrap() = default;
+    template <typename Arg,
+              typename... Args,
+              typename = std::enable_if_t<
+                  std::is_constructible<T, Arg&&, Args&&...>::value>>
+    constexpr wrap(Arg&& arg, Args&&... args)
+        : t{std::forward<Arg>(arg), std::forward<Args>(args)...} {}
     constexpr T& get() noexcept { return t; }
     constexpr const T& get() const noexcept { return t; }
 
    private:
     T t;
 };
+
 template <typename T>
-struct ebo<T, true> : private T {
-    constexpr ebo(T t) : T{std::move(t)} {}
+struct wrap<T, true> : private T {
+    constexpr wrap() = default;
+    template <typename Arg,
+              typename... Args,
+              typename = std::enable_if_t<
+                  std::is_constructible<T, Arg&&, Args&&...>::value>>
+    constexpr wrap(Arg&& arg, Args&&... args)
+        : T{std::forward<Arg>(arg), std::forward<Args>(args)...} {}
     constexpr T& get() noexcept { return *this; }
     constexpr const T& get() const noexcept { return *this; }
 };
 
+namespace detail {
+template <typename T>
+struct can_ebo
+    : std::integral_constant<bool,
+                             std::is_empty<T>::value &&
+                                 !std::is_final<T>::value> {};
+
 template <typename T, int Which>
-struct compressed_pair_base : ebo<T> {
-    using ebo<T>::ebo;
+struct compressed_pair_base : wrap<T, can_ebo<T>::value> {
+    using base = wrap<T, can_ebo<T>::value>;
+    template <
+        typename U,
+        typename = std::enable_if_t<std::is_constructible<base, U&&>::value>>
+    constexpr compressed_pair_base(U&& u) : base{std::forward<U>(u)} {}
 };
 }  // namespace detail
 

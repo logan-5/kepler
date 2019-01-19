@@ -4,6 +4,8 @@
 #include "common.hpp"
 #include "util.hpp"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include <cassert>
 #include <exception>
 #include <string>
@@ -42,6 +44,11 @@ class Shader {
 
     void setUniform(const std::string& name, GLint i) noexcept {
         glUniform1i(getUniformLocation(name), i);
+    }
+
+    void setUniform(const std::string& name, const glm::mat4& m) noexcept {
+        glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE,
+                           glm::value_ptr(m));
     }
 
    private:

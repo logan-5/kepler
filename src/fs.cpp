@@ -25,12 +25,12 @@ std::string absolutePathFromRelative(const std::string& rel) {
 
 namespace fs {
 AbsolutePath::AbsolutePath(const RelativePath& rel)
-    : AbsolutePath{absolutePathFromRelative(rel.path)} {}
+    : AbsolutePath{absolutePathFromRelative(rel.get())} {}
 
 std::string loadFileAsString(const AbsolutePath& path) {
-    std::ifstream t(path.path);
+    std::ifstream t(path.get());
     if (!t) {
-        throw error_opening_file{path.path};
+        throw error_opening_file{path.get()};
     }
     std::stringstream buffer;
     buffer << t.rdbuf();

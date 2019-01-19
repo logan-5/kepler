@@ -1,15 +1,16 @@
 #ifndef FS_HPP
 #define FS_HPP
 
+#include "util.hpp"
+
 #include <exception>
 #include <string>
 
 namespace fs {
 namespace detail {
 template <typename PathTag>
-struct Path {
-    explicit Path(std::string p) : path{std::move(p)} {}
-    std::string path;
+struct Path : public util::wrap<std::string, false> {
+    using util::wrap<std::string, false>::wrap;
 };
 struct Absolute_Tag {};
 struct Relative_Tag {};

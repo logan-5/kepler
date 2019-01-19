@@ -35,7 +35,7 @@ struct Image::Impl : util::NonCopyable {
 };
 
 Image::Image(const fs::AbsolutePath& path)
-    : impl{std::make_unique<Impl>(path.path)} {}
+    : impl{std::make_unique<Impl>(path.get())} {}
 Image::~Image() = default;
 
 const unsigned char* Image::data() const {

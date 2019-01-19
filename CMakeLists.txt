@@ -6,6 +6,7 @@ set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
 set(INCLUDE_DIRS ${INCLUDE_DIRS} ${SRC})
+set(SRC ${SRC} ${SRC_DIR}/camera.cpp)
 set(SRC ${SRC} ${SRC_DIR}/fs.cpp)
 set(SRC ${SRC} ${SRC_DIR}/image.cpp)
 set(SRC ${SRC} ${SRC_DIR}/main.cpp)

@@ -5,6 +5,16 @@
 
 #include <GLFW/glfw3.h>
 
+namespace {
+Window::WindowSizeCallback global_windowSizeCallback;
+
+void callWindowSizeCallback(GLFWwindow* window, int width, int height) {
+    (void)window;
+    if (global_windowSizeCallback)
+        global_windowSizeCallback(Resolution{width, height});
+}
+}  // namespace
+
 Window::Window(Window&&) = default;
 Window& Window::operator=(Window&&) = default;
 Window::~Window() = default;
@@ -42,6 +52,7 @@ struct Window::Impl : Window_base {
             if (!window) {
                 throw initialization_error{"Unable to create window"};
             }
+            glfwSetWindowSizeCallback(window, callWindowSizeCallback);
             return window;
         }()} {
         glfwMakeContextCurrent(window);
@@ -59,6 +70,8 @@ struct Window::Impl : Window_base {
         glfwPollEvents();
     }
 
+    float getTime() const { return glfwGetTime(); }
+
     util::RAII<GLFWwindow*, DestroyWindow> window;
 };
 
@@ -75,4 +88,13 @@ bool Window::shouldClose() const {
 void Window::update() {
     assert(impl);
     impl->update();
+}
+
+float Window::getTime() const {
+    assert(impl);
+    return impl->getTime();
+}
+
+void Window::setWindowSizeCallback(WindowSizeCallback cb) {
+    global_windowSizeCallback = std::move(cb);
 }

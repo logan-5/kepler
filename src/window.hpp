@@ -14,6 +14,7 @@ struct initialization_error : std::runtime_error {
 
 class Window {
    public:
+    using WindowSizeCallback = std::function<void(Resolution)>;
     using ErrorCallback = void (*)(int, const char*);
     Window(Resolution resolution,
            const std::string& title,
@@ -24,6 +25,10 @@ class Window {
 
     bool shouldClose() const;
     void update();
+
+    float getTime() const;
+
+    void setWindowSizeCallback(WindowSizeCallback cb);
 
    private:
     struct Impl;
