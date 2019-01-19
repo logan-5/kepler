@@ -1,8 +1,9 @@
 #include "camera.hpp"
 
 namespace {
-glm::mat4 getProjectionMatrix(Resolution resolution,
-                              const PerspectiveCamera::Config& config) {
+glm::mat4 getPerspectiveProjectionMatrix(
+    Resolution resolution,
+    const PerspectiveCamera::Config& config) {
     return glm::perspective(config.fov.rep(), resolution.getAspectRatio().rep(),
                             config.near, config.far);
 }
@@ -16,10 +17,11 @@ glm::vec3 getUpVector(const glm::vec3& dir) {
 
 PerspectiveCamera::PerspectiveCamera(Resolution resolution,
                                      const Config& config)
-    : config{config}, projection{getProjectionMatrix(resolution, config)} {}
+    : config{config}
+    , projection{getPerspectiveProjectionMatrix(resolution, config)} {}
 
 void PerspectiveCamera::resolutionChanged(Resolution newResolution) {
-    projection = getProjectionMatrix(newResolution, this->config);
+    projection = getPerspectiveProjectionMatrix(newResolution, this->config);
 }
 
 glm::mat4 PerspectiveCamera::getViewMatrix() const {

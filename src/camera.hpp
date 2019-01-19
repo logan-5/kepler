@@ -9,7 +9,10 @@ class Camera : public Transformed {
     virtual ~Camera() = default;
 
     virtual void resolutionChanged(Resolution newResolution) = 0;
-    virtual glm::mat4 getViewProjectionMatrix() const = 0;
+    glm::mat4 getViewProjectionMatrix() const {
+        return getProjectionMatrix() * getViewMatrix();
+    }
+    virtual const glm::mat4& getProjectionMatrix() const = 0;
     virtual glm::mat4 getViewMatrix() const = 0;
 };
 
@@ -27,8 +30,8 @@ class PerspectiveCamera : public Camera {
     const Config& getConfig() const { return config; }
 
     virtual void resolutionChanged(Resolution newResolution) override;
-    virtual glm::mat4 getViewProjectionMatrix() const override {
-        return projection * getViewMatrix();
+    virtual const glm::mat4& getProjectionMatrix() const override {
+        return projection;
     }
     virtual glm::mat4 getViewMatrix() const override;
 

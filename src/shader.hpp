@@ -51,6 +51,10 @@ class Shader {
                            glm::value_ptr(m));
     }
 
+    void setUniform(const std::string& name, const glm::vec4& v4) noexcept {
+        glUniform4f(getUniformLocation(name), v4.r, v4.g, v4.b, v4.a);
+    }
+
    private:
     util::RAII<GLuint, Destroy, util::Movable> program;
 };
