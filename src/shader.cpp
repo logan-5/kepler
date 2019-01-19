@@ -25,9 +25,10 @@ Shader::Shader(const char* const vertexSource, const char* const fragmentSource)
     GLint success;
     glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        // char info[512];
-        // glGetShaderInfoLog(vertexShader, 512, NULL, info);
-        throw compile_error{};
+        char info[512];
+        GLsizei len;
+        glGetShaderInfoLog(vertexShader, 512, &len, info);
+		throw compile_error{"(vertex shader) " + std::string(info, len)};
     }
 
     util::RAII<GLuint, DeleteShader> fragmentShader{
@@ -38,9 +39,10 @@ Shader::Shader(const char* const vertexSource, const char* const fragmentSource)
 
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
     if (!success) {
-        // char info[512];
-        // glGetShaderInfoLog(vertexShader, 512, NULL, info);
-        throw compile_error{};
+        char info[512];
+        GLsizei len;
+        glGetShaderInfoLog(fragmentShader, 512, &len, info);
+		throw compile_error{"(fragment shader) " + std::string(info, len)};
     }
 
     this->program = glCreateProgram();

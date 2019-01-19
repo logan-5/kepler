@@ -9,7 +9,7 @@
 class Shader {
    public:
     struct compile_error : std::runtime_error {
-        compile_error() : std::runtime_error{"error compiling shader"} {}
+        using runtime_error::runtime_error;
     };
     Shader(const char* const vertexSource, const char* const fragmentSource);
     Shader(const std::string& vertexSource, const std::string& fragmentSource)
@@ -22,6 +22,13 @@ class Shader {
 
     GLint getAttributeLocation(const std::string& attrib) const noexcept {
         return glGetAttribLocation(this->program, attrib.c_str());
+    }
+    GLint getUniformLocation(const std::string& uniform) const noexcept {
+        return glGetUniformLocation(this->program, uniform.c_str());
+    }
+
+    void setUniform(const std::string& name, GLint i) noexcept {
+        glUniform1i(getUniformLocation(name), i);
     }
 
     ~Shader();

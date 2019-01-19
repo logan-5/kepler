@@ -59,6 +59,7 @@ struct Color : public Rep<glm::vec4> {
 
 struct Vertex {
     Point position;
+    Point2D texCoord;
     Color color;
 };
 

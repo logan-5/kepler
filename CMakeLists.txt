@@ -7,8 +7,10 @@ set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
 
 set(INCLUDE_DIRS ${INCLUDE_DIRS} ${SRC})
 set(SRC ${SRC} ${SRC_DIR}/fs.cpp)
+set(SRC ${SRC} ${SRC_DIR}/image.cpp)
 set(SRC ${SRC} ${SRC_DIR}/main.cpp)
 set(SRC ${SRC} ${SRC_DIR}/shader.cpp)
+set(SRC ${SRC} ${SRC_DIR}/texture.cpp)
 set(SRC ${SRC} ${SRC_DIR}/types.cpp)
 set(SRC ${SRC} ${SRC_DIR}/window.cpp)
 
@@ -45,6 +47,11 @@ set(LINK_LIBS ${LINK_LIBS} glad)
 set(GLM_DIR ${LIB_DIR}/glm)
 set(GLM_INCLUDE ${LIB_DIR}/glm)
 set(INCLUDE_DIRS ${INCLUDE_DIRS} ${GLM_INCLUDE})
+
+# STB
+set(STB_DIR ${LIB_DIR}/stb)
+set(STB_INCLUDE ${STB_DIR})
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${STB_INCLUDE})
 
 add_executable(${PROJECT_NAME} ${SRC})
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})

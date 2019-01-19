@@ -24,16 +24,16 @@ std::string absolutePathFromRelative(const std::string& rel) {
 }  // namespace
 
 namespace fs {
-std::string loadFileAsString(const std::string& path) {
-    std::ifstream t(path);
+AbsolutePath::AbsolutePath(const RelativePath& rel)
+    : AbsolutePath{absolutePathFromRelative(rel.path)} {}
+
+std::string loadFileAsString(const AbsolutePath& path) {
+    std::ifstream t(path.path);
     if (!t) {
         throw error_opening_file{};
     }
     std::stringstream buffer;
     buffer << t.rdbuf();
     return buffer.str();
-}
-std::string loadRelPathAsString(const std::string& relPath) {
-    return loadFileAsString(absolutePathFromRelative(relPath));
 }
 }  // namespace fs
