@@ -12,6 +12,7 @@ set(SRC ${SRC} ${SRC_DIR}/main.cpp)
 set(SRC ${SRC} ${SRC_DIR}/shader.cpp)
 set(SRC ${SRC} ${SRC_DIR}/texture.cpp)
 set(SRC ${SRC} ${SRC_DIR}/types.cpp)
+set(SRC ${SRC} ${SRC_DIR}/util.cpp)
 set(SRC ${SRC} ${SRC_DIR}/window.cpp)
 
 set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)

@@ -23,8 +23,7 @@ inline bool ends_with(const char* str, const char val) {
 }
 
 struct NonCopyable {
-    NonCopyable() = default;
-    ~NonCopyable() = default;
+    constexpr NonCopyable() = default;
 
     NonCopyable(const NonCopyable&) = delete;
     NonCopyable& operator=(const NonCopyable&) = delete;
@@ -32,7 +31,6 @@ struct NonCopyable {
 
 struct NonMovable {
     constexpr NonMovable() = default;
-    ~NonMovable() = default;
 
     NonMovable(const NonMovable&) = delete;
     NonMovable& operator=(const NonMovable&) = delete;
@@ -61,16 +59,9 @@ struct Movable {
     bool _moved;
 };
 
-static_assert(!std::is_copy_constructible<Movable>::value &&
-                  !std::is_copy_assignable<Movable>::value,
-              "");
-static_assert(std::is_nothrow_move_constructible<Movable>::value &&
-                  std::is_nothrow_move_assignable<Movable>::value,
-              "");
-
 template <typename... Ts>
 struct NoOp {
-    void operator()(const Ts&...) const {}
+    constexpr void operator()(const Ts&...) const {}
 };
 
 namespace detail {
@@ -83,18 +74,18 @@ struct can_ebo
 
 template <typename T, bool = detail::can_ebo<T>::value>
 struct ebo {
-    ebo(T t) : t{std::move(t)} {}
-    T& get() { return t; }
-    const T& get() const { return t; }
+    constexpr ebo(T t) : t{std::move(t)} {}
+    constexpr T& get() noexcept { return t; }
+    constexpr const T& get() const noexcept { return t; }
 
    private:
     T t;
 };
 template <typename T>
 struct ebo<T, true> : private T {
-    ebo(T t) : T{std::move(t)} {}
-    T& get() { return *this; }
-    const T& get() const { return *this; }
+    constexpr ebo(T t) : T{std::move(t)} {}
+    constexpr T& get() noexcept { return *this; }
+    constexpr const T& get() const noexcept { return *this; }
 };
 
 template <typename T, int Which>
@@ -120,7 +111,7 @@ struct compressed_pair
     using second_reference = second_type&;
     using second_const_reference = const second_type&;
 
-    compressed_pair(First f, Second s)
+    constexpr compressed_pair(First f, Second s)
         : first_base{std::move(f)}, second_base{std::move(s)} {}
 
     compressed_pair(const compressed_pair&) = default;
@@ -128,10 +119,14 @@ struct compressed_pair
     compressed_pair(compressed_pair&&) = default;
     compressed_pair& operator=(compressed_pair&&) = default;
 
-    first_reference first() { return first_base::get(); }
-    first_const_reference first() const { return first_base::get(); }
-    second_reference second() { return second_base::get(); }
-    second_const_reference second() const { return second_base::get(); }
+    constexpr first_reference first() noexcept { return first_base::get(); }
+    constexpr first_const_reference first() const noexcept {
+        return first_base::get();
+    }
+    constexpr second_reference second() noexcept { return second_base::get(); }
+    constexpr second_const_reference second() const noexcept {
+        return second_base::get();
+    }
 };
 
 template <typename T, typename Deleter, typename MovePolicy = NonMovable>
@@ -142,10 +137,10 @@ struct RAII : MovePolicy {
     RAII(RAII&&) = default;
     RAII& operator=(RAII&&) = default;
 
-    T& get() { return data.first(); }
-    const T& get() const { return data.first(); }
-    operator T&() { return get(); }
-    operator const T&() const { return get(); }
+    T& get() noexcept { return data.first(); }
+    const T& get() const noexcept { return data.first(); }
+    operator T&() noexcept { return get(); }
+    operator const T&() const noexcept { return get(); }
 
     ~RAII() {
         if (!MovePolicy::moved())
@@ -155,15 +150,6 @@ struct RAII : MovePolicy {
    private:
     compressed_pair<T, Deleter> data;
 };
-
-static_assert(sizeof(RAII<int, NoOp<int>>) == sizeof(int), "");
-static_assert(!std::is_move_constructible<RAII<int, NoOp<int>>>::value &&
-                  !std::is_move_assignable<RAII<int, NoOp<int>>>::value,
-              "");
-static_assert(
-    std::is_move_constructible<RAII<int, NoOp<int>, Movable>>::value &&
-        std::is_move_assignable<RAII<int, NoOp<int>, Movable>>::value,
-    "");
 
 }  // namespace util
 
