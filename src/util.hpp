@@ -24,9 +24,49 @@ inline bool ends_with(const char* str, const char val) {
 
 struct NonCopyable {
     NonCopyable() = default;
+    ~NonCopyable() = default;
+
     NonCopyable(const NonCopyable&) = delete;
     NonCopyable& operator=(const NonCopyable&) = delete;
 };
+
+struct NonMovable {
+    constexpr NonMovable() = default;
+    ~NonMovable() = default;
+
+    NonMovable(const NonMovable&) = delete;
+    NonMovable& operator=(const NonMovable&) = delete;
+    NonMovable(NonMovable&&) = delete;
+    NonMovable& operator=(NonMovable&&) = delete;
+
+    constexpr bool moved() const noexcept { return false; }
+};
+
+struct Movable {
+    constexpr Movable() : _moved{false} {}
+    Movable(const Movable&) = delete;
+    Movable& operator=(const Movable&) = delete;
+    Movable(Movable&& other) noexcept { other._moved = true; }
+    Movable& operator=(Movable&& other) noexcept {
+        if (this != &other) {
+            other._moved = true;
+            this->_moved = false;
+        }
+        return *this;
+    }
+
+    constexpr bool moved() const noexcept { return _moved; }
+
+   private:
+    bool _moved;
+};
+
+static_assert(!std::is_copy_constructible<Movable>::value &&
+                  !std::is_copy_assignable<Movable>::value,
+              "");
+static_assert(std::is_nothrow_move_constructible<Movable>::value &&
+                  std::is_nothrow_move_assignable<Movable>::value,
+              "");
 
 template <typename... Ts>
 struct NoOp {
@@ -43,8 +83,7 @@ struct can_ebo
 
 template <typename T, bool = detail::can_ebo<T>::value>
 struct ebo {
-    template <typename U>
-    ebo(U&& u) : t{std::forward<U>(u)} {}
+    ebo(T t) : t{std::move(t)} {}
     T& get() { return t; }
     const T& get() const { return t; }
 
@@ -53,8 +92,7 @@ struct ebo {
 };
 template <typename T>
 struct ebo<T, true> : private T {
-    template <typename U>
-    ebo(U&& u) : T{std::forward<U>(u)} {}
+    ebo(T t) : T{std::move(t)} {}
     T& get() { return *this; }
     const T& get() const { return *this; }
 };
@@ -82,9 +120,13 @@ struct compressed_pair
     using second_reference = second_type&;
     using second_const_reference = const second_type&;
 
-    template <typename T, typename U>
-    compressed_pair(T&& t, U&& u)
-        : first_base{std::forward<T>(t)}, second_base{std::forward<U>(u)} {}
+    compressed_pair(First f, Second s)
+        : first_base{std::move(f)}, second_base{std::move(s)} {}
+
+    compressed_pair(const compressed_pair&) = default;
+    compressed_pair& operator=(const compressed_pair&) = default;
+    compressed_pair(compressed_pair&&) = default;
+    compressed_pair& operator=(compressed_pair&&) = default;
 
     first_reference first() { return first_base::get(); }
     first_const_reference first() const { return first_base::get(); }
@@ -92,25 +134,36 @@ struct compressed_pair
     second_const_reference second() const { return second_base::get(); }
 };
 
-template <typename T, typename Deleter>
-struct RAII : NonCopyable {
+template <typename T, typename Deleter, typename MovePolicy = NonMovable>
+struct RAII : MovePolicy {
    public:
-    template <typename TT, typename DD = Deleter>
-    RAII(TT&& tt, DD&& dd = {})
-        : data{std::forward<TT>(tt), std::forward<DD>(dd)} {}
+    RAII(T t, Deleter d = {}) : data{std::move(t), std::move(d)} {}
+
+    RAII(RAII&&) = default;
+    RAII& operator=(RAII&&) = default;
 
     T& get() { return data.first(); }
     const T& get() const { return data.first(); }
     operator T&() { return get(); }
     operator const T&() const { return get(); }
 
-    ~RAII() { data.second()(data.first()); }
+    ~RAII() {
+        if (!MovePolicy::moved())
+            data.second()(data.first());
+    }
 
    private:
     compressed_pair<T, Deleter> data;
 };
 
 static_assert(sizeof(RAII<int, NoOp<int>>) == sizeof(int), "");
+static_assert(!std::is_move_constructible<RAII<int, NoOp<int>>>::value &&
+                  !std::is_move_assignable<RAII<int, NoOp<int>>>::value,
+              "");
+static_assert(
+    std::is_move_constructible<RAII<int, NoOp<int>, Movable>>::value &&
+        std::is_move_assignable<RAII<int, NoOp<int>, Movable>>::value,
+    "");
 
 }  // namespace util
 

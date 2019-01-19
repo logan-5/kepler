@@ -2,21 +2,34 @@
 #define SHADER_HPP
 
 #include "common.hpp"
+#include "util.hpp"
 
+#include <cassert>
 #include <exception>
 #include <string>
 
 class Shader {
+   private:
+    static GLuint create(const char* const vertexSource,
+                         const char* const fragmentSource);
+    struct Destroy {
+        void operator()(GLuint program) const {
+            assert(glIsProgram(program));
+            glDeleteProgram(program);
+        }
+    };
+
    public:
     struct compile_error : std::runtime_error {
         using runtime_error::runtime_error;
     };
-    Shader(const char* const vertexSource, const char* const fragmentSource);
+    Shader(const char* const vertexSource, const char* const fragmentSource)
+        : program{create(vertexSource, fragmentSource)} {}
     Shader(const std::string& vertexSource, const std::string& fragmentSource)
         : Shader{vertexSource.c_str(), fragmentSource.c_str()} {}
 
-    Shader& operator=(Shader&& other);
-    Shader(Shader&& other);
+    Shader& operator=(Shader&& other) = default;
+    Shader(Shader&& other) = default;
 
     void use() noexcept { glUseProgram(this->program); }
 
@@ -31,11 +44,8 @@ class Shader {
         glUniform1i(getUniformLocation(name), i);
     }
 
-    ~Shader();
-
    private:
-    bool moved;
-    GLuint program;
+    util::RAII<GLuint, Destroy, util::Movable> program;
 };
 
 #endif

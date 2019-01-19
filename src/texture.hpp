@@ -54,7 +54,7 @@ class Texture {
     }
 
    private:
-    util::RAII<GLuint, Destroy> texID;
+    util::RAII<GLuint, Destroy, util::Movable> texID;
 };
 
 #endif

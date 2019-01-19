@@ -2,7 +2,6 @@
 #include "util.hpp"
 
 #include <cassert>
-#include <iostream>
 #include <memory>
 
 namespace {
@@ -14,8 +13,8 @@ struct DeleteShader {
 };
 }  // namespace
 
-Shader::Shader(const char* const vertexSource, const char* const fragmentSource)
-    : moved{false} {
+GLuint Shader::create(const char* const vertexSource,
+                      const char* const fragmentSource) {
     util::RAII<GLuint, DeleteShader> vertexShader{
         glCreateShader(GL_VERTEX_SHADER)};
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
@@ -28,7 +27,7 @@ Shader::Shader(const char* const vertexSource, const char* const fragmentSource)
         char info[512];
         GLsizei len;
         glGetShaderInfoLog(vertexShader, 512, &len, info);
-		throw compile_error{"(vertex shader) " + std::string(info, len)};
+        throw compile_error{"(vertex shader) " + std::string(info, len)};
     }
 
     util::RAII<GLuint, DeleteShader> fragmentShader{
@@ -42,33 +41,17 @@ Shader::Shader(const char* const vertexSource, const char* const fragmentSource)
         char info[512];
         GLsizei len;
         glGetShaderInfoLog(fragmentShader, 512, &len, info);
-		throw compile_error{"(fragment shader) " + std::string(info, len)};
+        throw compile_error{"(fragment shader) " + std::string(info, len)};
     }
 
-    this->program = glCreateProgram();
-    glAttachShader(this->program, vertexShader);
-    glAttachShader(this->program, fragmentShader);
+    const auto program = glCreateProgram();
+    glAttachShader(program, vertexShader);
+    glAttachShader(program, fragmentShader);
     glLinkProgram(program);
 
-    glDetachShader(this->program, vertexShader);
-    glDetachShader(this->program, fragmentShader);
-
+    glDetachShader(program, vertexShader);
+    glDetachShader(program, fragmentShader);
     assert(glGetError() == GL_NO_ERROR);
-}
 
-Shader& Shader::operator=(Shader&& other) {
-    if (this != &other) {
-        this->program = other.program;
-        other.moved = true;
-    }
-    return *this;
-}
-Shader::Shader(Shader&& other) : moved{false}, program{other.program} {
-    other.moved = true;
-}
-
-Shader::~Shader() {
-    if (!moved) {
-        glDeleteProgram(this->program);
-    }
+    return program;
 }

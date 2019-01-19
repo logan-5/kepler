@@ -13,6 +13,8 @@ class Window {
     Window(Resolution resolution,
            const std::string& title,
            ErrorCallback errorCallback);
+    Window(Window&&);
+    Window& operator=(Window&&);
     ~Window();
 
     bool shouldClose() const;

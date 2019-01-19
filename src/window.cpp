@@ -5,6 +5,8 @@
 
 #include <GLFW/glfw3.h>
 
+Window::Window(Window&&) = default;
+Window& Window::operator=(Window&&) = default;
 Window::~Window() = default;
 
 namespace {
@@ -13,9 +15,8 @@ struct DestroyWindow {
         glfwDestroyWindow(window);
     }
 };
-}  // namespace
 
-struct Window_base : util::NonCopyable {
+struct Window_base : util::NonMovable {
     Window_base(Window::ErrorCallback errorCallback) {
         int glfwInitRes = glfwInit();
         if (!glfwInitRes) {
@@ -25,6 +26,7 @@ struct Window_base : util::NonCopyable {
     }
     ~Window_base() { glfwTerminate(); }
 };
+}  // namespace
 
 struct Window::Impl : Window_base {
     Impl(Resolution resolution, const std::string& title, ErrorCallback err)
@@ -66,9 +68,11 @@ Window::Window(Resolution resolution,
     : impl{std::make_unique<Impl>(resolution, title, errorCallback)} {}
 
 bool Window::shouldClose() const {
+    assert(impl);
     return impl->shouldClose();
 }
 
 void Window::update() {
+    assert(impl);
     impl->update();
 }
