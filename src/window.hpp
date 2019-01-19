@@ -3,9 +3,14 @@
 
 #include "types.hpp"
 
+#include <exception>
 #include <functional>
 #include <memory>
 #include <string>
+
+struct initialization_error : std::runtime_error {
+    using runtime_error::runtime_error;
+};
 
 class Window {
    public:

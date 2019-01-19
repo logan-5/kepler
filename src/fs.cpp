@@ -30,7 +30,7 @@ AbsolutePath::AbsolutePath(const RelativePath& rel)
 std::string loadFileAsString(const AbsolutePath& path) {
     std::ifstream t(path.path);
     if (!t) {
-        throw error_opening_file{};
+        throw error_opening_file{path.path};
     }
     std::stringstream buffer;
     buffer << t.rdbuf();

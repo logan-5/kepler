@@ -20,7 +20,7 @@ struct Window_base : util::NonMovable {
     Window_base(Window::ErrorCallback errorCallback) {
         int glfwInitRes = glfwInit();
         if (!glfwInitRes) {
-            throw std::runtime_error{"Unable to initialize GLFW"};
+            throw initialization_error{"Unable to initialize GLFW"};
         }
         glfwSetErrorCallback(errorCallback);
     }
@@ -40,7 +40,7 @@ struct Window::Impl : Window_base {
                 glfwCreateWindow(resolution.width(), resolution.height(),
                                  title.c_str(), nullptr, nullptr);
             if (!window) {
-                throw std::runtime_error{"Unable to create window"};
+                throw initialization_error{"Unable to create window"};
             }
             return window;
         }()} {
@@ -48,7 +48,7 @@ struct Window::Impl : Window_base {
 
         int gladInitRes = gladLoadGL();
         if (!gladInitRes) {
-            throw std::runtime_error{"Unable to initialize glad"};
+            throw initialization_error{"Unable to initialize glad"};
         }
     }
 
