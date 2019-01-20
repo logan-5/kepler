@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "input.inl"
 #include "util.hpp"
 
 #include <glad/glad.h>
@@ -40,7 +41,8 @@ struct Window_base : util::NonMovable {
 
 struct Window::Impl : Window_base {
     Impl(Resolution resolution, const std::string& title, ErrorCallback err)
-        : Window_base{err}, window{[&] {
+        : Window_base{err}
+        , window{[&] {
             glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
             glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -54,7 +56,8 @@ struct Window::Impl : Window_base {
             }
             glfwSetWindowSizeCallback(window, callWindowSizeCallback);
             return window;
-        }()} {
+        }()}
+        , input{std::make_unique<Input::Impl>(window)} {
         glfwMakeContextCurrent(window);
 
         int gladInitRes = gladLoadGL();
@@ -68,11 +71,13 @@ struct Window::Impl : Window_base {
     void update() {
         glfwSwapBuffers(window);
         glfwPollEvents();
+        input.update();
     }
 
     float getTime() const { return glfwGetTime(); }
 
     util::RAII<GLFWwindow*, DestroyWindow> window;
+    Input input;
 };
 
 Window::Window(Resolution resolution,
@@ -97,4 +102,11 @@ float Window::getTime() const {
 
 void Window::setWindowSizeCallback(WindowSizeCallback cb) {
     global_windowSizeCallback = std::move(cb);
+}
+
+Input& Window::getInput() {
+    return impl->input;
+}
+const Input& Window::getInput() const {
+    return impl->input;
 }

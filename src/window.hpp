@@ -8,6 +8,8 @@
 #include <memory>
 #include <string>
 
+class Input;
+
 struct initialization_error : std::runtime_error {
     using runtime_error::runtime_error;
 };
@@ -29,6 +31,9 @@ class Window {
     float getTime() const;
 
     void setWindowSizeCallback(WindowSizeCallback cb);
+
+    Input& getInput();
+    const Input& getInput() const;
 
    private:
     struct Impl;

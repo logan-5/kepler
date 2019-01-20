@@ -3,6 +3,7 @@
 #include "cube.hpp"
 #include "fs.hpp"
 #include "image.hpp"
+#include "input.hpp"
 #include "light.hpp"
 #include "material.hpp"
 #include "shader.hpp"
@@ -130,7 +131,7 @@ int main() {
     glEnable(GL_DEPTH_TEST);
 
     Transformed cube{{Point{0.f, 1.f, -4.f},
-                      Euler{Degrees{45.f}, Degrees{0.f}, Degrees{0.f}},
+                      Euler{Degrees{0.f}, Degrees{0.f}, Degrees{0.f}},
                       Scale{1.f, 1.f, 1.f}}};
 
     Light light{
@@ -149,12 +150,33 @@ int main() {
     });
     camera.transform().position.z() = 1.f;
 
-    while (!window.shouldClose()) {
-        const auto rotation = window.getTime();
+    constexpr auto cameraSpeed = 0.01f;
+    auto& input = window.getInput();
+    input.setKeyCallback(Input::Key::W, [&] {
+        camera.transform().position.rep() += glm::vec3{0.f, 0.f, cameraSpeed};
+    });
+    input.setKeyCallback(Input::Key::S, [&] {
+        camera.transform().position.rep() -= glm::vec3{0.f, 0.f, cameraSpeed};
+    });
+    input.setKeyCallback(Input::Key::A, [&] {
+        camera.transform().position.rep() += glm::vec3{cameraSpeed, 0.f, 0.f};
+    });
+    input.setKeyCallback(Input::Key::D, [&] {
+        camera.transform().position.rep() -= glm::vec3{cameraSpeed, 0.f, 0.f};
+    });
+    input.setKeyCallback(Input::Key::Q, [&] {
+        camera.transform().position.rep() += glm::vec3{0.f, cameraSpeed, 0.f};
+    });
+    input.setKeyCallback(Input::Key::E, [&] {
+        camera.transform().position.rep() -= glm::vec3{0.f, cameraSpeed, 0.f};
+    });
 
-        cube.transform().angle.yaw() =
-            Radians{Degrees{std::sin(rotation) * 90.f}}.count();
-        cube.transform().angle.pitch() = Radians{rotation}.count();
+    while (!window.shouldClose()) {
+        // const auto rotation = window.getTime();
+
+        // cube.transform().angle.yaw() =
+        //     Radians{Degrees{std::sin(rotation) * 90.f}}.count();
+        // cube.transform().angle.pitch() = Radians{rotation}.count();
         // light.transform().position.x() = std::sin(rotation) * 4.f;
         // light.transform().position.z() =
         // std::sin(window.getTime() * 1.5f) * 3.f - 4.f;
