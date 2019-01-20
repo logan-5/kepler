@@ -76,5 +76,5 @@ void Shader::setUniform(const std::string& name,
     setUniform(name + ".specular", light.specular.rep());
     setUniform(name + ".position",
                glm::vec3{viewMatrix *
-                         glm::vec4{light.transform().position.rep(), 0.f}});
+                         glm::vec4{light.transform().position.rep(), 1.f}});
 }
