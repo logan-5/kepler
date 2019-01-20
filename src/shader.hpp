@@ -10,6 +10,9 @@
 #include <exception>
 #include <string>
 
+struct Light;
+struct Material;
+
 class Shader {
    private:
     static GLuint create(const char* const vertexSource,
@@ -47,6 +50,11 @@ class Shader {
         glUniform1i(getUniformLocation(name), i);
     }
 
+    void setUniform(const std::string& name, float f) noexcept {
+        use();
+        glUniform1f(getUniformLocation(name), f);
+    }
+
     void setUniform(const std::string& name, const glm::mat3& m3) noexcept {
         use();
         glUniformMatrix3fv(getUniformLocation(name), 1, GL_FALSE,
@@ -67,6 +75,12 @@ class Shader {
         use();
         glUniform4f(getUniformLocation(name), v4.r, v4.g, v4.b, v4.a);
     }
+
+    void setUniform(const std::string& name, const Material& material) noexcept;
+
+    void setUniform(const std::string& name,
+                    const Light& light,
+                    const glm::mat4& viewMatrix) noexcept;
 
    private:
     util::RAII<GLuint, Destroy, util::Movable> program;

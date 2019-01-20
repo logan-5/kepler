@@ -3,6 +3,8 @@
 #include "cube.hpp"
 #include "fs.hpp"
 #include "image.hpp"
+#include "light.hpp"
+#include "material.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
 #include "types.hpp"
@@ -117,19 +119,29 @@ int main() {
         fs::loadFileAsString(fs::RelativePath{"shaders/light.vsh"}),
         fs::loadFileAsString(fs::RelativePath{"shaders/light.fsh"})};
 
-    Texture containerTexture{Image{fs::RelativePath{"res/container.jpg"}}};
+    auto containerTexture = std::make_shared<Texture>(
+        Image{fs::RelativePath{"res/container2.png"}});
+    auto containerSpecularTexture = std::make_shared<Texture>(
+        Image{fs::RelativePath{"res/container2_specular.png"}});
 
     auto phongVao = createPhongVao(cubeBuffer, phongShader);
     auto lightVao = createLightVao(cubeBuffer, lightShader);
 
     glEnable(GL_DEPTH_TEST);
 
-    Transformed cube{{Point{0.f, 0.f, -4.f},
+    Transformed cube{{Point{0.f, 1.f, -4.f},
                       Euler{Degrees{45.f}, Degrees{0.f}, Degrees{0.f}},
-                      Scale{1.f, 1.f, 0.3f}}};
+                      Scale{1.f, 1.f, 1.f}}};
 
-    Transformed light{{Point{4.f, 0.f, -3.f}, Euler{}, Scale{0.5f}}};
-    ColorRGB lightColor{1.f, 0.f, 1.f};
+    Light light{
+        {Point{1.f, 1.f, -1.f}, Euler{}, Scale{0.5f}},
+        {0.1f, 0.1f, 0.1f},
+        {1.f, 0.5f, 1.f},
+        {1.f, 0.5f, 1.f},
+    };
+    const ColorRGB lightColor{1.f, 1.f, 1.f};
+    const Material cubeMaterial{containerTexture, containerSpecularTexture,
+                                256.f};
 
     PerspectiveCamera camera{{1280, 720}};
     window.setWindowSizeCallback([&](const Resolution newResolution) {
@@ -140,12 +152,12 @@ int main() {
     while (!window.shouldClose()) {
         const auto rotation = window.getTime();
 
-        // cube.transform().angle.pitch() =
-        //     Radians{Degrees{std::sin(rotation) * 90.f}}.count();
+        cube.transform().angle.yaw() =
+            Radians{Degrees{std::sin(rotation) * 90.f}}.count();
         cube.transform().angle.pitch() = Radians{rotation}.count();
-        light.transform().position.x() = std::sin(rotation) * 4.f;
-        light.transform().position.z() =
-            std::sin(window.getTime() * 1.5f) * 3.f - 4.f;
+        // light.transform().position.x() = std::sin(rotation) * 4.f;
+        // light.transform().position.z() =
+        // std::sin(window.getTime() * 1.5f) * 3.f - 4.f;
 
         // camera.transform().angle.pitch() = std::sin(rotation) * 0.33f;
 
@@ -153,7 +165,6 @@ int main() {
 
         glBindVertexArray(phongVao);
         phongShader.use();
-        containerTexture.bind(0);
         phongShader.setUniform("diffuseTexture", 0);
         phongShader.setUniform("lightColor", lightColor.rep());
         const auto viewMatrix = camera.getViewMatrix();
@@ -165,13 +176,15 @@ int main() {
         phongShader.setUniform("modelView", modelView);
         phongShader.setUniform("projection", camera.getProjectionMatrix());
         phongShader.setUniform("normalMatrix", matrix::normal(modelView));
+        phongShader.setUniform("material", cubeMaterial);
+        phongShader.setUniform("light", light, viewMatrix);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glBindVertexArray(lightVao);
         lightShader.use();
         lightShader.setUniform("mvp", camera.getProjectionMatrix() *
                                           viewMatrix * light.getModelMatrix());
-        lightShader.setUniform("color", lightColor.rep());
+        lightShader.setUniform("color", light.diffuse.rep());
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         window.update();
