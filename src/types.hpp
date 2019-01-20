@@ -52,6 +52,21 @@ struct Point2D : public Rep<glm::vec2> {
     constexpr float_type y() const noexcept { return rep().y; }
 };
 
+struct Normal : public Rep<glm::vec3> {
+   private:
+    using float_type = glm::vec3::value_type;
+
+   public:
+    using Rep::Rep;
+
+    constexpr float_type& x() noexcept { return rep().x; }
+    constexpr float_type x() const noexcept { return rep().x; }
+    constexpr float_type& y() noexcept { return rep().y; }
+    constexpr float_type y() const noexcept { return rep().y; }
+    constexpr float_type& z() noexcept { return rep().z; }
+    constexpr float_type z() const noexcept { return rep().z; }
+};
+
 struct Color : public Rep<glm::vec4> {
    private:
     using float_type = glm::vec4::value_type;
@@ -69,8 +84,24 @@ struct Color : public Rep<glm::vec4> {
     constexpr float_type a() const noexcept { return rep().b; }
 };
 
+struct ColorRGB : public Rep<glm::vec3> {
+   private:
+    using float_type = glm::vec3::value_type;
+
+   public:
+    using Rep::Rep;
+
+    constexpr float_type& r() noexcept { return rep().r; }
+    constexpr float_type r() const noexcept { return rep().r; }
+    constexpr float_type& g() noexcept { return rep().g; }
+    constexpr float_type g() const noexcept { return rep().g; }
+    constexpr float_type& b() noexcept { return rep().b; }
+    constexpr float_type b() const noexcept { return rep().b; }
+};
+
 struct Vertex {
     Point position;
+    Normal normal;
     Point2D texCoord;
     Color color;
 };
@@ -119,11 +150,15 @@ struct Radians : public Rep<float> {
 inline Degrees::Degrees(Radians rad) : Degrees{glm::degrees(rad.count())} {}
 inline Radians::Radians(Degrees deg) : Radians{glm::radians(deg.count())} {}
 
-namespace glm_ext {
+namespace matrix {
 inline glm::mat4 identity() {
     return glm::mat4{1.f};
 }
-}  // namespace glm_ext
+
+inline glm::mat3 normal(const glm::mat4& model) {
+    return glm::transpose(glm::inverse(glm::mat3{model}));
+}
+}  // namespace matrix
 
 struct Euler : Rep<glm::vec3> {
    private:
@@ -142,11 +177,11 @@ struct Euler : Rep<glm::vec3> {
 
     glm::mat4 getMatrix() const {
         const auto p =
-            glm::rotate(glm_ext::identity(), pitch(), glm::vec3{0.f, 1.f, 0.f});
+            glm::rotate(matrix::identity(), pitch(), glm::vec3{0.f, 1.f, 0.f});
         const auto y =
-            glm::rotate(glm_ext::identity(), yaw(), glm::vec3{1.f, 0.f, 0.f});
+            glm::rotate(matrix::identity(), yaw(), glm::vec3{1.f, 0.f, 0.f});
         const auto r =
-            glm::rotate(glm_ext::identity(), roll(), glm::vec3{0.f, 0.f, 1.f});
+            glm::rotate(matrix::identity(), roll(), glm::vec3{0.f, 0.f, 1.f});
         return p * y * r;
     }
 };
@@ -184,9 +219,9 @@ struct Transformed {
     glm::mat4 getModelMatrix() const {
         const auto rotation = transform().angle.getMatrix();
         const auto translation =
-            glm::translate(glm_ext::identity(), transform().position.rep());
+            glm::translate(matrix::identity(), transform().position.rep());
         const auto scale =
-            glm::scale(glm_ext::identity(), transform().scale.rep());
+            glm::scale(matrix::identity(), transform().scale.rep());
         return translation * rotation * scale;
     }
 

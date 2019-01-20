@@ -43,15 +43,28 @@ class Shader {
     }
 
     void setUniform(const std::string& name, GLint i) noexcept {
+        use();
         glUniform1i(getUniformLocation(name), i);
     }
 
-    void setUniform(const std::string& name, const glm::mat4& m) noexcept {
+    void setUniform(const std::string& name, const glm::mat3& m3) noexcept {
+        use();
+        glUniformMatrix3fv(getUniformLocation(name), 1, GL_FALSE,
+                           glm::value_ptr(m3));
+    }
+    void setUniform(const std::string& name, const glm::mat4& m4) noexcept {
+        use();
         glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE,
-                           glm::value_ptr(m));
+                           glm::value_ptr(m4));
+    }
+
+    void setUniform(const std::string& name, const glm::vec3& v3) noexcept {
+        use();
+        glUniform3f(getUniformLocation(name), v3.x, v3.y, v3.z);
     }
 
     void setUniform(const std::string& name, const glm::vec4& v4) noexcept {
+        use();
         glUniform4f(getUniformLocation(name), v4.r, v4.g, v4.b, v4.a);
     }
 
