@@ -2,6 +2,7 @@
 #define SHADER_HPP
 
 #include "common.hpp"
+#include "gl_object.hpp"
 #include "util.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -13,36 +14,39 @@
 struct Light;
 struct Material;
 
-class Shader {
+namespace detail {
+struct DeleteShader {
+    void operator()(GLuint program) const {
+        assert(glIsProgram(program));
+        glDeleteProgram(program);
+    }
+};
+}  // namespace detail
+
+class Shader : public GLObject<detail::DeleteShader> {
    private:
     static GLuint create(const char* const vertexSource,
                          const char* const fragmentSource);
-    struct Destroy {
-        void operator()(GLuint program) const {
-            assert(glIsProgram(program));
-            glDeleteProgram(program);
-        }
-    };
 
    public:
     struct compile_error : std::runtime_error {
         using runtime_error::runtime_error;
     };
     Shader(const char* const vertexSource, const char* const fragmentSource)
-        : program{create(vertexSource, fragmentSource)} {}
+        : GLObject{create(vertexSource, fragmentSource)} {}
     Shader(const std::string& vertexSource, const std::string& fragmentSource)
         : Shader{vertexSource.c_str(), fragmentSource.c_str()} {}
 
     Shader& operator=(Shader&& other) = default;
     Shader(Shader&& other) = default;
 
-    void use() noexcept { glUseProgram(this->program); }
+    void use() noexcept { glUseProgram(this->handle); }
 
     GLint getAttributeLocation(const std::string& attrib) const noexcept {
-        return glGetAttribLocation(this->program, attrib.c_str());
+        return glGetAttribLocation(this->handle, attrib.c_str());
     }
     GLint getUniformLocation(const std::string& uniform) const noexcept {
-        return glGetUniformLocation(this->program, uniform.c_str());
+        return glGetUniformLocation(this->handle, uniform.c_str());
     }
 
     void setUniform(const std::string& name, GLint i) noexcept {
@@ -81,9 +85,6 @@ class Shader {
     void setUniform(const std::string& name,
                     const Light& light,
                     const glm::mat4& viewMatrix) noexcept;
-
-   private:
-    util::RAII<GLuint, Destroy, util::Movable> program;
 };
 
 #endif

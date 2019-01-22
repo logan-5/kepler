@@ -11,7 +11,10 @@
 
 namespace detail {
 struct DeleteBuffer {
-    void operator()(GLuint buf) const noexcept { glDeleteBuffers(1, &buf); }
+    void operator()(GLuint buf) const noexcept {
+        assert(glIsBuffer(buf));
+        glDeleteBuffers(1, &buf);
+    }
 };
 }  // namespace detail
 

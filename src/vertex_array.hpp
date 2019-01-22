@@ -12,6 +12,7 @@ class Shader;
 namespace detail {
 struct DeleteVAO {
     void operator()(GLuint vao) const noexcept {
+        assert(glIsVertexArray(vao));
         glDeleteVertexArrays(1, &vao);
     }
 };
