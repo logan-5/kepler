@@ -1,3 +1,5 @@
+#include "binding.hpp"
+#include "buffer.hpp"
 #include "camera.hpp"
 #include "common.hpp"
 #include "cube.hpp"
@@ -9,6 +11,7 @@
 #include "shader.hpp"
 #include "texture.hpp"
 #include "types.hpp"
+#include "vertex_array.hpp"
 #include "window.hpp"
 
 #include <array>
@@ -20,98 +23,13 @@ void errorCallback(int error, const char* description) {
 }
 }  // namespace
 
-struct DeleteVAO {
-    void operator()(GLuint vao) const {
-        assert(glIsVertexArray(vao));
-        glDeleteVertexArrays(1, &vao);
-    }
-};
-using RAIIVao = util::RAII<GLuint, DeleteVAO, util::Movable>;
-
-struct DeleteBuffer {
-    void operator()(GLuint buf) const {
-        assert(glIsBuffer(buf));
-        glDeleteBuffers(1, &buf);
-    }
-};
-using RAIIBuffer = util::RAII<GLuint, DeleteBuffer>;
-
-RAIIVao createPhongVao(const GLuint vbo, const Shader& phong) {
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    {
-        const auto positionLocation = phong.getAttributeLocation("position");
-        glVertexAttribPointer(positionLocation, sizeof(Point) / sizeof(float),
-                              GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                              (GLvoid*)offsetof(Vertex, position));
-        glEnableVertexAttribArray(positionLocation);
-    }
-    {
-        const auto normalLocation = phong.getAttributeLocation("normal");
-        glVertexAttribPointer(normalLocation, sizeof(Normal) / sizeof(float),
-                              GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                              (GLvoid*)offsetof(Vertex, normal));
-        glEnableVertexAttribArray(normalLocation);
-    }
-    {
-        const auto texCoordLocation = phong.getAttributeLocation("texCoord");
-        glVertexAttribPointer(texCoordLocation, sizeof(Point2D) / sizeof(float),
-                              GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                              (GLvoid*)offsetof(Vertex, texCoord));
-        glEnableVertexAttribArray(texCoordLocation);
-    }
-    {
-        const auto colorLocation = phong.getAttributeLocation("color");
-        glVertexAttribPointer(colorLocation, sizeof(Color) / sizeof(float),
-                              GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                              (GLvoid*)offsetof(Vertex, color));
-        glEnableVertexAttribArray(colorLocation);
-    }
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    return {vao};
-}
-
-RAIIVao createLightVao(const GLuint vbo, const Shader& light) {
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
-    {
-        const auto positionLocation = light.getAttributeLocation("position");
-        glVertexAttribPointer(positionLocation, sizeof(Point) / sizeof(float),
-                              GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                              (GLvoid*)offsetof(Vertex, position));
-        glEnableVertexAttribArray(positionLocation);
-    }
-
-    glBindVertexArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    return {vao};
-}
-
 int main() {
     Window window{{1280, 720}, "deferred shading demo", errorCallback};
 
     // Set the clear color to a nice green
     glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 
-    RAIIBuffer cubeBuffer{[&] {
-        constexpr auto cubeVerts = getCubeVerts();
-        GLuint vbo;
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof cubeVerts, cubeVerts.data(),
-                     GL_STATIC_DRAW);
-        return vbo;
-    }()};
+    auto cubeBuffer = std::make_shared<VertexBuffer>(getCubeVerts());
     Shader phongShader{
         fs::loadFileAsString(fs::RelativePath{"shaders/phong.vsh"}),
         fs::loadFileAsString(fs::RelativePath{"shaders/phong.fsh"})};
@@ -125,13 +43,13 @@ int main() {
     auto containerSpecularTexture = std::make_shared<Texture>(
         Image{fs::RelativePath{"res/container2_specular.png"}});
 
-    auto phongVao = createPhongVao(cubeBuffer, phongShader);
-    auto lightVao = createLightVao(cubeBuffer, lightShader);
+    auto phongVao = VertexArrayObject{cubeBuffer, phongShader};
+    auto lightVao = VertexArrayObject{cubeBuffer, lightShader};
 
     glEnable(GL_DEPTH_TEST);
 
     Transformed cube{{Point{0.f, 1.f, -4.f},
-                      Euler{Degrees{0.f}, Degrees{0.f}, Degrees{0.f}},
+                      Euler{Degrees{15.f}, Degrees{0.f}, Degrees{0.f}},
                       Scale{1.f, 1.f, 1.f}}};
 
     Light light{
@@ -185,7 +103,7 @@ int main() {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glBindVertexArray(phongVao);
+        phongVao.bind();
         phongShader.use();
         phongShader.setUniform("diffuseTexture", 0);
         phongShader.setUniform("lightColor", lightColor.rep());
@@ -200,14 +118,14 @@ int main() {
         phongShader.setUniform("normalMatrix", matrix::normal(modelView));
         phongShader.setUniform("material", cubeMaterial);
         phongShader.setUniform("light", light, viewMatrix);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, phongVao.getBuffer().getVertexCount());
 
-        glBindVertexArray(lightVao);
+        lightVao.bind();
         lightShader.use();
         lightShader.setUniform("mvp", camera.getProjectionMatrix() *
                                           viewMatrix * light.getModelMatrix());
         lightShader.setUniform("color", light.diffuse.rep());
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, lightVao.getBuffer().getVertexCount());
 
         window.update();
     }
