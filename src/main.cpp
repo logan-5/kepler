@@ -37,10 +37,6 @@ std::vector<T> toVec(const std::array<T, N>& arr) {
 std::unique_ptr<Camera> createCamera(Window& window) {
     std::unique_ptr<Camera> camera =
         std::make_unique<PerspectiveCamera>(window.getResolution());
-    window.setWindowSizeCallback(
-        [camera = &*camera](const Resolution newResolution) {
-            camera->resolutionChanged(newResolution);
-        });
 
     camera->transform().position.z() = 1.f;
 
@@ -112,7 +108,7 @@ int main() {
                           Euler{Degrees{15.f}, Degrees{0.f}, Degrees{0.f}},
                           Scale{1.f, 1.f, 1.f}},
                 toVec(getCubeVerts()), cubeMaterial};
-    static constexpr auto numberOfCubes = 50;
+    static constexpr auto numberOfCubes = 200;
     std::vector<Object> cubes{cube};
     cubes.reserve(1 + numberOfCubes);
     std::generate_n(std::back_inserter(cubes), numberOfCubes,
@@ -121,6 +117,11 @@ int main() {
     Scene mainScene{std::move(cubes), light};
     Renderer theRenderer{window.getResolution(), createCamera(window)};
     theRenderer.setBackgroundColor({0.05f, 0.05f, 0.06f, 1.f});
+
+    window.setWindowSizeCallback([&](const Resolution newResolution) {
+        std::cout << "window size changed to " << newResolution << '\n';
+        theRenderer.resolutionChanged(newResolution);
+    });
 
     while (!window.shouldClose()) {
         // const auto rotation = window.getTime();

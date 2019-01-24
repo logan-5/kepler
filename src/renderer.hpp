@@ -24,6 +24,8 @@ class Renderer {
     void setBackgroundColor(const Color& color);
     void setDepthTestEnabled(const bool enabled);
 
+    void resolutionChanged(Resolution newResolution);
+
    private:
     std::unique_ptr<Camera> camera;
     Color clearColor;

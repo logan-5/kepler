@@ -19,6 +19,11 @@ std::array<Vertex, 6> getFullScreenQuad() {
         {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
     }};
 }
+void setDrawBuffers(GBuffer& gBuffer) {
+    RAIIBinding<FrameBuffer> bind{gBuffer.getFrameBufferHandle()};
+    auto buffers = gBuffer.getBuffers();
+    GL_CHECK(glDrawBuffers(buffers.size(), buffers.data()));
+}
 }  // namespace
 
 Renderer::Renderer(Resolution resolution, std::unique_ptr<Camera> in_camera)
@@ -34,9 +39,13 @@ Renderer::Renderer(Resolution resolution, std::unique_ptr<Camera> in_camera)
                        deferredPassShader} {
     setDepthTestEnabled(true);
 
-    RAIIBinding<FrameBuffer> bind{gBuffer.getFrameBufferHandle()};
-    auto buffers = gBuffer.getBuffers();
-    GL_CHECK(glDrawBuffers(buffers.size(), buffers.data()));
+    setDrawBuffers(gBuffer);
+}
+
+void Renderer::resolutionChanged(Resolution resolution) {
+    gBuffer = GBuffer{resolution};
+    setDrawBuffers(gBuffer);
+    camera->resolutionChanged(resolution);
 }
 
 void Renderer::setBackgroundColor(const Color& color) {

@@ -7,7 +7,7 @@
 
 struct GBuffer {
     struct Target {
-        enum : std::size_t {
+        enum {
             Position,
             Normal,
             // Diffuse,

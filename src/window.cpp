@@ -8,11 +8,16 @@
 
 namespace {
 Window::WindowSizeCallback global_windowSizeCallback;
+bool global_windowSizeDirty = false;
 
-void callWindowSizeCallback(GLFWwindow* window, int width, int height) {
-    (void)window;
+void setWindowSizeDirty(GLFWwindow*, int, int) {
+    global_windowSizeDirty = true;
+}
+
+void callWindowSizeCallback(Resolution resolution) {
     if (global_windowSizeCallback)
-        global_windowSizeCallback(Resolution{width, height});
+        global_windowSizeCallback(resolution);
+    global_windowSizeDirty = false;
 }
 }  // namespace
 
@@ -54,7 +59,7 @@ struct Window::Impl : Window_base {
             if (!window) {
                 throw initialization_error{"Unable to create window"};
             }
-            glfwSetWindowSizeCallback(window, callWindowSizeCallback);
+            glfwSetWindowSizeCallback(window, setWindowSizeDirty);
             return window;
         }()}
         , input{std::make_unique<Input::Impl>(window)} {
@@ -72,6 +77,15 @@ struct Window::Impl : Window_base {
         glfwSwapBuffers(window);
         glfwPollEvents();
         input.update();
+        if (global_windowSizeDirty) {
+            callWindowSizeCallback(getResolution());
+        }
+    }
+
+    Resolution getResolution() const {
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+        return {width, height};
     }
 
     float getTime() const { return glfwGetTime(); }
@@ -112,9 +126,7 @@ const Input& Window::getInput() const {
 }
 
 Resolution Window::getResolution() const {
-    int width, height;
-    glfwGetWindowSize(impl->window, &width, &height);
-    return {width, height};
+    return impl->getResolution();
 }
 
 void Window::requestClose() {
