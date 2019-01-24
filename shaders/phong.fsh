@@ -1,5 +1,6 @@
 #version 330 core
-out vec4 color;
+layout (location = 0) out vec4 color;
+layout (location = 1) out vec4 other_color;
 
 uniform sampler2D diffuseTexture;
 uniform vec3 lightColor;
@@ -41,4 +42,6 @@ void main() {
 
     vec4 result = ambient + diffuse + specular;
     color = frag_color * result;
+
+    other_color = vec4(1.0) - color;
 }

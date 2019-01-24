@@ -3,12 +3,15 @@
 
 #include "camera.hpp"
 #include "common.hpp"
+#include "gbuffer.hpp"
+#include "shader.hpp"
+#include "vertex_array.hpp"
 
 class Scene;
 
 class Renderer {
    public:
-    Renderer(std::unique_ptr<Camera> in_camera);
+    Renderer(Resolution resolution, std::unique_ptr<Camera> in_camera);
 
     void renderScene(Scene& scene);
 
@@ -23,7 +26,11 @@ class Renderer {
 
    private:
     std::unique_ptr<Camera> camera;
+    Color clearColor;
     GLuint clearFlag;
+    GBuffer gBuffer;
+    Shader deferredPassShader;
+    VertexArrayObject deferredPassQuad;
 };
 
 #endif

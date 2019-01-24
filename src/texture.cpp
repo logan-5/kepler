@@ -1,4 +1,5 @@
 #include "texture.hpp"
+#include "gl.hpp"
 #include "image.hpp"
 
 namespace {
@@ -31,17 +32,30 @@ void setTexParams(GLuint texID, const Texture::Params& params) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
                     convertFilter(params.filterMag));
 }
-}  // namespace
 
-GLuint Texture::create(const Image& img, const Params& params) {
-    const auto resolution = img.getResolution();
+GLuint createTexture(Resolution resolution,
+                     Texture::Format format,
+                     const GLvoid* data,
+                     const Texture::Params& params) {
     GLuint texID;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
-    glTexImage2D(GL_TEXTURE_2D, 0, img.getFormat(), resolution.width(),
-                 resolution.height(), 0, img.getFormat(), GL_UNSIGNED_BYTE,
-                 img.data());
-
+    GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, format.format, resolution.width(),
+                          resolution.height(), 0, format.format, format.type,
+                          data));
     setTexParams(texID, params);
     return texID;
+}
+}  // namespace
+
+GLuint Texture::create(const Image& img, const Params& params) {
+    return createTexture(img.getResolution(),
+                         {img.getFormat(), GL_UNSIGNED_BYTE}, img.data(),
+                         params);
+}
+
+GLuint Texture::create(Resolution resolution,
+                       Format format,
+                       const Params& params) {
+    return createTexture(resolution, format, nullptr, params);
 }

@@ -37,6 +37,7 @@ class Shader final : public GLObject<detail::DeleteShader> {
         cache;
 
     struct private_tag {};
+    friend class Renderer;
 
    public:
     Shader(const std::string& vertexSource,

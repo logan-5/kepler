@@ -1,0 +1,58 @@
+#ifndef FRAME_BUFFER_HPP
+#define FRAME_BUFFER_HPP
+
+#include "gl_object.hpp"
+#include "optional.hpp"
+#include "texture.hpp"
+#include "types.hpp"
+
+#include <cassert>
+#include <vector>
+
+namespace detail {
+struct DeleteFBO {
+    void operator()(GLuint fbo) const {
+        assert(glIsFramebuffer(fbo));
+        glDeleteFramebuffers(1, &fbo);
+    }
+};
+}  // namespace detail
+
+class FrameBuffer : public GLObject<detail::DeleteFBO> {
+   public:
+    struct Attachments {
+       private:
+        friend class FrameBuffer;
+
+        Attachments(Texture in_mainColor)
+            : mainColor{std::move(in_mainColor)} {}
+
+       public:
+        struct Options {
+            bool depth = true;
+            bool stencil = false;
+            Texture::Format mainColorFormat;
+            std::vector<Texture::Format> additionalColorFormats;
+        };
+
+        Texture mainColor;
+        std::vector<Texture> additionalColors;
+        util::optional<Texture> depth;
+
+       private:
+        static Attachments create(Resolution resolution,
+                                  GLuint fbo,
+                                  const Options& options);
+    };
+    FrameBuffer(Resolution resolution, const Attachments::Options& options);
+
+    void bind() noexcept { bind(this->handle); }
+    static void bind(GLuint buf) noexcept {
+        glBindFramebuffer(GL_FRAMEBUFFER, buf);
+    }
+    static void unbind() noexcept { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+
+    Attachments attachments;
+};
+
+#endif

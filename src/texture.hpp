@@ -2,6 +2,7 @@
 #define TEXTURE_HPP
 
 #include "common.hpp"
+#include "gl_object.hpp"
 #include "types.hpp"
 #include "util.hpp"
 
@@ -9,7 +10,16 @@
 
 class Image;
 
-class Texture {
+namespace detail {
+struct DeleteTexture {
+    void operator()(GLuint texID) const {
+        assert(glIsTexture(texID));
+        glDeleteTextures(1, &texID);
+    }
+};
+}  // namespace detail
+
+class Texture : public GLObject<detail::DeleteTexture> {
    public:
     enum class Wrap {
         Clamp,
@@ -27,8 +37,16 @@ class Texture {
         Filter filterMag = Filter::Linear;
     };
 
+    struct Format {
+        GLenum format;
+        GLenum type;
+    };
+
    private:
     static GLuint create(const Image& img, const Params& params);
+    static GLuint create(Resolution resolution,
+                         Format format,
+                         const Params& params);
 
     static GLuint maxBoundTextures() {
         GLint count;
@@ -36,25 +54,17 @@ class Texture {
         return count;
     }
 
-    struct Destroy {
-        void operator()(GLuint texID) const {
-            assert(glIsTexture(texID));
-            glDeleteTextures(1, &texID);
-        }
-    };
-
    public:
     Texture(const Image& img, const Params& params = {})
-        : texID{create(img, params)} {}
+        : GLObject{create(img, params)} {}
+    Texture(const Resolution& res, Format format, const Params& params)
+        : GLObject{create(res, format, params)} {}
 
     void bind(GLenum unit) {
         assert((unit + 1) <= maxBoundTextures());
         glActiveTexture(GL_TEXTURE0 + unit);
-        glBindTexture(GL_TEXTURE_2D, texID);
+        glBindTexture(GL_TEXTURE_2D, this->handle);
     }
-
-   private:
-    util::RAII<GLuint, Destroy, util::Movable> texID;
 };
 
 #endif

@@ -9,6 +9,7 @@
 #include "light.hpp"
 #include "material.hpp"
 #include "object.hpp"
+#include "optional.hpp"
 #include "renderer.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
@@ -84,8 +85,6 @@ int main() {
     window.getInput().setKeyCallback(Input::Key::Esc,
                                      [&] { window.requestClose(); });
 
-    glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
-
     auto lightShader = Shader::create(fs::RelativePath{"shaders/light.vsh"},
                                       fs::RelativePath{"shaders/light.fsh"});
 
@@ -120,7 +119,8 @@ int main() {
                     [&] { return randomCube(cube); });
 
     Scene mainScene{std::move(cubes), light};
-    Renderer theRenderer{createCamera(window)};
+    Renderer theRenderer{window.getResolution(), createCamera(window)};
+    theRenderer.setBackgroundColor({0.05f, 0.05f, 0.06f, 1.f});
 
     while (!window.shouldClose()) {
         // const auto rotation = window.getTime();
