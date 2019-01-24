@@ -17,6 +17,9 @@ struct GBuffer {
         };
         Target() = delete;
     };
+    enum {
+        DepthTarget = Target::MAX,
+    };
 
     GBuffer(Resolution resolution);
 
@@ -25,6 +28,10 @@ struct GBuffer {
 
     Texture& getColorTarget(std::size_t target);
     const Texture& getColorTarget(std::size_t target) const;
+    Texture& getDepthTarget() { return *frameBuffer.attachments.depth; }
+    const Texture& getDepthTarget() const {
+        return *frameBuffer.attachments.depth;
+    }
 
     GLuint getFrameBufferHandle() const { return frameBuffer.getHandle(); }
     void bind() { frameBuffer.bind(); }

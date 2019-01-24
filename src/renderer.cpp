@@ -86,6 +86,10 @@ void Renderer::renderScene(Scene& scene) {
     };
     bindColorTarget("color", GBuffer::Target::Position);
     bindColorTarget("color2", GBuffer::Target::Normal);
+
+    gBuffer.getDepthTarget().bind(GBuffer::DepthTarget);
+    deferredPassShader.setUniform("color3", GBuffer::DepthTarget);
+
     GL_CHECK(glDrawArrays(GL_TRIANGLES, 0,
                           deferredPassQuad.getBuffer().getVertexCount()));
     GL_CHECK();
