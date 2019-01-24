@@ -29,6 +29,7 @@ struct Point : public Rep<glm::vec3> {
     using float_type = glm::vec3::value_type;
 
    public:
+    Point() : Rep{0.f, 0.f, 0.f} {}
     using Rep::Rep;
 
     constexpr float_type& x() noexcept { return rep().x; }
@@ -44,6 +45,7 @@ struct Point2D : public Rep<glm::vec2> {
     using float_type = glm::vec2::value_type;
 
    public:
+    Point2D() : Rep{0.f, 0.f} {}
     using Rep::Rep;
 
     constexpr float_type& x() noexcept { return rep().x; }

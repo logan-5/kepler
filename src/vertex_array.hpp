@@ -19,8 +19,7 @@ struct DeleteVAO {
 }  // namespace detail
 
 struct VertexArrayObject : public GLObject<detail::DeleteVAO> {
-    VertexArrayObject(std::shared_ptr<VertexBuffer> in_vbo,
-                      const Shader& shader);
+    VertexArrayObject(std::shared_ptr<VertexBuffer> in_vbo, Shader& shader);
 
     void bind() noexcept { bind(this->handle); }
     static void bind(GLuint buf) noexcept { glBindVertexArray(buf); }
@@ -32,7 +31,7 @@ struct VertexArrayObject : public GLObject<detail::DeleteVAO> {
     }
 
    private:
-    void configureVertexAttributes(const Shader& shader);
+    void configureVertexAttributes(Shader& shader);
     std::shared_ptr<VertexBuffer> vbo;
 };
 

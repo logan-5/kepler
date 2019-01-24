@@ -167,6 +167,43 @@ struct RAII : MovePolicy {
     compressed_pair<T, Deleter> data;
 };
 
+// allows for non-const access of container elements,
+// without allowing the container itself to be modified (e.g. push_back)
+template <typename Container>
+class container_view {
+   public:
+    container_view(Container& in_c) : c{in_c} {}
+    typename Container::iterator begin() { return c.get().begin(); }
+    typename Container::iterator end() { return c.get().end(); }
+
+    bool empty() const { return c.get().empty(); }
+    std::size_t size() const { return c.get().size(); }
+
+   private:
+    std::reference_wrapper<Container> c;
+};
+}  // namespace util
+
+#include <random>
+
+namespace util {
+namespace random {
+namespace detail {
+extern std::mt19937 engine;
+}
+
+template <typename Int>
+std::enable_if_t<std::is_integral<Int>::value, Int> random(Int min, Int max) {
+    return std::uniform_int_distribution<Int>{min, max}(detail::engine);
+}
+template <typename Float>
+std::enable_if_t<std::is_floating_point<Float>::value, Float> random(
+    Float min,
+    Float max) {
+    return std::uniform_real_distribution<Float>{min, max}(detail::engine);
+}
+}  // namespace random
+
 }  // namespace util
 
 #endif

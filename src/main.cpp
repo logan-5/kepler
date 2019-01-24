@@ -8,6 +8,9 @@
 #include "input.hpp"
 #include "light.hpp"
 #include "material.hpp"
+#include "object.hpp"
+#include "renderer.hpp"
+#include "scene.hpp"
 #include "shader.hpp"
 #include "texture.hpp"
 #include "types.hpp"
@@ -21,36 +24,81 @@ namespace {
 void errorCallback(int error, const char* description) {
     std::cerr << "GLFW error " << error << ": " << description << '\n';
 }
+
+template <typename T, std::size_t N>
+std::vector<T> toVec(const std::array<T, N>& arr) {
+    std::vector<T> vec;
+    vec.reserve(N);
+    std::copy(std::begin(arr), std::end(arr), std::back_inserter(vec));
+    return vec;
+}
+
+std::unique_ptr<Camera> createCamera(Window& window) {
+    std::unique_ptr<Camera> camera =
+        std::make_unique<PerspectiveCamera>(window.getResolution());
+    window.setWindowSizeCallback(
+        [camera = &*camera](const Resolution newResolution) {
+            camera->resolutionChanged(newResolution);
+        });
+
+    camera->transform().position.z() = 1.f;
+
+    constexpr auto cameraSpeed = 0.01f;
+    auto& input = window.getInput();
+    input.setKeyCallback(Input::Key::W, [camera = &*camera] {
+        camera->transform().position.rep() += glm::vec3{0.f, 0.f, cameraSpeed};
+    });
+    input.setKeyCallback(Input::Key::S, [camera = &*camera] {
+        camera->transform().position.rep() -= glm::vec3{0.f, 0.f, cameraSpeed};
+    });
+    input.setKeyCallback(Input::Key::A, [camera = &*camera] {
+        camera->transform().position.rep() += glm::vec3{cameraSpeed, 0.f, 0.f};
+    });
+    input.setKeyCallback(Input::Key::D, [camera = &*camera] {
+        camera->transform().position.rep() -= glm::vec3{cameraSpeed, 0.f, 0.f};
+    });
+    input.setKeyCallback(Input::Key::Q, [camera = &*camera] {
+        camera->transform().position.rep() += glm::vec3{0.f, cameraSpeed, 0.f};
+    });
+    input.setKeyCallback(Input::Key::E, [camera = &*camera] {
+        camera->transform().position.rep() -= glm::vec3{0.f, cameraSpeed, 0.f};
+    });
+    return camera;
+}
+
+Object randomCube(const Object& startingCube) {
+    Object ret = startingCube;
+    using namespace util::random;
+    ret.transform().position =
+        Point{random(-5.f, 5.f), random(-5.f, 5.f), random(0.f, -10.f)};
+    ret.transform().scale = Scale{random(0.5f, 1.5f)};
+    ret.transform().angle =
+        Euler{Degrees{random(0.f, 360.f)}, Degrees{random(0.f, 360.f)},
+              Degrees{random(0.f, 360.f)}};
+    return ret;
+}
 }  // namespace
 
 int main() {
     Window window{{1280, 720}, "deferred shading demo", errorCallback};
+    window.getInput().setKeyCallback(Input::Key::Esc,
+                                     [&] { window.requestClose(); });
 
-    // Set the clear color to a nice green
     glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
 
-    auto cubeBuffer = std::make_shared<VertexBuffer>(getCubeVerts());
-    Shader phongShader{
-        fs::loadFileAsString(fs::RelativePath{"shaders/phong.vsh"}),
-        fs::loadFileAsString(fs::RelativePath{"shaders/phong.fsh"})};
-
-    Shader lightShader{
-        fs::loadFileAsString(fs::RelativePath{"shaders/light.vsh"}),
-        fs::loadFileAsString(fs::RelativePath{"shaders/light.fsh"})};
+    auto lightShader = Shader::create(fs::RelativePath{"shaders/light.vsh"},
+                                      fs::RelativePath{"shaders/light.fsh"});
 
     auto containerTexture = std::make_shared<Texture>(
         Image{fs::RelativePath{"res/container2.png"}});
     auto containerSpecularTexture = std::make_shared<Texture>(
         Image{fs::RelativePath{"res/container2_specular.png"}});
+    assert(glGetError() == GL_NO_ERROR);
 
-    auto phongVao = VertexArrayObject{cubeBuffer, phongShader};
-    auto lightVao = VertexArrayObject{cubeBuffer, lightShader};
+    auto cubeBuffer = std::make_shared<VertexBuffer>(getCubeVerts());
 
-    glEnable(GL_DEPTH_TEST);
-
-    Transformed cube{{Point{0.f, 1.f, -4.f},
-                      Euler{Degrees{15.f}, Degrees{0.f}, Degrees{0.f}},
-                      Scale{1.f, 1.f, 1.f}}};
+    // auto phongVao = VertexArrayObject{cubeBuffer, phongShader};
+    auto lightVao = VertexArrayObject{cubeBuffer, *lightShader};
 
     Light light{
         {Point{1.f, 1.f, -1.f}, Euler{}, Scale{0.5f}},
@@ -58,36 +106,21 @@ int main() {
         {1.f, 0.5f, 1.f},
         {1.f, 0.5f, 1.f},
     };
-    const ColorRGB lightColor{1.f, 1.f, 1.f};
     const Material cubeMaterial{containerTexture, containerSpecularTexture,
                                 256.f};
 
-    PerspectiveCamera camera{{1280, 720}};
-    window.setWindowSizeCallback([&](const Resolution newResolution) {
-        camera.resolutionChanged(newResolution);
-    });
-    camera.transform().position.z() = 1.f;
+    Object cube{Transform{Point{0.f, 1.f, -4.f},
+                          Euler{Degrees{15.f}, Degrees{0.f}, Degrees{0.f}},
+                          Scale{1.f, 1.f, 1.f}},
+                toVec(getCubeVerts()), cubeMaterial};
+    static constexpr auto numberOfCubes = 50;
+    std::vector<Object> cubes{cube};
+    cubes.reserve(1 + numberOfCubes);
+    std::generate_n(std::back_inserter(cubes), numberOfCubes,
+                    [&] { return randomCube(cube); });
 
-    constexpr auto cameraSpeed = 0.01f;
-    auto& input = window.getInput();
-    input.setKeyCallback(Input::Key::W, [&] {
-        camera.transform().position.rep() += glm::vec3{0.f, 0.f, cameraSpeed};
-    });
-    input.setKeyCallback(Input::Key::S, [&] {
-        camera.transform().position.rep() -= glm::vec3{0.f, 0.f, cameraSpeed};
-    });
-    input.setKeyCallback(Input::Key::A, [&] {
-        camera.transform().position.rep() += glm::vec3{cameraSpeed, 0.f, 0.f};
-    });
-    input.setKeyCallback(Input::Key::D, [&] {
-        camera.transform().position.rep() -= glm::vec3{cameraSpeed, 0.f, 0.f};
-    });
-    input.setKeyCallback(Input::Key::Q, [&] {
-        camera.transform().position.rep() += glm::vec3{0.f, cameraSpeed, 0.f};
-    });
-    input.setKeyCallback(Input::Key::E, [&] {
-        camera.transform().position.rep() -= glm::vec3{0.f, cameraSpeed, 0.f};
-    });
+    Scene mainScene{std::move(cubes), light};
+    Renderer theRenderer{createCamera(window)};
 
     while (!window.shouldClose()) {
         // const auto rotation = window.getTime();
@@ -101,34 +134,20 @@ int main() {
 
         // camera.transform().angle.pitch() = std::sin(rotation) * 0.33f;
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        theRenderer.renderScene(mainScene);
 
-        phongVao.bind();
-        phongShader.use();
-        phongShader.setUniform("diffuseTexture", 0);
-        phongShader.setUniform("lightColor", lightColor.rep());
-        const auto viewMatrix = camera.getViewMatrix();
-        phongShader.setUniform(
-            "lightPosition",
-            glm::vec3{viewMatrix *
-                      glm::vec4{light.transform().position.rep(), 1.f}});
-        const auto modelView = viewMatrix * cube.getModelMatrix();
-        phongShader.setUniform("modelView", modelView);
-        phongShader.setUniform("projection", camera.getProjectionMatrix());
-        phongShader.setUniform("normalMatrix", matrix::normal(modelView));
-        phongShader.setUniform("material", cubeMaterial);
-        phongShader.setUniform("light", light, viewMatrix);
-        glDrawArrays(GL_TRIANGLES, 0, phongVao.getBuffer().getVertexCount());
-
-        lightVao.bind();
-        lightShader.use();
-        lightShader.setUniform("mvp", camera.getProjectionMatrix() *
-                                          viewMatrix * light.getModelMatrix());
-        lightShader.setUniform("color", light.diffuse.rep());
-        glDrawArrays(GL_TRIANGLES, 0, lightVao.getBuffer().getVertexCount());
+        // lightVao.bind();
+        // lightShader->use();
+        // lightShader->setUniform("mvp", camera.getProjectionMatrix() *
+        //                                    viewMatrix *
+        //                                    light.getModelMatrix());
+        // lightShader->setUniform("color", light.diffuse.rep());
+        // glDrawArrays(GL_TRIANGLES, 0, lightVao.getBuffer().getVertexCount());
 
         window.update();
     }
+
+    Shader::clearCache();
 
     return 0;
 }

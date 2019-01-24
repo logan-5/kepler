@@ -2,6 +2,8 @@
 
 using namespace util;
 
+std::mt19937 random::detail::engine{std::random_device{}()};
+
 static_assert(!std::is_copy_constructible<Movable>::value &&
                   !std::is_copy_assignable<Movable>::value,
               "");

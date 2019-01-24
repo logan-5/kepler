@@ -5,7 +5,7 @@ namespace {
 GLenum convertWrap(const Texture::Wrap wrap) {
     switch (wrap) {
         case Texture::Wrap::Clamp:
-            return GL_CLAMP;
+            return GL_CLAMP_TO_EDGE;
         case Texture::Wrap::Repeat:
             return GL_REPEAT;
     }
@@ -25,6 +25,7 @@ void setTexParams(GLuint texID, const Texture::Params& params) {
                     convertWrap(params.wrapS));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
                     convertWrap(params.wrapT));
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                     convertFilter(params.filterMin));
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,

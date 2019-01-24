@@ -17,6 +17,7 @@ class Input {
         D,
         Q,
         E,
+        Esc,
     };
 
     Input(std::unique_ptr<Impl> impl);

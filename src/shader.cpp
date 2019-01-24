@@ -1,4 +1,5 @@
 #include "shader.hpp"
+#include "fs.hpp"
 #include "light.hpp"
 #include "material.hpp"
 #include "util.hpp"
@@ -15,10 +16,16 @@ struct DeleteShader {
 };
 }  // namespace
 
-GLuint Shader::create(const char* const vertexSource,
-                      const char* const fragmentSource) {
+std::map<std::tuple<std::string, std::string>,
+         std::shared_ptr<Shader>,
+         std::less<>>
+    Shader::cache;
+
+GLuint Shader::create_impl(const char* const vertexSource,
+                           const char* const fragmentSource) {
     util::RAII<GLuint, DeleteShader> vertexShader{
         glCreateShader(GL_VERTEX_SHADER)};
+
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     glCompileShader(vertexShader);
     assert(glIsShader(vertexShader));
@@ -53,6 +60,7 @@ GLuint Shader::create(const char* const vertexSource,
 
     glDetachShader(program, vertexShader);
     glDetachShader(program, fragmentShader);
+
     assert(glGetError() == GL_NO_ERROR);
 
     return program;
@@ -77,4 +85,18 @@ void Shader::setUniform(const std::string& name,
     setUniform(name + ".position",
                glm::vec3{viewMatrix *
                          glm::vec4{light.transform().position.rep(), 1.f}});
+}
+
+std::shared_ptr<Shader> Shader::create(const fs::AbsolutePath& vertexPath,
+                                       const fs::AbsolutePath& fragmentPath) {
+    auto existing = cache.find(std::tie(vertexPath.get(), fragmentPath.get()));
+    if (existing == std::end(cache)) {
+        return cache
+            .emplace(std::make_tuple(vertexPath.get(), fragmentPath.get()),
+                     std::make_shared<Shader>(
+                         fs::loadFileAsString(vertexPath),
+                         fs::loadFileAsString(fragmentPath), private_tag{}))
+            .first->second;
+    }
+    return existing->second;
 }

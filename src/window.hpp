@@ -35,6 +35,10 @@ class Window {
     Input& getInput();
     const Input& getInput() const;
 
+    Resolution getResolution() const;
+
+    void requestClose();
+
    private:
     struct Impl;
     std::unique_ptr<Impl> impl;

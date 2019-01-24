@@ -2,6 +2,7 @@
 #define SHADER_HPP
 
 #include "common.hpp"
+#include "fs.hpp"
 #include "gl_object.hpp"
 #include "util.hpp"
 
@@ -9,7 +10,9 @@
 
 #include <cassert>
 #include <exception>
+#include <map>
 #include <string>
+#include <tuple>
 
 struct Light;
 struct Material;
@@ -23,19 +26,32 @@ struct DeleteShader {
 };
 }  // namespace detail
 
-class Shader : public GLObject<detail::DeleteShader> {
+class Shader final : public GLObject<detail::DeleteShader> {
    private:
-    static GLuint create(const char* const vertexSource,
-                         const char* const fragmentSource);
+    static GLuint create_impl(const char* const vertexSource,
+                              const char* const fragmentSource);
+
+    static std::map<std::tuple<std::string, std::string>,
+                    std::shared_ptr<Shader>,
+                    std::less<>>
+        cache;
+
+    struct private_tag {};
 
    public:
+    Shader(const std::string& vertexSource,
+           const std::string& fragmentSource,
+           private_tag)
+        : GLObject{create_impl(vertexSource.c_str(), fragmentSource.c_str())} {}
+
+    static void clearCache() { cache.clear(); }
+
     struct compile_error : std::runtime_error {
         using runtime_error::runtime_error;
     };
-    Shader(const char* const vertexSource, const char* const fragmentSource)
-        : GLObject{create(vertexSource, fragmentSource)} {}
-    Shader(const std::string& vertexSource, const std::string& fragmentSource)
-        : Shader{vertexSource.c_str(), fragmentSource.c_str()} {}
+
+    static std::shared_ptr<Shader> create(const fs::AbsolutePath& vertexPath,
+                                          const fs::AbsolutePath& fragmentPath);
 
     Shader& operator=(Shader&& other) = default;
     Shader(Shader&& other) = default;

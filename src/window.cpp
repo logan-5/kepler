@@ -110,3 +110,13 @@ Input& Window::getInput() {
 const Input& Window::getInput() const {
     return impl->input;
 }
+
+Resolution Window::getResolution() const {
+    int width, height;
+    glfwGetWindowSize(impl->window, &width, &height);
+    return {width, height};
+}
+
+void Window::requestClose() {
+    glfwSetWindowShouldClose(impl->window, GLFW_TRUE);
+}

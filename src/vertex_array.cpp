@@ -19,7 +19,7 @@ struct AttributeLocation : util::wrap<GLint, false> {
 }  // namespace
 
 VertexArrayObject::VertexArrayObject(std::shared_ptr<VertexBuffer> in_vbo,
-                                     const Shader& shader)
+                                     Shader& shader)
     : GLObject{[] {
         GLuint vao;
         glGenVertexArrays(1, &vao);
@@ -30,7 +30,8 @@ VertexArrayObject::VertexArrayObject(std::shared_ptr<VertexBuffer> in_vbo,
     configureVertexAttributes(shader);
 }
 
-void VertexArrayObject::configureVertexAttributes(const Shader& shader) {
+void VertexArrayObject::configureVertexAttributes(Shader& shader) {
+    shader.use();
     RAIIBinding<VertexArrayObject> bindSelf{this->handle};
     assert(vbo);
     RAIIBinding<VertexBuffer> bindBuffer{vbo->getHandle()};
