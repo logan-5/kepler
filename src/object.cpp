@@ -1,6 +1,5 @@
 #include "object.hpp"
 #include "fs.hpp"
-#include "light.hpp"
 
 #include <memory>
 #include <vector>
@@ -47,12 +46,6 @@ void Object::setUniformsImpl(const glm::mat4& model,
     shader->setUniform("projection", projection);
     shader->setUniform("normalMatrix", matrix::normal(modelView));
     shader->setUniform("material", this->material);
-}
-
-void Object::setLights(const std::vector<Light>& lights,
-                       const glm::mat4& viewMatrix) {
-    shader->use();
-    shader->setUniform("light", lights[0], viewMatrix);
 }
 
 void Object::render() {

@@ -1,7 +1,6 @@
 #include "shader.hpp"
 #include "fs.hpp"
 #include "gl.hpp"
-#include "light.hpp"
 #include "material.hpp"
 #include "util.hpp"
 
@@ -83,17 +82,6 @@ void Shader::setUniform(const std::string& name,
     material.specular->bind(Material::TextureUnit::Specular);
     setUniform(name + ".specular", Material::TextureUnit::Specular);
     setUniform(name + ".shininess", material.shininess);
-}
-
-void Shader::setUniform(const std::string& name,
-                        const Light& light,
-                        const glm::mat4& viewMatrix) noexcept {
-    setUniform(name + ".ambient", light.ambient.rep());
-    setUniform(name + ".diffuse", light.diffuse.rep());
-    setUniform(name + ".specular", light.specular.rep());
-    setUniform(name + ".position",
-               glm::vec3{viewMatrix *
-                         glm::vec4{light.transform().position.rep(), 1.f}});
 }
 
 std::shared_ptr<Shader> Shader::create(const fs::AbsolutePath& vertexPath,

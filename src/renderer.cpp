@@ -7,6 +7,7 @@
 #include "types.hpp"
 
 #include <array>
+#include <string>
 
 namespace {
 std::array<Vertex, 6> getFullScreenQuad() {
@@ -75,10 +76,8 @@ void Renderer::renderScene(Scene& scene) {
 
     const auto projection = camera->getProjectionMatrix();
     const auto view = camera->getViewMatrix();
-    const auto lights = scene.getLights();
     for (auto& object : scene.getObjects()) {
         GL_CHECK(object.setUniforms(view, projection));
-        GL_CHECK(object.setLights(lights, view));
         GL_CHECK(object.render());
     }
 
@@ -91,7 +90,15 @@ void Renderer::renderScene(Scene& scene) {
     glClear(GL_COLOR_BUFFER_BIT);
     deferredPassQuad.bind();
     deferredPassShader.use();
-    deferredPassShader.setUniform("light", lights[0], view);
+
+    auto pointLights = scene.getPointLights();
+    for (std::size_t i = 0; i < pointLights.size(); ++i) {
+        GL_CHECK(pointLights[i].applyUniforms(
+            "pointLights[" + std::to_string(i) + ']', deferredPassShader,
+            view));
+    }
+    deferredPassShader.setUniform("pointLightCount",
+                                  static_cast<int>(pointLights.size()));
 
     auto bindColorTarget = [&](const auto& name, int target) {
         gBuffer.getColorTarget(target).bind(target);

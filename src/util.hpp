@@ -176,6 +176,14 @@ class container_view {
     typename Container::iterator begin() { return c.get().begin(); }
     typename Container::iterator end() { return c.get().end(); }
 
+    // TODO some sfinae for these
+    typename Container::reference operator[](std::size_t idx) {
+        return c.get()[idx];
+    }
+    typename Container::reference at(std::size_t idx) {
+        return c.get().at(idx);
+    }
+
     bool empty() const { return c.get().empty(); }
     std::size_t size() const { return c.get().size(); }
 

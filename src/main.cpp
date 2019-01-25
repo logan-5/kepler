@@ -143,11 +143,17 @@ int main() {
     auto lightVao = VertexArrayObject{cubeBuffer, *lightShader};
     GL_CHECK();
 
-    Light light{
+    PointLight light{
         {Point{1.f, 1.f, -1.f}, Euler{}, Scale{0.5f}},
         {0.1f, 0.1f, 0.1f},
         {1.f, 0.5f, 1.f},
         {1.f, 0.5f, 1.f},
+    };
+    PointLight light2{
+        {Point{1.f, -1.f, -10.f}, Euler{}, Scale{0.5f}},
+        {0.1f, 0.1f, 0.1f},
+        {0.f, 0.5f, 1.f},
+        {0.f, 0.5f, 1.f},
     };
     const Material cubeMaterial{containerTexture, containerSpecularTexture,
                                 256.f};
@@ -168,7 +174,7 @@ int main() {
     std::generate_n(std::back_inserter(cubes), numberOfCubes,
                     [&] { return randomCube(cube); });
 
-    Scene mainScene{std::move(cubes), light};
+    Scene mainScene{std::move(cubes), {light, light2}};
     std::cout << mainScene << '\n';
 
     window.setWindowSizeCallback([&](const Resolution newResolution) {

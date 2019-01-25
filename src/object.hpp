@@ -44,8 +44,6 @@ class Object : public MeshRenderable {
            Material mat,
            BehaviorList behaviors = {});
 
-    void setLights(const std::vector<Light>& light, const glm::mat4& view);
-
     void render() override;
 
     void addBehavior(BehaviorList::List::value_type behavior) {

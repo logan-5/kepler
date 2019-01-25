@@ -99,10 +99,6 @@ class Shader final : public GLObject<detail::DeleteShader> {
     }
 
     void setUniform(const std::string& name, const Material& material) noexcept;
-
-    void setUniform(const std::string& name,
-                    const Light& light,
-                    const glm::mat4& viewMatrix) noexcept;
 };
 
 #endif

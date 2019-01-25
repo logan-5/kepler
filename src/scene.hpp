@@ -10,15 +10,22 @@
 
 class Scene {
    public:
-    Scene(std::vector<Object> in_objects, Light in_light)
-        : objects{std::move(in_objects)}, light{std::move(in_light)} {}
+    Scene(std::vector<Object> in_objects, std::vector<PointLight> in_lights)
+        : objects{std::move(in_objects)}, pointLights{std::move(in_lights)} {}
 
     void addObject(Object o) { objects.push_back(std::move(o)); }
+
+    void addPointLight(PointLight l) { pointLights.push_back(std::move(l)); }
 
     util::container_view<std::vector<Object>> getObjects() { return {objects}; }
     const std::vector<Object>& getObjects() const { return objects; }
 
-    std::vector<Light> getLights() const { return {light}; }
+    util::container_view<std::vector<PointLight>> getPointLights() {
+        return {pointLights};
+    }
+    const std::vector<PointLight>& getPointLights() const {
+        return pointLights;
+    }
 
     void update(Seconds dt);
 
@@ -26,7 +33,7 @@ class Scene {
 
    private:
     std::vector<Object> objects;
-    Light light;
+    std::vector<PointLight> pointLights;
 };
 
 #endif
