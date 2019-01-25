@@ -5,6 +5,7 @@
 #include "object.hpp"
 #include "util.hpp"
 
+#include <string>
 #include <vector>
 
 class Scene {
@@ -18,6 +19,10 @@ class Scene {
     const std::vector<Object>& getObjects() const { return objects; }
 
     std::vector<Light> getLights() const { return {light}; }
+
+    void update(Seconds dt);
+
+    std::string toString() const;
 
    private:
     std::vector<Object> objects;

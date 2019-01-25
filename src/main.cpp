@@ -39,28 +39,45 @@ std::unique_ptr<Camera> createCamera(Window& window) {
         std::make_unique<PerspectiveCamera>(window.getResolution());
 
     camera->transform().position.z() = 1.f;
+    std::cout << "camera transform: " << camera->transform() << '\n';
 
     constexpr auto cameraSpeed = 0.01f;
     auto& input = window.getInput();
     input.setKeyCallback(Input::Key::W, [camera = &*camera] {
-        camera->transform().position.rep() += glm::vec3{0.f, 0.f, cameraSpeed};
+        camera->transform().translateByRelative(
+            glm::vec3{0.f, 0.f, -cameraSpeed});
     });
     input.setKeyCallback(Input::Key::S, [camera = &*camera] {
-        camera->transform().position.rep() -= glm::vec3{0.f, 0.f, cameraSpeed};
+        camera->transform().translateByRelative(
+            glm::vec3{0.f, 0.f, +cameraSpeed});
     });
     input.setKeyCallback(Input::Key::A, [camera = &*camera] {
-        camera->transform().position.rep() += glm::vec3{cameraSpeed, 0.f, 0.f};
+        camera->transform().translateByRelative(
+            glm::vec3{+cameraSpeed, 0.f, 0.f});
     });
     input.setKeyCallback(Input::Key::D, [camera = &*camera] {
-        camera->transform().position.rep() -= glm::vec3{cameraSpeed, 0.f, 0.f};
+        camera->transform().translateByRelative(
+            glm::vec3{-cameraSpeed, 0.f, 0.f});
     });
     input.setKeyCallback(Input::Key::Q, [camera = &*camera] {
-        camera->transform().position.rep() += glm::vec3{0.f, cameraSpeed, 0.f};
+        camera->transform().translateByRelative(
+            glm::vec3{0.f, +cameraSpeed, 0.f});
     });
     input.setKeyCallback(Input::Key::E, [camera = &*camera] {
-        camera->transform().position.rep() -= glm::vec3{0.f, cameraSpeed, 0.f};
+        camera->transform().translateByRelative(
+            glm::vec3{0.f, -cameraSpeed, 0.f});
+    });
+    input.setKeyCallback(Input::Key::LeftArrow, [camera = &*camera] {
+        camera->transform().rotateBy(Euler{-cameraSpeed, 0.f, 0.f});
+    });
+    input.setKeyCallback(Input::Key::RightArrow, [camera = &*camera] {
+        camera->transform().rotateBy(Euler{+cameraSpeed, 0.f, 0.f});
     });
     return camera;
+}
+
+bool coinFlip() {
+    return util::random::random(false, true);
 }
 
 Object randomCube(const Object& startingCube) {
@@ -69,9 +86,14 @@ Object randomCube(const Object& startingCube) {
     ret.transform().position =
         Point{random(-5.f, 5.f), random(-5.f, 5.f), random(0.f, -10.f)};
     ret.transform().scale = Scale{random(0.5f, 1.5f)};
-    ret.transform().angle =
-        Euler{Degrees{random(0.f, 360.f)}, Degrees{random(0.f, 360.f)},
-              Degrees{random(0.f, 360.f)}};
+    // ret.transform().angle =
+    //     Euler{Degrees{random(0.f, 360.f)}, Degrees{random(0.f, 360.f)},
+    //           Degrees{random(0.f, 360.f)}};
+    if (coinFlip()) {
+        ret.addBehavior(std::make_unique<RotateForeverBehavior>(
+            Euler{Degrees{random(-5.f, 5.f)}, Degrees{random(-5.f, 5.f)},
+                  Degrees{random(-5.f, 5.f)}}));
+    }
     return ret;
 }
 }  // namespace
@@ -105,7 +127,7 @@ int main() {
                                 256.f};
 
     Object cube{Transform{Point{0.f, 1.f, -4.f},
-                          Euler{Degrees{15.f}, Degrees{0.f}, Degrees{0.f}},
+                          Euler{Degrees{0.f}, Degrees{0.f}, Degrees{0.f}},
                           Scale{1.f, 1.f, 1.f}},
                 toVec(getCubeVerts()), cubeMaterial};
     static constexpr auto numberOfCubes = 200;
@@ -115,6 +137,7 @@ int main() {
                     [&] { return randomCube(cube); });
 
     Scene mainScene{std::move(cubes), light};
+    std::cout << mainScene << '\n';
     Renderer theRenderer{window.getResolution(), createCamera(window)};
     theRenderer.setBackgroundColor({0.05f, 0.05f, 0.06f, 1.f});
 
@@ -124,17 +147,7 @@ int main() {
     });
 
     while (!window.shouldClose()) {
-        // const auto rotation = window.getTime();
-
-        // cube.transform().angle.yaw() =
-        //     Radians{Degrees{std::sin(rotation) * 90.f}}.count();
-        // cube.transform().angle.pitch() = Radians{rotation}.count();
-        // light.transform().position.x() = std::sin(rotation) * 4.f;
-        // light.transform().position.z() =
-        // std::sin(window.getTime() * 1.5f) * 3.f - 4.f;
-
-        // camera.transform().angle.pitch() = std::sin(rotation) * 0.33f;
-
+        mainScene.update(0.016f);
         theRenderer.renderScene(mainScene);
 
         // lightVao.bind();

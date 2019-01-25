@@ -18,6 +18,8 @@ class Input {
         Q,
         E,
         Esc,
+        LeftArrow,
+        RightArrow,
     };
 
     Input(std::unique_ptr<Impl> impl);

@@ -30,9 +30,11 @@ MeshRenderable::MeshRenderable(const Transform& transform,
 
 Object::Object(const Transform& transform,
                const std::vector<Vertex>& vertices,
-               Material mat)
+               Material mat,
+               BehaviorList in_behaviors)
     : MeshRenderable{transform, phongShader(), vertices}
-    , material{std::move(mat)} {}
+    , material{std::move(mat)}
+    , behaviors{std::move(in_behaviors)} {}
 
 void Object::setUniformsImpl(const glm::mat4& model,
                              const glm::mat4& view,
@@ -55,4 +57,14 @@ void Object::render() {
     shader->use();
     vao->bind();
     glDrawArrays(GL_TRIANGLES, 0, vao->getBuffer().getVertexCount());
+}
+
+void Object::update(Seconds dt) {
+    for (auto& behavior : behaviors.get()) {
+        behavior->update(dt, *this);
+    }
+}
+
+std::string Object::toString() const {
+    return "object: { " + transform().toString() + " }";
 }

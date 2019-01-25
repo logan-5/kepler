@@ -186,6 +186,9 @@ struct Euler : Rep<glm::vec3> {
             glm::rotate(matrix::identity(), roll(), glm::vec3{0.f, 0.f, 1.f});
         return p * y * r;
     }
+    glm::vec3 rotateVector(const glm::vec3& vec) const {
+        return glm::vec3{getMatrix() * glm::vec4{vec, 0.f}};
+    }
 };
 
 struct Scale : Rep<glm::vec3> {
@@ -207,6 +210,14 @@ struct Transform {
     Point position;
     Euler angle;
     Scale scale;
+    std::string toString() const;
+
+    void translateBy(const glm::vec3& tx) { this->position.rep() += tx; }
+    void translateByRelative(const glm::vec3 tx) {
+        translateBy(angle.rotateVector(tx));
+    }
+    void rotateBy(const Euler& ang) { this->angle.rep() += ang.rep(); }
+    void scaleBy(const glm::vec3& scale) { this->scale.rep() *= scale; }
 };
 
 struct Transformed {
@@ -224,11 +235,15 @@ struct Transformed {
             glm::translate(matrix::identity(), transform().position.rep());
         const auto scale =
             glm::scale(matrix::identity(), transform().scale.rep());
-        return translation * rotation * scale;
+        return translation * scale * rotation;
     }
 
    private:
     Transform _transform;
+};
+
+struct Seconds : Rep<float> {
+    using Rep::Rep;
 };
 
 template <typename T>

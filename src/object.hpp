@@ -1,6 +1,7 @@
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
+#include "behavior.hpp"
 #include "material.hpp"
 #include "shader.hpp"
 #include "types.hpp"
@@ -40,11 +41,20 @@ class Object : public MeshRenderable {
    public:
     Object(const Transform& transform,
            const std::vector<Vertex>& vertices,
-           Material mat);
+           Material mat,
+           BehaviorList behaviors = {});
 
     void setLights(const std::vector<Light>& light, const glm::mat4& view);
 
     void render() override;
+
+    void addBehavior(BehaviorList::List::value_type behavior) {
+        behaviors.push(std::move(behavior));
+    }
+
+    void update(Seconds dt);
+
+    std::string toString() const;
 
    protected:
     void setUniformsImpl(const glm::mat4& model,
@@ -52,6 +62,7 @@ class Object : public MeshRenderable {
                          const glm::mat4& projection) override;
 
     Material material;
+    BehaviorList behaviors;
 };
 
 #endif

@@ -85,7 +85,7 @@ struct Window::Impl : Window_base {
     Resolution getResolution() const {
         int width, height;
         glfwGetWindowSize(window, &width, &height);
-        return {width, height};
+        return {width*2, height*2};
     }
 
     float getTime() const { return glfwGetTime(); }

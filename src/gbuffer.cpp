@@ -17,7 +17,7 @@ std::vector<T> drop(const std::vector<T>& vec) {
 auto getColorFormats() {
     std::vector<Texture::Format> formats(GBuffer::Target::MAX);
     formats[GBuffer::Target::Position] = {GL_RGBA, GL_UNSIGNED_BYTE};
-    formats[GBuffer::Target::Normal] = {GL_RGBA, GL_UNSIGNED_BYTE};
+    formats[GBuffer::Target::Normal] = {GL_RGB, GL_UNSIGNED_BYTE};
     return formats;
 }
 auto getAttachmentConfig() {

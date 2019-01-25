@@ -20,6 +20,10 @@ int getKey(Input::Key key) {
             return GLFW_KEY_E;
         case Input::Key::Esc:
             return GLFW_KEY_ESCAPE;
+        case Input::Key::LeftArrow:
+            return GLFW_KEY_LEFT;
+        case Input::Key::RightArrow:
+            return GLFW_KEY_RIGHT;
     }
 }
 }  // namespace

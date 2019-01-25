@@ -204,6 +204,23 @@ std::enable_if_t<std::is_floating_point<Float>::value, Float> random(
 }
 }  // namespace random
 
+template <typename... Ts>
+using void_t = void;
+
+namespace detail {
+template <typename T, typename = void>
+struct has_toString : std::false_type {};
+template <typename T>
+struct has_toString<T, void_t<decltype(std::declval<T>().toString())>>
+    : std::true_type {};
+}  // namespace detail
+
 }  // namespace util
+
+template <typename ToStringable>
+std::enable_if_t<util::detail::has_toString<ToStringable>::value, std::ostream&>
+operator<<(std::ostream& out, const ToStringable& t) {
+    return out << t.toString();
+}
 
 #endif
