@@ -11,7 +11,9 @@ std::shared_ptr<Shader> phongShader() {
         fs::RelativePath{"shaders/phong.vsh"};
     static const fs::AbsolutePath fragPath =
         fs::RelativePath{"shaders/phong.fsh"};
-    return Shader::create(vertPath, fragPath);
+    auto shader = Shader::create(vertPath, fragPath);
+    GL_CHECK();
+    return shader;
 }
 }  // namespace
 

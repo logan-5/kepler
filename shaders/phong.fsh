@@ -1,6 +1,8 @@
 #version 330 core
-layout (location = 0) out vec4 color;
-layout (location = 1) out vec4 other_color;
+layout (location = 0) out vec3 out_position;
+layout (location = 1) out vec3 out_normal;
+layout (location = 2) out vec3 out_diffuse;
+layout (location = 3) out vec3 out_specular;
 
 uniform sampler2D diffuseTexture;
 uniform vec3 lightColor;
@@ -41,7 +43,9 @@ void main() {
     vec4 specular = specularColor * pow(max(dot(reflected, lightDir), 0.0), material.shininess);
 
     vec4 result = ambient + diffuse + specular;
-    color = frag_color * result;
 
-    other_color = vec4(1.0) - color;
+    out_position = frag_viewPosition;
+    out_normal = normal;
+    out_diffuse = diffuseColor.rgb;
+    out_specular = specularColor.rgb;
 }

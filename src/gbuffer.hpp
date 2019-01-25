@@ -10,8 +10,8 @@ struct GBuffer {
         enum {
             Position,
             Normal,
-            // Diffuse,
-            // Specular,
+            Diffuse,
+            Specular,
 
             MAX,
         };

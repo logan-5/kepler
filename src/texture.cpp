@@ -37,6 +37,7 @@ GLuint createTexture(Resolution resolution,
                      Texture::Format format,
                      const GLvoid* data,
                      const Texture::Params& params) {
+    GL_CHECK();
     GLuint texID;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);

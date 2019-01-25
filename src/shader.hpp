@@ -3,6 +3,7 @@
 
 #include "common.hpp"
 #include "fs.hpp"
+#include "gl.hpp"
 #include "gl_object.hpp"
 #include "util.hpp"
 
@@ -57,7 +58,7 @@ class Shader final : public GLObject<detail::DeleteShader> {
     Shader& operator=(Shader&& other) = default;
     Shader(Shader&& other) = default;
 
-    void use() noexcept { glUseProgram(this->handle); }
+    void use() noexcept { GL_CHECK(glUseProgram(this->handle)); }
 
     GLint getAttributeLocation(const std::string& attrib) const noexcept {
         return glGetAttribLocation(this->handle, attrib.c_str());

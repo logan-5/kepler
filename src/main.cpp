@@ -4,6 +4,7 @@
 #include "common.hpp"
 #include "cube.hpp"
 #include "fs.hpp"
+#include "gl.hpp"
 #include "image.hpp"
 #include "input.hpp"
 #include "light.hpp"
@@ -113,9 +114,11 @@ int main() {
     assert(glGetError() == GL_NO_ERROR);
 
     auto cubeBuffer = std::make_shared<VertexBuffer>(getCubeVerts());
+    GL_CHECK();
 
     // auto phongVao = VertexArrayObject{cubeBuffer, phongShader};
     auto lightVao = VertexArrayObject{cubeBuffer, *lightShader};
+    GL_CHECK();
 
     Light light{
         {Point{1.f, 1.f, -1.f}, Euler{}, Scale{0.5f}},
@@ -125,11 +128,17 @@ int main() {
     };
     const Material cubeMaterial{containerTexture, containerSpecularTexture,
                                 256.f};
+    GL_CHECK();
+
+    Renderer theRenderer{window.getResolution(), createCamera(window)};
+    theRenderer.setBackgroundColor({0.05f, 0.05f, 0.06f, 1.f});
 
     Object cube{Transform{Point{0.f, 1.f, -4.f},
                           Euler{Degrees{0.f}, Degrees{0.f}, Degrees{0.f}},
                           Scale{1.f, 1.f, 1.f}},
                 toVec(getCubeVerts()), cubeMaterial};
+    GL_CHECK();
+
     static constexpr auto numberOfCubes = 200;
     std::vector<Object> cubes{cube};
     cubes.reserve(1 + numberOfCubes);
@@ -138,8 +147,6 @@ int main() {
 
     Scene mainScene{std::move(cubes), light};
     std::cout << mainScene << '\n';
-    Renderer theRenderer{window.getResolution(), createCamera(window)};
-    theRenderer.setBackgroundColor({0.05f, 0.05f, 0.06f, 1.f});
 
     window.setWindowSizeCallback([&](const Resolution newResolution) {
         std::cout << "window size changed to " << newResolution << '\n';

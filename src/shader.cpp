@@ -1,5 +1,6 @@
 #include "shader.hpp"
 #include "fs.hpp"
+#include "gl.hpp"
 #include "light.hpp"
 #include "material.hpp"
 #include "util.hpp"
@@ -61,7 +62,15 @@ GLuint Shader::create_impl(const char* const vertexSource,
     glDetachShader(program, vertexShader);
     glDetachShader(program, fragmentShader);
 
-    assert(glGetError() == GL_NO_ERROR);
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+    if (!success) {
+        char info[512];
+        GLsizei len;
+        glGetProgramInfoLog(program, 512, &len, info);
+        throw compile_error{"(program linking) " + std::string(info, len)};
+    }
+
+    GL_CHECK();
 
     return program;
 }

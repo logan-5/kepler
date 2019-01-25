@@ -21,6 +21,7 @@ std::array<Vertex, 6> getFullScreenQuad() {
 }
 void setDrawBuffers(GBuffer& gBuffer) {
     RAIIBinding<FrameBuffer> bind{gBuffer.getFrameBufferHandle()};
+    GL_CHECK();
     auto buffers = gBuffer.getBuffers();
     GL_CHECK(glDrawBuffers(buffers.size(), buffers.data()));
 }
@@ -64,7 +65,7 @@ void Renderer::setDepthTestEnabled(const bool enabled) {
 }
 
 void Renderer::renderScene(Scene& scene) {
-    gBuffer.bind();
+    GL_CHECK(gBuffer.bind());
 
     glClearColor(clearColor.rep().r, clearColor.rep().g, clearColor.rep().b,
                  clearColor.rep().a);
@@ -80,7 +81,7 @@ void Renderer::renderScene(Scene& scene) {
         GL_CHECK(object.render());
     }
 
-    gBuffer.unbind();
+    GL_CHECK(gBuffer.unbind());
 
     glDisable(GL_DEPTH_TEST);
 
@@ -93,11 +94,13 @@ void Renderer::renderScene(Scene& scene) {
         gBuffer.getColorTarget(target).bind(target);
         deferredPassShader.setUniform(name, target);
     };
-    bindColorTarget("color", GBuffer::Target::Position);
-    bindColorTarget("color2", GBuffer::Target::Normal);
+    bindColorTarget("position", GBuffer::Target::Position);
+    bindColorTarget("normal", GBuffer::Target::Normal);
+    bindColorTarget("diffuse", GBuffer::Target::Diffuse);
+    bindColorTarget("specular", GBuffer::Target::Specular);
 
     gBuffer.getDepthTarget().bind(GBuffer::DepthTarget);
-    deferredPassShader.setUniform("color3", GBuffer::DepthTarget);
+    deferredPassShader.setUniform("depth", GBuffer::DepthTarget);
 
     GL_CHECK(glDrawArrays(GL_TRIANGLES, 0,
                           deferredPassQuad.getBuffer().getVertexCount()));
