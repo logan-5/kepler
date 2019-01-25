@@ -41,9 +41,10 @@ GLuint createTexture(Resolution resolution,
     GLuint texID;
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
-    GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, format.format, resolution.width(),
-                          resolution.height(), 0, format.format, format.type,
-                          data));
+    GL_CHECK(glTexImage2D(GL_TEXTURE_2D, 0,
+                          format.internalFormat.value_or(format.format),
+                          resolution.width(), resolution.height(), 0,
+                          format.format, format.type, data));
     setTexParams(texID, params);
     return texID;
 }

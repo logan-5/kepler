@@ -170,6 +170,7 @@ struct Euler : Rep<glm::vec3> {
     constexpr Euler() : Rep{0.f, 0.f, 0.f} {}
     constexpr Euler(Radians pitch, Radians yaw, Radians roll)
         : Rep{pitch.count(), yaw.count(), roll.count()} {}
+    explicit constexpr Euler(const glm::vec3& vec) : Rep{vec} {}
     constexpr float_type& pitch() { return rep().x; }
     constexpr float_type pitch() const { return rep().x; }
     constexpr float_type& yaw() { return rep().y; }

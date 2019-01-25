@@ -16,8 +16,8 @@ std::vector<T> drop(const std::vector<T>& vec) {
 
 auto getColorFormats() {
     std::vector<Texture::Format> formats(GBuffer::Target::MAX);
-    formats[GBuffer::Target::Position] = {GL_RGB, GL_UNSIGNED_BYTE};
-    formats[GBuffer::Target::Normal] = {GL_RGB, GL_UNSIGNED_BYTE};
+    formats[GBuffer::Target::Position] = {GL_RGB, GL_UNSIGNED_BYTE, GL_RGB16F};
+    formats[GBuffer::Target::Normal] = {GL_RGB, GL_UNSIGNED_BYTE, GL_RGB16F};
     formats[GBuffer::Target::Diffuse] = {GL_RGB, GL_UNSIGNED_BYTE};
     formats[GBuffer::Target::Specular] = {GL_RGB, GL_UNSIGNED_BYTE};
     return formats;

@@ -62,7 +62,9 @@ struct Window::Impl : Window_base {
             glfwSetWindowSizeCallback(window, setWindowSizeDirty);
             return window;
         }()}
-        , input{std::make_unique<Input::Impl>(window)} {
+        , input{std::make_unique<Input::Impl>(window)}
+        , lastLastTime{0.f}
+        , lastTime{0.f} {
         glfwMakeContextCurrent(window);
 
         int gladInitRes = gladLoadGL();
@@ -80,18 +82,24 @@ struct Window::Impl : Window_base {
         if (global_windowSizeDirty) {
             callWindowSizeCallback(getResolution());
         }
+        lastLastTime = std::exchange(lastTime, getTime());
     }
 
     Resolution getResolution() const {
         int width, height;
         glfwGetWindowSize(window, &width, &height);
-        return {width*2, height*2};
+        return {width * 2, height * 2};
     }
 
-    float getTime() const { return glfwGetTime(); }
+    Seconds getTime() const { return {static_cast<float>(glfwGetTime())}; }
+    Seconds getDeltaTime() const {
+        return {lastTime.rep() - lastLastTime.rep()};
+    }
 
     util::RAII<GLFWwindow*, DestroyWindow> window;
     Input input;
+    Seconds lastLastTime;
+    Seconds lastTime;
 };
 
 Window::Window(Resolution resolution,
@@ -109,9 +117,14 @@ void Window::update() {
     impl->update();
 }
 
-float Window::getTime() const {
+Seconds Window::getTime() const {
     assert(impl);
     return impl->getTime();
+}
+
+Seconds Window::getDeltaTime() const {
+    assert(impl);
+    return impl->getDeltaTime();
 }
 
 void Window::setWindowSizeCallback(WindowSizeCallback cb) {

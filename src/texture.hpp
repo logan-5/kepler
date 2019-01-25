@@ -3,6 +3,7 @@
 
 #include "common.hpp"
 #include "gl_object.hpp"
+#include "optional.hpp"
 #include "types.hpp"
 #include "util.hpp"
 
@@ -40,6 +41,7 @@ class Texture : public GLObject<detail::DeleteTexture> {
     struct Format {
         GLenum format;
         GLenum type;
+        util::optional<GLenum> internalFormat = util::nullopt;
     };
 
    private:

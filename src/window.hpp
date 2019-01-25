@@ -28,7 +28,8 @@ class Window {
     bool shouldClose() const;
     void update();
 
-    float getTime() const;
+    Seconds getTime() const;
+    Seconds getDeltaTime() const;
 
     void setWindowSizeCallback(WindowSizeCallback cb);
 

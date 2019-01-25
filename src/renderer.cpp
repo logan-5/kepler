@@ -41,6 +41,9 @@ Renderer::Renderer(Resolution resolution, std::unique_ptr<Camera> in_camera)
     setDepthTestEnabled(true);
 
     setDrawBuffers(gBuffer);
+
+    glEnable(GL_CULL_FACE);
+    GL_CHECK(glCullFace(GL_BACK));
 }
 
 void Renderer::resolutionChanged(Resolution resolution) {
@@ -67,9 +70,7 @@ void Renderer::setDepthTestEnabled(const bool enabled) {
 void Renderer::renderScene(Scene& scene) {
     GL_CHECK(gBuffer.bind());
 
-    glClearColor(clearColor.rep().r, clearColor.rep().g, clearColor.rep().b,
-                 clearColor.rep().a);
-
+    glClearColor(0.f, 0.f, 0.f, 0.f);
     GL_CHECK(glClear(clearFlag));
 
     const auto projection = camera->getProjectionMatrix();
@@ -85,10 +86,12 @@ void Renderer::renderScene(Scene& scene) {
 
     glDisable(GL_DEPTH_TEST);
 
-    glClearColor(0.f, 0.f, 0.f, 0.f);
+    glClearColor(clearColor.rep().r, clearColor.rep().g, clearColor.rep().b,
+                 clearColor.rep().a);
     glClear(GL_COLOR_BUFFER_BIT);
     deferredPassQuad.bind();
     deferredPassShader.use();
+    deferredPassShader.setUniform("light", lights[0], view);
 
     auto bindColorTarget = [&](const auto& name, int target) {
         gBuffer.getColorTarget(target).bind(target);

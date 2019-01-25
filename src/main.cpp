@@ -23,6 +23,27 @@
 #include <iostream>
 
 namespace {
+struct FPSTimer {
+    FPSTimer(Seconds freq) : printFrequency{freq} {}
+    void update(Seconds dt) {
+        ++frames;
+        seconds.rep() += dt.rep();
+        if (seconds.rep() > printFrequency.rep()) {
+            printFPS();
+        }
+    }
+    void printFPS() {
+        std::cout << "fps: " << frames / seconds.rep() << '\n';
+        frames = 0.f;
+        seconds = {};
+    }
+
+   private:
+    Seconds printFrequency;
+    int frames;
+    Seconds seconds;
+};
+
 void errorCallback(int error, const char* description) {
     std::cerr << "GLFW error " << error << ": " << description << '\n';
 }
@@ -42,37 +63,39 @@ std::unique_ptr<Camera> createCamera(Window& window) {
     camera->transform().position.z() = 1.f;
     std::cout << "camera transform: " << camera->transform() << '\n';
 
-    constexpr auto cameraSpeed = 0.01f;
+    constexpr auto cameraSpeed = 2.5f;
     auto& input = window.getInput();
-    input.setKeyCallback(Input::Key::W, [camera = &*camera] {
+    input.setKeyCallback(Input::Key::W, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, 0.f, -cameraSpeed});
+            glm::vec3{0.f, 0.f, -cameraSpeed} * window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::S, [camera = &*camera] {
+    input.setKeyCallback(Input::Key::S, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, 0.f, +cameraSpeed});
+            glm::vec3{0.f, 0.f, +cameraSpeed} * window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::A, [camera = &*camera] {
+    input.setKeyCallback(Input::Key::A, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{+cameraSpeed, 0.f, 0.f});
+            glm::vec3{+cameraSpeed, 0.f, 0.f} * window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::D, [camera = &*camera] {
+    input.setKeyCallback(Input::Key::D, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{-cameraSpeed, 0.f, 0.f});
+            glm::vec3{-cameraSpeed, 0.f, 0.f} * window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::Q, [camera = &*camera] {
+    input.setKeyCallback(Input::Key::Q, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, +cameraSpeed, 0.f});
+            glm::vec3{0.f, +cameraSpeed, 0.f} * window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::E, [camera = &*camera] {
+    input.setKeyCallback(Input::Key::E, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, -cameraSpeed, 0.f});
+            glm::vec3{0.f, -cameraSpeed, 0.f} * window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::LeftArrow, [camera = &*camera] {
-        camera->transform().rotateBy(Euler{-cameraSpeed, 0.f, 0.f});
+    input.setKeyCallback(Input::Key::LeftArrow, [camera = &*camera, &window] {
+        camera->transform().rotateBy(Euler{glm::vec3{-cameraSpeed, 0.f, 0.f} *
+                                           window.getDeltaTime().rep()});
     });
-    input.setKeyCallback(Input::Key::RightArrow, [camera = &*camera] {
-        camera->transform().rotateBy(Euler{+cameraSpeed, 0.f, 0.f});
+    input.setKeyCallback(Input::Key::RightArrow, [camera = &*camera, &window] {
+        camera->transform().rotateBy(Euler{glm::vec3{+cameraSpeed, 0.f, 0.f} *
+                                           window.getDeltaTime().rep()});
     });
     return camera;
 }
@@ -153,8 +176,10 @@ int main() {
         theRenderer.resolutionChanged(newResolution);
     });
 
+    FPSTimer timer{1.f};
+
     while (!window.shouldClose()) {
-        mainScene.update(0.016f);
+        mainScene.update(window.getDeltaTime());
         theRenderer.renderScene(mainScene);
 
         // lightVao.bind();
@@ -165,6 +190,7 @@ int main() {
         // lightShader->setUniform("color", light.diffuse.rep());
         // glDrawArrays(GL_TRIANGLES, 0, lightVao.getBuffer().getVertexCount());
 
+        timer.update(window.getDeltaTime());
         window.update();
     }
 
