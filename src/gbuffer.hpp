@@ -37,6 +37,12 @@ struct GBuffer {
     void bind() { frameBuffer.bind(); }
     void unbind() { frameBuffer.unbind(); }
 
+    void blit(GLbitfield mask,
+              FrameBuffer::View destination,
+              Resolution resolution) {
+        frameBuffer.blit(mask, destination, resolution);
+    }
+
    private:
     FrameBuffer frameBuffer;
 };

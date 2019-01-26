@@ -28,8 +28,9 @@ void setDrawBuffers(GBuffer& gBuffer) {
 }
 }  // namespace
 
-Renderer::Renderer(Resolution resolution, std::unique_ptr<Camera> in_camera)
-    : camera{std::move(in_camera)}
+Renderer::Renderer(Resolution in_resolution, std::unique_ptr<Camera> in_camera)
+    : resolution{in_resolution}
+    , camera{std::move(in_camera)}
     , clearFlag{GL_COLOR_BUFFER_BIT}
     , gBuffer{resolution}
     , deferredPassShader{fs::loadFileAsString(
@@ -38,7 +39,8 @@ Renderer::Renderer(Resolution resolution, std::unique_ptr<Camera> in_camera)
                              fs::RelativePath("shaders/deferred.fsh")),
                          Shader::private_tag{}}
     , deferredPassQuad{std::make_shared<VertexBuffer>(getFullScreenQuad()),
-                       deferredPassShader} {
+                       deferredPassShader}
+    , debugDrawLights{false} {
     setDepthTestEnabled(true);
 
     setDrawBuffers(gBuffer);
@@ -47,7 +49,8 @@ Renderer::Renderer(Resolution resolution, std::unique_ptr<Camera> in_camera)
     GL_CHECK(glCullFace(GL_BACK));
 }
 
-void Renderer::resolutionChanged(Resolution resolution) {
+void Renderer::resolutionChanged(Resolution newResolution) {
+    this->resolution = newResolution;
     gBuffer = GBuffer{resolution};
     setDrawBuffers(gBuffer);
     camera->resolutionChanged(resolution);
@@ -74,6 +77,9 @@ void Renderer::renderScene(Scene& scene) {
 
     GL_CHECK(doGeometryPass(scene, view, projection));
     GL_CHECK(doDeferredPass(scene, view, projection));
+    if (needsForwardPass()) {
+        GL_CHECK(doForwardPass(scene, view, projection));
+    }
 }
 
 void Renderer::doGeometryPass(Scene& scene,
@@ -151,5 +157,19 @@ void Renderer::setDeferredPassLights(Scene& scene,
         deferredPassShader.setUniform(
             "directionalLightCount",
             static_cast<int>(directionalLights.size()));
+    }
+}
+
+bool Renderer::needsForwardPass() const {
+    return debugDrawLights;
+}
+
+void Renderer::doForwardPass(Scene& scene,
+                             const glm::mat4& viewTransform,
+                             const glm::mat4& projectionTransform) {
+    gBuffer.blit(GL_DEPTH_BUFFER_BIT, FrameBuffer::View{0}, this->resolution);
+    const auto viewProjection = projectionTransform * viewTransform;
+    for (auto& light : scene.getPointLights()) {
+        light.debugDraw(viewProjection);
     }
 }

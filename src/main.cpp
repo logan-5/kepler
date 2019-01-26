@@ -169,6 +169,7 @@ int main() {
 
     Renderer theRenderer{window.getResolution(), createCamera(window)};
     theRenderer.setBackgroundColor({0.05f, 0.05f, 0.06f, 1.f});
+    theRenderer.setDebugDrawLights(true);
 
     Object cube{Transform{Point{0.f, 1.f, -4.f},
                           Euler{Degrees{0.f}, Degrees{0.f}, Degrees{0.f}},
@@ -198,15 +199,6 @@ int main() {
     while (!window.shouldClose()) {
         mainScene.update(window.getDeltaTime());
         theRenderer.renderScene(mainScene);
-
-        // lightVao.bind();
-        // lightShader->use();
-        // lightShader->setUniform("mvp", camera.getProjectionMatrix() *
-        //                                    viewMatrix *
-        //                                    light.getModelMatrix());
-        // lightShader->setUniform("color", light.diffuse.rep());
-        // glDrawArrays(GL_TRIANGLES, 0, lightVao.getBuffer().getVertexCount());
-
         timer.update(window.getDeltaTime());
         window.update();
     }

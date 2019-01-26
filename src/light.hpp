@@ -1,9 +1,11 @@
 #ifndef LIGHT_HPP
 #define LIGHT_HPP
 
+#include "lazy.hpp"
 #include "types.hpp"
 
 class Shader;
+struct VertexArrayObject;
 
 struct Light_base {
     struct Colors {
@@ -39,10 +41,7 @@ struct PointLight
     };
     PointLight(const Transform& transform,
                const Light_base::Colors& colors,
-               Attenuation in_attenuation)
-        : Transformed{transform}
-        , Light_base{colors}
-        , attenuation{in_attenuation} {}
+               Attenuation in_attenuation);
 
     PointLight(const Transform& transform,
                const Light_base::Colors& colors,
@@ -51,7 +50,16 @@ struct PointLight
 
     Attenuation attenuation;
 
+    void debugDraw(const glm::mat4& viewProjectionTransform);
+
    private:
+    struct DebugDrawData {
+        std::shared_ptr<Shader> shader;
+        std::shared_ptr<VertexArrayObject> vao;
+    };
+    static DebugDrawData getDebugDrawData();
+    util::Lazy<DebugDrawData, DebugDrawData (*)()> debugDrawData;
+
     void applyAdditionalUniforms(const std::string& name,
                                  Shader& shader,
                                  const glm::mat4& viewTransform) override;

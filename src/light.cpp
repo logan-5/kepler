@@ -1,6 +1,7 @@
 #include "light.hpp"
-
+#include "cube.hpp"
 #include "shader.hpp"
+#include "vertex_array.hpp"
 
 void Light_base::applyUniforms(const std::string& name,
                                Shader& shader,
@@ -10,6 +11,16 @@ void Light_base::applyUniforms(const std::string& name,
     shader.setUniform(name + ".specular", this->colors.specular.rep());
     applyAdditionalUniforms(name, shader, viewTransform);
 }
+
+//
+
+PointLight::PointLight(const Transform& transform,
+                       const Light_base::Colors& colors,
+                       Attenuation in_attenuation)
+    : Transformed{transform}
+    , Light_base{colors}
+    , attenuation{in_attenuation}
+    , debugDrawData{getDebugDrawData} {}
 
 void PointLight::applyAdditionalUniforms(const std::string& name,
                                          Shader& shader,
@@ -27,6 +38,27 @@ auto PointLight::Attenuation::fromDistance(float distance) -> Attenuation {
     (void)distance;  // TODO
     return {1.f, 0.09f, 0.032f};
 }
+
+void PointLight::debugDraw(const glm::mat4& viewProjectionTransform) {
+    DebugDrawData& data = debugDrawData;
+    data.shader->use();
+    data.vao->bind();
+    data.shader->setUniform("mvp",
+                            viewProjectionTransform * this->getModelMatrix());
+    data.shader->setUniform("color", this->colors.diffuse.rep());
+    glDrawArrays(GL_TRIANGLES, 0, data.vao->getBuffer().getVertexCount());
+}
+
+auto PointLight::getDebugDrawData() -> DebugDrawData {
+    DebugDrawData theData;
+    theData.shader = Shader::create(fs::RelativePath{"shaders/light.vsh"},
+                                    fs::RelativePath{"shaders/light.fsh"});
+    theData.vao = std::make_shared<VertexArrayObject>(
+        std::make_shared<VertexBuffer>(getCubeVerts()), *theData.shader);
+    return theData;
+}
+
+//
 
 void DirectionalLight::applyAdditionalUniforms(const std::string& name,
                                                Shader& shader,

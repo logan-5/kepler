@@ -1,5 +1,6 @@
 #include "frame_buffer.hpp"
 #include "binding.hpp"
+#include "gl.hpp"
 
 #include <iostream>
 
@@ -14,6 +15,7 @@ GLuint create() {
 auto FrameBuffer::Attachments::create(Resolution resolution,
                                       GLuint fbo,
                                       const Options& options) -> Attachments {
+    GL_CHECK();
     RAIIBinding<FrameBuffer> bind{fbo};
 
     Attachments attachments{
@@ -39,6 +41,7 @@ auto FrameBuffer::Attachments::create(Resolution resolution,
 
     assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
     assert(glGetError() == GL_NO_ERROR);
+    GL_CHECK();
 
     return attachments;
 }
@@ -47,3 +50,21 @@ FrameBuffer::FrameBuffer(Resolution resolution,
                          const Attachments::Options& options)
     : GLObject{create()}
     , attachments{Attachments::create(resolution, this->handle, options)} {}
+
+namespace {
+GLenum getFilter(GLbitfield mask) {
+    if (mask & GL_DEPTH_BUFFER_BIT || mask & GL_STENCIL_BUFFER_BIT)
+        return GL_NEAREST;
+    return GL_LINEAR;
+}
+}  // namespace
+
+void FrameBuffer::blit(GLbitfield mask,
+                       View destination,
+                       Resolution resolution) {
+    GL_CHECK(glBindFramebuffer(GL_READ_FRAMEBUFFER, this->getHandle()));
+    GL_CHECK(glBindFramebuffer(GL_DRAW_FRAMEBUFFER, destination.fbo));
+    GL_CHECK(glBlitFramebuffer(0, 0, resolution.width(), resolution.height(), 0,
+                               0, resolution.width(), resolution.height(), mask,
+                               getFilter(mask)));
+}

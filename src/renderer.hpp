@@ -26,6 +26,8 @@ class Renderer {
 
     void resolutionChanged(Resolution newResolution);
 
+    void setDebugDrawLights(bool d) { debugDrawLights = d; }
+
    private:
     void doGeometryPass(Scene& scene,
                         const glm::mat4& viewTransform,
@@ -36,13 +38,19 @@ class Renderer {
     void setDeferredPassLights(Scene& scene,
                                const glm::mat4& viewTransform,
                                const glm::mat4& projectionTransform);
+    void doForwardPass(Scene& scene,
+                       const glm::mat4& viewTransform,
+                       const glm::mat4& projectionTransform);
+    bool needsForwardPass() const;
 
+    Resolution resolution;
     std::unique_ptr<Camera> camera;
     Color clearColor;
     GLuint clearFlag;
     GBuffer gBuffer;
     Shader deferredPassShader;
     VertexArrayObject deferredPassQuad;
+    bool debugDrawLights;
 };
 
 #endif

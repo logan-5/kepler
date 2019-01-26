@@ -53,6 +53,15 @@ class FrameBuffer : public GLObject<detail::DeleteFBO> {
     static void unbind() noexcept { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
     Attachments attachments;
+
+    struct View {
+        explicit View(GLuint fbo) : fbo{fbo} {}
+        View(const View&) = default;
+        View& operator=(const View&) = default;
+        GLuint fbo;
+    };
+    operator View() const { return View{getHandle()}; }
+    void blit(GLbitfield mask, View destination, Resolution resolution);
 };
 
 #endif
