@@ -6,13 +6,16 @@
 class Shader;
 
 struct Light_base {
-    Light_base(const ColorRGB& a, const ColorRGB& d, const ColorRGB& s)
-        : ambient{a}, diffuse{d}, specular{s} {}
+    struct Colors {
+        ColorRGB ambient;
+        ColorRGB diffuse;
+        ColorRGB specular;
+    };
+
+    Light_base(const Colors& in_colors) : colors{in_colors} {}
     virtual ~Light_base() = default;
 
-    ColorRGB ambient;
-    ColorRGB diffuse;
-    ColorRGB specular;
+    Colors colors;
 
     void applyUniforms(const std::string& name,
                        Shader& shader,
@@ -27,13 +30,47 @@ struct Light_base {
 struct PointLight
     : public Transformed
     , public Light_base {
+    struct Attenuation {
+        float constant;
+        float linear;
+        float quadratic;
+
+        static Attenuation fromDistance(float distance);
+    };
     PointLight(const Transform& transform,
-               const ColorRGB& a,
-               const ColorRGB& d,
-               const ColorRGB& s)
-        : Transformed{transform}, Light_base{a, d, s} {}
+               const Light_base::Colors& colors,
+               Attenuation in_attenuation)
+        : Transformed{transform}
+        , Light_base{colors}
+        , attenuation{in_attenuation} {}
+
+    PointLight(const Transform& transform,
+               const Light_base::Colors& colors,
+               float range)
+        : PointLight(transform, colors, Attenuation::fromDistance(range)) {}
+
+    Attenuation attenuation;
 
    private:
+    void applyAdditionalUniforms(const std::string& name,
+                                 Shader& shader,
+                                 const glm::mat4& viewTransform) override;
+};
+
+struct DirectionalLight : public Light_base {
+   public:
+    DirectionalLight(const Direction& in_direction,
+                     const Light_base::Colors& colors)
+        : Light_base{colors}, direction{glm::normalize(in_direction.rep())} {}
+
+    const Direction& getDirection() const { return direction; }
+    void setDirection(const Direction& newDirection) {
+        direction = {glm::normalize(newDirection.rep())};
+    }
+
+   private:
+    Direction direction;
+
     void applyAdditionalUniforms(const std::string& name,
                                  Shader& shader,
                                  const glm::mat4& viewTransform) override;

@@ -27,6 +27,16 @@ class Renderer {
     void resolutionChanged(Resolution newResolution);
 
    private:
+    void doGeometryPass(Scene& scene,
+                        const glm::mat4& viewTransform,
+                        const glm::mat4& projectionTransform);
+    void doDeferredPass(Scene& scene,
+                        const glm::mat4& viewTransform,
+                        const glm::mat4& projectionTransform);
+    void setDeferredPassLights(Scene& scene,
+                               const glm::mat4& viewTransform,
+                               const glm::mat4& projectionTransform);
+
     std::unique_ptr<Camera> camera;
     Color clearColor;
     GLuint clearFlag;

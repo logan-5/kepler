@@ -69,20 +69,32 @@ void Renderer::setDepthTestEnabled(const bool enabled) {
 }
 
 void Renderer::renderScene(Scene& scene) {
+    const auto projection = camera->getProjectionMatrix();
+    const auto view = camera->getViewMatrix();
+
+    GL_CHECK(doGeometryPass(scene, view, projection));
+    GL_CHECK(doDeferredPass(scene, view, projection));
+}
+
+void Renderer::doGeometryPass(Scene& scene,
+                              const glm::mat4& viewTransform,
+                              const glm::mat4& projectionTransform) {
     GL_CHECK(gBuffer.bind());
 
     glClearColor(0.f, 0.f, 0.f, 0.f);
     GL_CHECK(glClear(clearFlag));
 
-    const auto projection = camera->getProjectionMatrix();
-    const auto view = camera->getViewMatrix();
     for (auto& object : scene.getObjects()) {
-        GL_CHECK(object.setUniforms(view, projection));
+        GL_CHECK(object.setUniforms(viewTransform, projectionTransform));
         GL_CHECK(object.render());
     }
 
     GL_CHECK(gBuffer.unbind());
+}
 
+void Renderer::doDeferredPass(Scene& scene,
+                              const glm::mat4& viewTransform,
+                              const glm::mat4& projectionTransform) {
     glDisable(GL_DEPTH_TEST);
 
     glClearColor(clearColor.rep().r, clearColor.rep().g, clearColor.rep().b,
@@ -91,14 +103,7 @@ void Renderer::renderScene(Scene& scene) {
     deferredPassQuad.bind();
     deferredPassShader.use();
 
-    auto pointLights = scene.getPointLights();
-    for (std::size_t i = 0; i < pointLights.size(); ++i) {
-        GL_CHECK(pointLights[i].applyUniforms(
-            "pointLights[" + std::to_string(i) + ']', deferredPassShader,
-            view));
-    }
-    deferredPassShader.setUniform("pointLightCount",
-                                  static_cast<int>(pointLights.size()));
+    setDeferredPassLights(scene, viewTransform, projectionTransform);
 
     auto bindColorTarget = [&](const auto& name, int target) {
         gBuffer.getColorTarget(target).bind(target);
@@ -120,4 +125,31 @@ void Renderer::renderScene(Scene& scene) {
     setDepthTestEnabled(clearFlag & GL_DEPTH_BUFFER_BIT);
 
     GL_CHECK();
+}
+
+void Renderer::setDeferredPassLights(Scene& scene,
+                                     const glm::mat4& viewTransform,
+                                     const glm::mat4& projectionTransform) {
+    {
+        (void)projectionTransform;
+        auto pointLights = scene.getPointLights();
+        for (std::size_t i = 0; i < pointLights.size(); ++i) {
+            GL_CHECK(pointLights[i].applyUniforms(
+                "pointLights[" + std::to_string(i) + ']', deferredPassShader,
+                viewTransform));
+        }
+        deferredPassShader.setUniform("pointLightCount",
+                                      static_cast<int>(pointLights.size()));
+    }
+    {
+        auto directionalLights = scene.getDirectionalLights();
+        for (std::size_t i = 0; i < directionalLights.size(); ++i) {
+            GL_CHECK(directionalLights[i].applyUniforms(
+                "directionalLights[" + std::to_string(i) + ']',
+                deferredPassShader, viewTransform));
+        }
+        deferredPassShader.setUniform(
+            "directionalLightCount",
+            static_cast<int>(directionalLights.size()));
+    }
 }

@@ -247,9 +247,42 @@ struct Seconds : Rep<float> {
     using Rep::Rep;
 };
 
+struct Direction : public Rep<glm::vec3> {
+   private:
+    using float_type = glm::vec3::value_type;
+
+   public:
+    using Rep::Rep;
+
+    constexpr float_type& x() noexcept { return rep().x; }
+    constexpr float_type x() const noexcept { return rep().x; }
+    constexpr float_type& y() noexcept { return rep().y; }
+    constexpr float_type y() const noexcept { return rep().y; }
+    constexpr float_type& z() noexcept { return rep().z; }
+    constexpr float_type z() const noexcept { return rep().z; }
+};
+
+namespace detail {
+template <typename T, typename = void>
+struct has_glm_toString : std::false_type {};
 template <typename T>
-std::ostream& operator<<(std::ostream& ostr, const Rep<T>& t) {
-    return ostr << glm::to_string(t.rep());
+struct has_glm_toString<T,
+                        util::void_t<decltype(glm::detail::compute_to_string<
+                                              T>::call(std::declval<T>()))>>
+    : std::true_type {};
+}  // namespace detail
+
+template <typename T>
+std::enable_if_t<detail::has_glm_toString<T>::value, std::ostream&> operator<<(
+    std::ostream& out,
+    const Rep<T>& t) {
+    return out << glm::to_string(t.rep());
+}
+template <typename T>
+std::enable_if_t<!detail::has_glm_toString<T>::value, std::ostream&> operator<<(
+    std::ostream& out,
+    const Rep<T>& t) {
+    return out << t.rep();
 }
 
 #endif

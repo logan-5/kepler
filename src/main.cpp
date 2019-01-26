@@ -24,7 +24,7 @@
 
 namespace {
 struct FPSTimer {
-    FPSTimer(Seconds freq) : printFrequency{freq} {}
+    FPSTimer(Seconds freq) : printFrequency{freq}, frames{0}, seconds{0.f} {}
     void update(Seconds dt) {
         ++frames;
         seconds.rep() += dt.rep();
@@ -33,7 +33,8 @@ struct FPSTimer {
         }
     }
     void printFPS() {
-        std::cout << "fps: " << frames / seconds.rep() << '\n';
+        std::cout << "fps: " << static_cast<float>(frames) / seconds.rep()
+                  << '\n';
         frames = 0.f;
         seconds = {};
     }
@@ -63,39 +64,48 @@ std::unique_ptr<Camera> createCamera(Window& window) {
     camera->transform().position.z() = 1.f;
     std::cout << "camera transform: " << camera->transform() << '\n';
 
-    constexpr auto cameraSpeed = 2.5f;
+    constexpr auto cameraMoveSpeed = 4.f;
+    constexpr auto cameraRotateSpeed = 2.5f;
     auto& input = window.getInput();
     input.setKeyCallback(Input::Key::W, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, 0.f, -cameraSpeed} * window.getDeltaTime().rep());
+            glm::vec3{0.f, 0.f, -cameraMoveSpeed} *
+            window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::S, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, 0.f, +cameraSpeed} * window.getDeltaTime().rep());
+            glm::vec3{0.f, 0.f, +cameraMoveSpeed} *
+            window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::A, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{+cameraSpeed, 0.f, 0.f} * window.getDeltaTime().rep());
+            glm::vec3{+cameraMoveSpeed, 0.f, 0.f} *
+            window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::D, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{-cameraSpeed, 0.f, 0.f} * window.getDeltaTime().rep());
+            glm::vec3{-cameraMoveSpeed, 0.f, 0.f} *
+            window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::Q, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, +cameraSpeed, 0.f} * window.getDeltaTime().rep());
+            glm::vec3{0.f, +cameraMoveSpeed, 0.f} *
+            window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::E, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, -cameraSpeed, 0.f} * window.getDeltaTime().rep());
+            glm::vec3{0.f, -cameraMoveSpeed, 0.f} *
+            window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::LeftArrow, [camera = &*camera, &window] {
-        camera->transform().rotateBy(Euler{glm::vec3{-cameraSpeed, 0.f, 0.f} *
-                                           window.getDeltaTime().rep()});
+        camera->transform().rotateBy(
+            Euler{glm::vec3{-cameraRotateSpeed, 0.f, 0.f} *
+                  window.getDeltaTime().rep()});
     });
     input.setKeyCallback(Input::Key::RightArrow, [camera = &*camera, &window] {
-        camera->transform().rotateBy(Euler{glm::vec3{+cameraSpeed, 0.f, 0.f} *
-                                           window.getDeltaTime().rep()});
+        camera->transform().rotateBy(
+            Euler{glm::vec3{+cameraRotateSpeed, 0.f, 0.f} *
+                  window.getDeltaTime().rep()});
     });
     return camera;
 }
@@ -145,15 +155,13 @@ int main() {
 
     PointLight light{
         {Point{1.f, 1.f, -1.f}, Euler{}, Scale{0.5f}},
-        {0.1f, 0.1f, 0.1f},
-        {1.f, 0.5f, 1.f},
-        {1.f, 0.5f, 1.f},
+        {{0.1f, 0.1f, 0.1f}, {1.f, 0.5f, 1.f}, {1.f, 0.5f, 1.f}},
+        PointLight::Attenuation::fromDistance(50.f),
     };
     PointLight light2{
         {Point{1.f, -1.f, -10.f}, Euler{}, Scale{0.5f}},
-        {0.1f, 0.1f, 0.1f},
-        {0.f, 0.5f, 1.f},
-        {0.f, 0.5f, 1.f},
+        {{0.1f, 0.1f, 0.1f}, {0.f, 0.5f, 1.f}, {0.f, 0.5f, 1.f}},
+        PointLight::Attenuation::fromDistance(25.f),
     };
     const Material cubeMaterial{containerTexture, containerSpecularTexture,
                                 256.f};
@@ -174,7 +182,10 @@ int main() {
     std::generate_n(std::back_inserter(cubes), numberOfCubes,
                     [&] { return randomCube(cube); });
 
-    Scene mainScene{std::move(cubes), {light, light2}};
+    Scene mainScene{std::move(cubes), {light, light2}, {}};
+    mainScene.addDirectionalLight(DirectionalLight{
+        Direction{0.f, -1.f, 0.f},
+        {{0.1f, 0.1f, 0.1f}, {0.5f, 0.4f, 0.3f}, {0.5f, 0.4f, 0.3f}}});
     std::cout << mainScene << '\n';
 
     window.setWindowSizeCallback([&](const Resolution newResolution) {
