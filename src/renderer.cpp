@@ -34,9 +34,9 @@ Renderer::Renderer(Resolution in_resolution, std::unique_ptr<Camera> in_camera)
     , clearFlag{GL_COLOR_BUFFER_BIT}
     , gBuffer{resolution}
     , deferredPassShader{fs::loadFileAsString(
-                             fs::RelativePath("shaders/deferred.vsh")),
+                             fs::RelativePath("shaders/deferred.vert")),
                          fs::loadFileAsString(
-                             fs::RelativePath("shaders/deferred.fsh")),
+                             fs::RelativePath("shaders/deferred.frag")),
                          Shader::private_tag{}}
     , deferredPassQuad{std::make_shared<VertexBuffer>(getFullScreenQuad()),
                        deferredPassShader}

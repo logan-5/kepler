@@ -52,7 +52,6 @@ vec4 getLightColor(vec4 diffuseColor,
     vec3 specularResult = lightSpecular *
                           pow(max(dot(reflected, lightDir), 0.0), roughness) *
                           specularVal;
-
     return ambientResult + diffuseResult + vec4(specularResult, 1.0);
 }
 

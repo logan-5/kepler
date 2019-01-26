@@ -67,7 +67,13 @@ set(STB_DIR ${LIB_DIR}/stb)
 set(STB_INCLUDE ${STB_DIR})
 set(INCLUDE_DIRS ${INCLUDE_DIRS} ${STB_INCLUDE})
 
+# validate shaders
+add_custom_target(validate_shaders 
+    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/validate_shaders.py ${CMAKE_CURRENT_SOURCE_DIR}/shaders)
+
+# main target
 add_executable(${PROJECT_NAME} ${SRC})
+add_dependencies(${PROJECT_NAME} validate_shaders)
 target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})
 target_include_directories(${PROJECT_NAME} PRIVATE ${INCLUDE_DIRS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE ${COMPILE_DEFS})

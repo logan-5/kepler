@@ -137,9 +137,6 @@ int main() {
     window.getInput().setKeyCallback(Input::Key::Esc,
                                      [&] { window.requestClose(); });
 
-    auto lightShader = Shader::create(fs::RelativePath{"shaders/light.vsh"},
-                                      fs::RelativePath{"shaders/light.fsh"});
-
     auto containerTexture = std::make_shared<Texture>(
         Image{fs::RelativePath{"res/container2.png"}});
     auto containerSpecularTexture = std::make_shared<Texture>(

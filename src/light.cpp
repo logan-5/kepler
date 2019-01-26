@@ -51,8 +51,8 @@ void PointLight::debugDraw(const glm::mat4& viewProjectionTransform) {
 
 auto PointLight::getDebugDrawData() -> DebugDrawData {
     DebugDrawData theData;
-    theData.shader = Shader::create(fs::RelativePath{"shaders/light.vsh"},
-                                    fs::RelativePath{"shaders/light.fsh"});
+    theData.shader = Shader::create(fs::RelativePath{"shaders/light.vert"},
+                                    fs::RelativePath{"shaders/light.frag"});
     theData.vao = std::make_shared<VertexArrayObject>(
         std::make_shared<VertexBuffer>(getCubeVerts()), *theData.shader);
     return theData;

@@ -7,9 +7,9 @@
 namespace {
 std::shared_ptr<Shader> phongShader() {
     static const fs::AbsolutePath vertPath =
-        fs::RelativePath{"shaders/phong.vsh"};
+        fs::RelativePath{"shaders/phong.vert"};
     static const fs::AbsolutePath fragPath =
-        fs::RelativePath{"shaders/phong.fsh"};
+        fs::RelativePath{"shaders/phong.frag"};
     auto shader = Shader::create(vertPath, fragPath);
     GL_CHECK();
     return shader;
