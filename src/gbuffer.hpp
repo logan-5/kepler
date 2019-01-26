@@ -8,10 +8,9 @@
 struct GBuffer {
     struct Target {
         enum {
-            Position,
-            Normal,
+            PositionRGB_SpecularA,
+            NormalRGB_RoughnessA,
             Diffuse,
-            Specular,
 
             MAX,
         };

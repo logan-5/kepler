@@ -149,10 +149,6 @@ int main() {
     auto cubeBuffer = std::make_shared<VertexBuffer>(getCubeVerts());
     GL_CHECK();
 
-    // auto phongVao = VertexArrayObject{cubeBuffer, phongShader};
-    auto lightVao = VertexArrayObject{cubeBuffer, *lightShader};
-    GL_CHECK();
-
     PointLight light{
         {Point{1.f, 1.f, -1.f}, Euler{}, Scale{0.5f}},
         {{0.1f, 0.1f, 0.1f}, {1.f, 0.5f, 1.f}, {1.f, 0.5f, 1.f}},
@@ -187,7 +183,6 @@ int main() {
     mainScene.addDirectionalLight(DirectionalLight{
         Direction{0.f, -1.f, 0.f},
         {{0.1f, 0.1f, 0.1f}, {0.5f, 0.4f, 0.3f}, {0.5f, 0.4f, 0.3f}}});
-    std::cout << mainScene << '\n';
 
     window.setWindowSizeCallback([&](const Resolution newResolution) {
         std::cout << "window size changed to " << newResolution << '\n';

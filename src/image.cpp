@@ -1,5 +1,6 @@
 #include "image.hpp"
 #include "common.hpp"
+#include "fs.hpp"
 #include "util.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -27,7 +28,11 @@ struct Image::Impl : util::NonCopyable {
         : x{}
         , y{}
         , channels{}
-        , data{stbi_load(filename.c_str(), &x, &y, &channels, 0)} {}
+        , data{stbi_load(filename.c_str(), &x, &y, &channels, 0)} {
+        if (data == nullptr) {
+            throw fs::error_opening_file{filename};
+        }
+    }
     ~Impl() { stbi_image_free(data); }
 
     int x, y, channels;

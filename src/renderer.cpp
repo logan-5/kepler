@@ -115,13 +115,11 @@ void Renderer::doDeferredPass(Scene& scene,
         gBuffer.getColorTarget(target).bind(target);
         deferredPassShader.setUniform(name, target);
     };
-    bindColorTarget("position", GBuffer::Target::Position);
-    bindColorTarget("normal", GBuffer::Target::Normal);
+    bindColorTarget("positionRGB_specularA",
+                    GBuffer::Target::PositionRGB_SpecularA);
+    bindColorTarget("normalRGB_roughnessA",
+                    GBuffer::Target::NormalRGB_RoughnessA);
     bindColorTarget("diffuse", GBuffer::Target::Diffuse);
-    bindColorTarget("specular", GBuffer::Target::Specular);
-
-    gBuffer.getDepthTarget().bind(GBuffer::DepthTarget);
-    deferredPassShader.setUniform("depth", GBuffer::DepthTarget);
 
     GL_CHECK(glDrawArrays(GL_TRIANGLES, 0,
                           deferredPassQuad.getBuffer().getVertexCount()));
