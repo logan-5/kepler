@@ -62,6 +62,9 @@ auto PointLight::getDebugDrawData() -> DebugDrawData {
 
 void DirectionalLight::applyAdditionalUniforms(const std::string& name,
                                                Shader& shader,
-                                               const glm::mat4&) {
-    shader.setUniform(name + ".direction", -this->direction.rep());
+                                               const glm::mat4& viewTransform) {
+    shader.setUniform(
+        name + ".direction",
+        glm::normalize(
+            -glm::vec3{viewTransform * glm::vec4{this->direction.rep(), 0.f}}));
 }

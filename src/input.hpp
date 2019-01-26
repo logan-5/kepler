@@ -20,6 +20,8 @@ class Input {
         Esc,
         LeftArrow,
         RightArrow,
+        UpArrow,
+        DownArrow,
     };
 
     Input(std::unique_ptr<Impl> impl);

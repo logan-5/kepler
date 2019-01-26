@@ -24,6 +24,10 @@ int getKey(Input::Key key) {
             return GLFW_KEY_LEFT;
         case Input::Key::RightArrow:
             return GLFW_KEY_RIGHT;
+        case Input::Key::UpArrow:
+            return GLFW_KEY_UP;
+        case Input::Key::DownArrow:
+            return GLFW_KEY_DOWN;
     }
 }
 }  // namespace

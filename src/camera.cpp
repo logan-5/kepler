@@ -11,7 +11,7 @@ glm::mat4 getPerspectiveProjectionMatrix(
 
 glm::vec3 getUpVector(const glm::vec3& dir) {
     const auto worldUp = glm::vec3{0.f, 1.f, 0.f};
-    const auto right = glm::cross(dir, worldUp);
+    const auto right = glm::cross(worldUp, dir);
     return glm::cross(dir, right);
 }
 }  // namespace

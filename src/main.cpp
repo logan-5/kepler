@@ -79,32 +79,42 @@ std::unique_ptr<Camera> createCamera(Window& window) {
     });
     input.setKeyCallback(Input::Key::A, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{+cameraMoveSpeed, 0.f, 0.f} *
+            glm::vec3{-cameraMoveSpeed, 0.f, 0.f} *
             window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::D, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{-cameraMoveSpeed, 0.f, 0.f} *
+            glm::vec3{+cameraMoveSpeed, 0.f, 0.f} *
             window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::Q, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, +cameraMoveSpeed, 0.f} *
+            glm::vec3{0.f, -cameraMoveSpeed, 0.f} *
             window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::E, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, -cameraMoveSpeed, 0.f} *
+            glm::vec3{0.f, +cameraMoveSpeed, 0.f} *
             window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::LeftArrow, [camera = &*camera, &window] {
         camera->transform().rotateBy(
-            Euler{glm::vec3{-cameraRotateSpeed, 0.f, 0.f} *
+            Euler{glm::vec3{+cameraRotateSpeed, 0.f, 0.f} *
                   window.getDeltaTime().rep()});
     });
     input.setKeyCallback(Input::Key::RightArrow, [camera = &*camera, &window] {
         camera->transform().rotateBy(
-            Euler{glm::vec3{+cameraRotateSpeed, 0.f, 0.f} *
+            Euler{glm::vec3{-cameraRotateSpeed, 0.f, 0.f} *
+                  window.getDeltaTime().rep()});
+    });
+    input.setKeyCallback(Input::Key::UpArrow, [camera = &*camera, &window] {
+        camera->transform().rotateBy(
+            Euler{glm::vec3{0.f, +cameraRotateSpeed, 0.f} *
+                  window.getDeltaTime().rep()});
+    });
+    input.setKeyCallback(Input::Key::DownArrow, [camera = &*camera, &window] {
+        camera->transform().rotateBy(
+            Euler{glm::vec3{0.f, -cameraRotateSpeed, 0.f} *
                   window.getDeltaTime().rep()});
     });
     return camera;
@@ -120,9 +130,6 @@ Object randomCube(const Object& startingCube) {
     ret.transform().position =
         Point{random(-5.f, 5.f), random(-5.f, 5.f), random(0.f, -10.f)};
     ret.transform().scale = Scale{random(0.5f, 1.5f)};
-    // ret.transform().angle =
-    //     Euler{Degrees{random(0.f, 360.f)}, Degrees{random(0.f, 360.f)},
-    //           Degrees{random(0.f, 360.f)}};
     if (coinFlip()) {
         ret.addBehavior(std::make_unique<RotateForeverBehavior>(
             Euler{Degrees{random(-5.f, 5.f)}, Degrees{random(-5.f, 5.f)},
@@ -157,7 +164,7 @@ int main() {
         PointLight::Attenuation::fromDistance(25.f),
     };
     const Material cubeMaterial{containerTexture, containerSpecularTexture,
-                                256.f};
+                                512.f};
     GL_CHECK();
 
     Renderer theRenderer{window.getResolution(), createCamera(window)};

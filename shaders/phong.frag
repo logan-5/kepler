@@ -22,8 +22,8 @@ in vec3 frag_viewPosition;
 void main() {
     out_positionRGB_specularA =
         vec4(frag_viewPosition, texture(material.specular, frag_texCoord).r);
-    out_normalRGB_roughnessA =
-        vec4(frag_normal,
-             128.0);  // normal vector normalized in the deferred pass
+    out_normalRGB_roughnessA = vec4(
+        frag_normal,
+        material.shininess);  // normal vector normalized in the deferred pass
     out_diffuse = texture(material.diffuse, frag_texCoord);
 }
