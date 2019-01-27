@@ -166,7 +166,7 @@ Object theFloor() {
 }  // namespace
 
 int main() {
-    Window window{{1280, 720}, "deferred shading demo", errorCallback};
+    Window window{{1280, 720}, "kepler", errorCallback};
     window.getInput().setKeyCallback(Input::Key::Esc,
                                      [&] { window.requestClose(); });
 

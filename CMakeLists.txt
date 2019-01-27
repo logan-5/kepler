@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 
-project(deferred)
+project(kepler)
 
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
