@@ -75,6 +75,7 @@ struct Color : public Rep<glm::vec4> {
 
    public:
     using Rep::Rep;
+    Color() : Rep{1.f} {}
 
     constexpr float_type& r() noexcept { return rep().r; }
     constexpr float_type r() const noexcept { return rep().r; }
@@ -92,6 +93,7 @@ struct ColorRGB : public Rep<glm::vec3> {
 
    public:
     using Rep::Rep;
+    ColorRGB() : Rep{1.f} {}
 
     constexpr float_type& r() noexcept { return rep().r; }
     constexpr float_type r() const noexcept { return rep().r; }

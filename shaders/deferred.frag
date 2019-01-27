@@ -47,11 +47,11 @@ vec4 getLightColor(vec4 diffuseColor,
     vec4 diffuseResult = diffuseColor * vec4(lightDiffuse, 1.0) *
                          max(dot(normalVal, lightDir), 0.0);
 
-    vec3 cameraRay = normalize(positionVal);
-    vec3 reflected = reflect(cameraRay, normalVal);
-    vec3 specularResult = lightSpecular *
-                          pow(max(dot(reflected, lightDir), 0.0), roughness) *
-                          specularVal;
+    vec3 cameraRay = -normalize(positionVal);
+    vec3 halfway = normalize(cameraRay + lightDir);
+    float specularFactor = max(dot(normalVal, halfway), 0.0);
+    vec3 specularResult =
+        lightSpecular * pow(specularFactor, roughness) * specularVal;
     return ambientResult + diffuseResult + vec4(specularResult, 1.0);
 }
 

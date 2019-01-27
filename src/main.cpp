@@ -137,6 +137,32 @@ Object randomCube(const Object& startingCube) {
     }
     return ret;
 }
+
+Object theFloor() {
+    Texture::Params params;
+    params.wrapS = params.wrapT = Texture::Wrap::Repeat;
+    auto containerTexture = std::make_shared<Texture>(
+        Image{fs::RelativePath{"res/tiles_016_basecolor.jpg"}}, params);
+    auto containerSpecularTexture = std::make_shared<Texture>(
+        Image{fs::RelativePath{"res/tiles_016_roughness.jpg"}}, params);
+    const Material floorMaterial{containerTexture, containerSpecularTexture,
+                                 256.f};
+
+    constexpr auto size = 20.f;
+    auto verts = {
+        Vertex{{-1.f, 0.f, -1.f}, {0.f, 1.f, 0.f}, {0.f, 0.f}, {}},
+        Vertex{{-1.f, 0.f, +1.f}, {0.f, 1.f, 0.f}, {size, 0.f}, {}},
+        Vertex{{+1.f, 0.f, -1.f}, {0.f, 1.f, 0.f}, {0.f, size}, {}},
+        Vertex{{+1.f, 0.f, -1.f}, {0.f, 1.f, 0.f}, {0.f, size}, {}},
+        Vertex{{-1.f, 0.f, +1.f}, {0.f, 1.f, 0.f}, {size, 0.f}, {}},
+        Vertex{{+1.f, 0.f, +1.f}, {0.f, 1.f, 0.f}, {size, size}, {}},
+    };
+    return {
+        Transform{Point{0.f, -2.f, 0.f}, Euler{}, Scale{size, 1.f, size}},
+        verts,
+        floorMaterial,
+    };
+}
 }  // namespace
 
 int main() {
@@ -184,6 +210,7 @@ int main() {
                     [&] { return randomCube(cube); });
 
     Scene mainScene{std::move(cubes), {light, light2}, {}};
+    mainScene.addObject(theFloor());
     mainScene.addDirectionalLight(DirectionalLight{
         Direction{0.f, -1.f, 0.f},
         {{0.1f, 0.1f, 0.1f}, {0.5f, 0.4f, 0.3f}, {0.5f, 0.4f, 0.3f}}});

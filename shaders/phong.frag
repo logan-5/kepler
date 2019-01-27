@@ -25,5 +25,5 @@ void main() {
     out_normalRGB_roughnessA = vec4(
         frag_normal,
         material.shininess);  // normal vector normalized in the deferred pass
-    out_diffuse = texture(material.diffuse, frag_texCoord);
+    out_diffuse = texture(material.diffuse, frag_texCoord) * frag_color;
 }
