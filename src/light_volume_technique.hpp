@@ -5,6 +5,7 @@
 #include "shader.hpp"
 #include "vertex_array.hpp"
 
+struct DirectionalLight;
 struct PointLight;
 
 struct LightVolumeTechnique final : public DeferredShadingTechnique {
@@ -19,7 +20,9 @@ struct LightVolumeTechnique final : public DeferredShadingTechnique {
     bool blitsGBufferDepth() const override;
 
    private:
-    void setUniforms(GBuffer& gBuffer, Shader& shader);
+    void setUniforms(GBuffer& gBuffer,
+                     Shader& shader,
+                     const Resolution resolution);
 
     void drawPointLights(GBuffer& gBuffer,
                          Scene& scene,
@@ -32,9 +35,19 @@ struct LightVolumeTechnique final : public DeferredShadingTechnique {
                         Shader& shader,
                         bool stencilPass);
 
+    void drawDirectionalLights(GBuffer& gBuffer,
+                               Scene& scene,
+                               const glm::mat4& viewTransform,
+                               const Resolution resolution);
+    void drawDirectionalLight(const DirectionalLight& light,
+                              const glm::mat4& viewTransform);
+
    private:
     Shader pointLightShader, pointLightStencilPassShader;
     VertexArrayObject pointLightVolume;
+
+    Shader directionalLightShader;
+    VertexArrayObject directionalLightQuad;
 };
 
 #endif
