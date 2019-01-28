@@ -8,6 +8,10 @@
 #include <memory>
 
 namespace {
+constexpr const auto emptyFragmentShader = R"_(
+#version 330 core
+void main() {}
+)_";
 struct DeleteShader {
     void operator()(GLuint shader) const {
         assert(glIsShader(shader));
@@ -22,7 +26,7 @@ std::map<std::tuple<std::string, std::string>,
     Shader::cache;
 
 GLuint Shader::create_impl(const char* const vertexSource,
-                           const char* const fragmentSource) {
+                           util::optional<const char*> const fragmentSource) {
     util::RAII<GLuint, DeleteShader> vertexShader{
         glCreateShader(GL_VERTEX_SHADER)};
 
@@ -41,7 +45,8 @@ GLuint Shader::create_impl(const char* const vertexSource,
 
     util::RAII<GLuint, DeleteShader> fragmentShader{
         glCreateShader(GL_FRAGMENT_SHADER)};
-    glShaderSource(fragmentShader, 1, &fragmentSource, NULL);
+    const auto fragmentSource_ = fragmentSource.value_or(emptyFragmentShader);
+    glShaderSource(fragmentShader, 1, &fragmentSource_, NULL);
     glCompileShader(fragmentShader);
     assert(glIsShader(fragmentShader));
 

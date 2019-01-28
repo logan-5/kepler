@@ -5,7 +5,7 @@
 
 void Light_base::applyUniforms(const std::string& name,
                                Shader& shader,
-                               const glm::mat4& viewTransform) {
+                               const glm::mat4& viewTransform) const {
     shader.setUniform(name + ".ambient", this->colors.ambient.rep());
     shader.setUniform(name + ".diffuse", this->colors.diffuse.rep());
     shader.setUniform(name + ".specular", this->colors.specular.rep());
@@ -24,7 +24,7 @@ PointLight::PointLight(const Transform& transform,
 
 void PointLight::applyAdditionalUniforms(const std::string& name,
                                          Shader& shader,
-                                         const glm::mat4& viewTransform) {
+                                         const glm::mat4& viewTransform) const {
     shader.setUniform(
         name + ".position",
         glm::vec3{viewTransform *
@@ -36,7 +36,7 @@ void PointLight::applyAdditionalUniforms(const std::string& name,
 
 auto PointLight::Attenuation::fromDistance(float distance) -> Attenuation {
     (void)distance;  // TODO
-    return {1.f, 0.09f, 0.032f};
+    return {1.f, 0.35f, 0.44f};
 }
 
 void PointLight::debugDraw(const glm::mat4& viewProjectionTransform) {
@@ -60,9 +60,10 @@ auto PointLight::getDebugDrawData() -> DebugDrawData {
 
 //
 
-void DirectionalLight::applyAdditionalUniforms(const std::string& name,
-                                               Shader& shader,
-                                               const glm::mat4& viewTransform) {
+void DirectionalLight::applyAdditionalUniforms(
+    const std::string& name,
+    Shader& shader,
+    const glm::mat4& viewTransform) const {
     shader.setUniform(
         name + ".direction",
         glm::normalize(

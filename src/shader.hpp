@@ -5,6 +5,7 @@
 #include "fs.hpp"
 #include "gl.hpp"
 #include "gl_object.hpp"
+#include "optional.hpp"
 #include "util.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -30,21 +31,31 @@ struct DeleteShader {
 class Shader final : public GLObject<detail::DeleteShader> {
    private:
     static GLuint create_impl(const char* const vertexSource,
-                              const char* const fragmentSource);
+                              util::optional<const char*> const fragmentSource);
 
     static std::map<std::tuple<std::string, std::string>,
                     std::shared_ptr<Shader>,
                     std::less<>>
         cache;
 
-    struct private_tag {};
-    friend class Renderer;
-
    public:
+    struct private_tag {
+        private_tag(const private_tag&) = default;
+        private_tag& operator=(const private_tag&) = default;
+
+       private:
+        private_tag() = default;
+        friend class Renderer;
+    };
+
     Shader(const std::string& vertexSource,
-           const std::string& fragmentSource,
+           const util::optional<std::string>& fragmentSource,
            private_tag)
-        : GLObject{create_impl(vertexSource.c_str(), fragmentSource.c_str())} {}
+        : GLObject{create_impl(
+              vertexSource.c_str(),
+              util::map(fragmentSource, [](const std::string& source) {
+                  return source.c_str();
+              }))} {}
 
     static void clearCache() { cache.clear(); }
 
@@ -86,6 +97,11 @@ class Shader final : public GLObject<detail::DeleteShader> {
         use();
         glUniformMatrix4fv(getUniformLocation(name), 1, GL_FALSE,
                            glm::value_ptr(m4));
+    }
+
+    void setUniform(const std::string& name, const glm::vec2& v2) noexcept {
+        use();
+        glUniform2f(getUniformLocation(name), v2.x, v2.y);
     }
 
     void setUniform(const std::string& name, const glm::vec3& v3) noexcept {

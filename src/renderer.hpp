@@ -8,10 +8,13 @@
 #include "vertex_array.hpp"
 
 class Scene;
+struct PointLight;
+struct DeferredShadingTechnique;
 
 class Renderer {
    public:
     Renderer(Resolution resolution, std::unique_ptr<Camera> in_camera);
+    ~Renderer();
 
     void renderScene(Scene& scene);
 
@@ -32,12 +35,6 @@ class Renderer {
     void doGeometryPass(Scene& scene,
                         const glm::mat4& viewTransform,
                         const glm::mat4& projectionTransform);
-    void doDeferredPass(Scene& scene,
-                        const glm::mat4& viewTransform,
-                        const glm::mat4& projectionTransform);
-    void setDeferredPassLights(Scene& scene,
-                               const glm::mat4& viewTransform,
-                               const glm::mat4& projectionTransform);
     void doForwardPass(Scene& scene,
                        const glm::mat4& viewTransform,
                        const glm::mat4& projectionTransform);
@@ -48,8 +45,7 @@ class Renderer {
     Color clearColor;
     GLuint clearFlag;
     GBuffer gBuffer;
-    Shader deferredPassShader;
-    VertexArrayObject deferredPassQuad;
+    std::unique_ptr<DeferredShadingTechnique> deferredTechnique;
     bool debugDrawLights;
 };
 

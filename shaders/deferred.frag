@@ -6,7 +6,7 @@ uniform sampler2D normalRGB_roughnessA;
 uniform sampler2D diffuse;
 uniform sampler2D specular;
 
-#define MAX_POINT_LIGHTS 16
+#define MAX_POINT_LIGHTS 64
 struct PointLight {
     vec3 ambient;
     vec3 diffuse;

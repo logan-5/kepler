@@ -1,25 +1,18 @@
 #include "renderer.hpp"
 #include "binding.hpp"
+#include "cube.hpp"
 #include "frame_buffer.hpp"
 #include "fs.hpp"
 #include "gl.hpp"
+#include "light_volume_technique.hpp"
 #include "scene.hpp"
+#include "simple_technique.hpp"
 #include "types.hpp"
 
 #include <array>
 #include <string>
 
 namespace {
-std::array<Vertex, 6> getFullScreenQuad() {
-    return {{
-        {{-1.f, -1.f, 0.f}, {}, {0.f, 0.f}, {}},
-        {{1.f, -1.f, 0.f}, {}, {1.f, 0.f}, {}},
-        {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
-        {{1.f, -1.f, 0.f}, {}, {1.f, 0.f}, {}},
-        {{1.f, 1.f, 0.f}, {}, {1.f, 1.f}, {}},
-        {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
-    }};
-}
 void setDrawBuffers(GBuffer& gBuffer) {
     RAIIBinding<FrameBuffer> bind{gBuffer.getFrameBufferHandle()};
     GL_CHECK();
@@ -33,13 +26,8 @@ Renderer::Renderer(Resolution in_resolution, std::unique_ptr<Camera> in_camera)
     , camera{std::move(in_camera)}
     , clearFlag{GL_COLOR_BUFFER_BIT}
     , gBuffer{resolution}
-    , deferredPassShader{fs::loadFileAsString(
-                             fs::RelativePath("shaders/deferred.vert")),
-                         fs::loadFileAsString(
-                             fs::RelativePath("shaders/deferred.frag")),
-                         Shader::private_tag{}}
-    , deferredPassQuad{std::make_shared<VertexBuffer>(getFullScreenQuad()),
-                       deferredPassShader}
+    , deferredTechnique{std::make_unique<SimpleTechnique>(
+          Shader::private_tag{})}
     , debugDrawLights{false} {
     setDepthTestEnabled(true);
 
@@ -48,6 +36,8 @@ Renderer::Renderer(Resolution in_resolution, std::unique_ptr<Camera> in_camera)
     glEnable(GL_CULL_FACE);
     GL_CHECK(glCullFace(GL_BACK));
 }
+
+Renderer::~Renderer() = default;
 
 void Renderer::resolutionChanged(Resolution newResolution) {
     this->resolution = newResolution;
@@ -76,7 +66,8 @@ void Renderer::renderScene(Scene& scene) {
     const auto view = camera->getViewMatrix();
 
     GL_CHECK(doGeometryPass(scene, view, projection));
-    GL_CHECK(doDeferredPass(scene, view, projection));
+    GL_CHECK(deferredTechnique->doDeferredPass(this->gBuffer, scene, view,
+                                               projection, this->resolution));
     if (needsForwardPass()) {
         GL_CHECK(doForwardPass(scene, view, projection));
     }
@@ -98,66 +89,6 @@ void Renderer::doGeometryPass(Scene& scene,
     GL_CHECK(gBuffer.unbind());
 }
 
-void Renderer::doDeferredPass(Scene& scene,
-                              const glm::mat4& viewTransform,
-                              const glm::mat4& projectionTransform) {
-    glDisable(GL_DEPTH_TEST);
-
-    glClearColor(clearColor.rep().r, clearColor.rep().g, clearColor.rep().b,
-                 clearColor.rep().a);
-    glClear(GL_COLOR_BUFFER_BIT);
-    deferredPassQuad.bind();
-    deferredPassShader.use();
-
-    setDeferredPassLights(scene, viewTransform, projectionTransform);
-
-    auto bindColorTarget = [&](const auto& name, int target) {
-        gBuffer.getColorTarget(target).bind(target);
-        deferredPassShader.setUniform(name, target);
-    };
-    bindColorTarget("positionRGB_specularA",
-                    GBuffer::Target::PositionRGB_SpecularA);
-    bindColorTarget("normalRGB_roughnessA",
-                    GBuffer::Target::NormalRGB_RoughnessA);
-    bindColorTarget("diffuse", GBuffer::Target::Diffuse);
-
-    GL_CHECK(glDrawArrays(GL_TRIANGLES, 0,
-                          deferredPassQuad.getBuffer().getVertexCount()));
-    GL_CHECK();
-    deferredPassQuad.unbind();
-
-    setDepthTestEnabled(clearFlag & GL_DEPTH_BUFFER_BIT);
-
-    GL_CHECK();
-}
-
-void Renderer::setDeferredPassLights(Scene& scene,
-                                     const glm::mat4& viewTransform,
-                                     const glm::mat4& projectionTransform) {
-    {
-        (void)projectionTransform;
-        auto pointLights = scene.getPointLights();
-        for (std::size_t i = 0; i < pointLights.size(); ++i) {
-            GL_CHECK(pointLights[i].applyUniforms(
-                "pointLights[" + std::to_string(i) + ']', deferredPassShader,
-                viewTransform));
-        }
-        deferredPassShader.setUniform("pointLightCount",
-                                      static_cast<int>(pointLights.size()));
-    }
-    {
-        auto directionalLights = scene.getDirectionalLights();
-        for (std::size_t i = 0; i < directionalLights.size(); ++i) {
-            GL_CHECK(directionalLights[i].applyUniforms(
-                "directionalLights[" + std::to_string(i) + ']',
-                deferredPassShader, viewTransform));
-        }
-        deferredPassShader.setUniform(
-            "directionalLightCount",
-            static_cast<int>(directionalLights.size()));
-    }
-}
-
 bool Renderer::needsForwardPass() const {
     return debugDrawLights;
 }
@@ -165,7 +96,9 @@ bool Renderer::needsForwardPass() const {
 void Renderer::doForwardPass(Scene& scene,
                              const glm::mat4& viewTransform,
                              const glm::mat4& projectionTransform) {
-    gBuffer.blit(GL_DEPTH_BUFFER_BIT, FrameBuffer::View{0}, this->resolution);
+    if (!deferredTechnique->blitsGBufferDepth()) {
+        gBuffer.blit(GL_DEPTH_BUFFER_BIT, FrameBuffer::View{0}, resolution);
+    }
     const auto viewProjection = projectionTransform * viewTransform;
     for (auto& light : scene.getPointLights()) {
         light.debugDraw(viewProjection);

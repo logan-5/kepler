@@ -2,6 +2,7 @@
 #define BINDING_HPP
 
 #include "common.hpp"
+#include "gl_object.hpp"
 #include "util.hpp"
 
 template <typename Bindable>
@@ -10,6 +11,10 @@ struct RAIIBinding {
         : binding{{}} {
         Bindable::bind(handle);
     }
+    template <typename... Ts>
+    RAIIBinding(const GLObject<Ts...>& obj) noexcept(
+        noexcept(Bindable::bind(obj.getHandle())))
+        : RAIIBinding(obj.getHandle()) {}
 
    private:
     struct Nothing {};

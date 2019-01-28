@@ -21,12 +21,13 @@ struct Light_base {
 
     void applyUniforms(const std::string& name,
                        Shader& shader,
-                       const glm::mat4& viewTransform);
+                       const glm::mat4& viewTransform) const;
 
    protected:
-    virtual void applyAdditionalUniforms(const std::string& name,
-                                         Shader& shader,
-                                         const glm::mat4& viewTransform) = 0;
+    virtual void applyAdditionalUniforms(
+        const std::string& name,
+        Shader& shader,
+        const glm::mat4& viewTransform) const = 0;
 };
 
 struct PointLight
@@ -62,7 +63,7 @@ struct PointLight
 
     void applyAdditionalUniforms(const std::string& name,
                                  Shader& shader,
-                                 const glm::mat4& viewTransform) override;
+                                 const glm::mat4& viewTransform) const override;
 };
 
 struct DirectionalLight : public Light_base {
@@ -81,7 +82,7 @@ struct DirectionalLight : public Light_base {
 
     void applyAdditionalUniforms(const std::string& name,
                                  Shader& shader,
-                                 const glm::mat4& viewTransform) override;
+                                 const glm::mat4& viewTransform) const override;
 };
 
 #endif

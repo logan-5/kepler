@@ -163,6 +163,32 @@ Object theFloor() {
         floorMaterial,
     };
 }
+
+PointLight randomLight() {
+    using namespace util::random;
+    constexpr auto areaSize = 10.f;
+    constexpr auto areaVertOffset = 2.5f;
+    auto randomPoint = [] {
+        return Point{random(-areaSize, areaSize),
+                     random(-areaSize, areaSize) + areaVertOffset,
+                     random(-areaSize, areaSize)};
+    };
+    auto randomColor = [] {
+        return ColorRGB{random(0.f, 1.f), random(0.f, 1.f), random(0.f, 1.f)};
+    };
+    const auto lightColor = randomColor();
+    return PointLight{
+        {randomPoint(), Euler{}, Scale{0.5f}},
+        Light_base::Colors{ColorRGB{0.1f, 0.1f, 0.1f}, lightColor, lightColor},
+        PointLight::Attenuation::fromDistance(50.f),
+    };
+}
+auto getRandomLights(std::size_t count) {
+    std::vector<PointLight> lights;
+    lights.reserve(count);
+    std::generate_n(std::back_inserter(lights), count, randomLight);
+    return lights;
+}
 }  // namespace
 
 int main() {
@@ -209,7 +235,9 @@ int main() {
     std::generate_n(std::back_inserter(cubes), numberOfCubes,
                     [&] { return randomCube(cube); });
 
-    Scene mainScene{std::move(cubes), {light, light2}, {}};
+    static constexpr auto numberOfPointLights = 63;
+
+    Scene mainScene{std::move(cubes), getRandomLights(numberOfPointLights), {}};
     mainScene.addObject(theFloor());
     mainScene.addDirectionalLight(DirectionalLight{
         Direction{0.f, -1.f, 0.f},

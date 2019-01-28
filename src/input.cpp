@@ -47,10 +47,11 @@ Input::~Input() {
 
 void Input::update() {
     for (auto& callbacks : keyCallbacks) {
-        auto glfwKey = getKey(callbacks.first);
+        const auto glfwKey = getKey(callbacks.first);
         if (glfwGetKey(impl->window, glfwKey) == GLFW_PRESS) {
-            for (auto& cb : callbacks.second)
+            for (auto& cb : callbacks.second) {
                 cb();
+            }
         }
     }
 }

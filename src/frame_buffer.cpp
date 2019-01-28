@@ -32,11 +32,25 @@ auto FrameBuffer::Attachments::create(Resolution resolution,
     }
 
     if (options.depth) {
-        Texture depth{resolution, Texture::Format{GL_DEPTH_COMPONENT, GL_FLOAT},
-                      Texture::Params{}};
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
-                             depth.getHandle(), 0);
-        attachments.depth = std::move(depth);
+        if (!options.stencil) {
+            Texture depth{resolution,
+                          Texture::Format{GL_DEPTH_COMPONENT, GL_FLOAT},
+                          Texture::Params{}};
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                 depth.getHandle(), 0);
+            attachments.depth = std::move(depth);
+        } else {
+            Texture depth{
+                resolution,
+                Texture::Format{GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8,
+                                GL_DEPTH24_STENCIL8},
+                Texture::Params{}};
+            glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
+                                 depth.getHandle(), 0);
+            attachments.depth = std::move(depth);
+        }
+    } else if (options.stencil) {
+        assert(false && "not yet implemented, sorry");
     }
 
     assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE);
