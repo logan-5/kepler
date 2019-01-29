@@ -178,7 +178,7 @@ PointLight randomLight() {
     };
     const auto lightColor = randomColor();
     return PointLight{
-        {randomPoint(), Euler{}, Scale{0.5f}},
+        {randomPoint(), Euler{}, Scale{2.5f}},
         Light_base::Colors{ColorRGB{0.1f, 0.1f, 0.1f}, lightColor, lightColor},
         PointLight::Attenuation::fromDistance(50.f),
     };

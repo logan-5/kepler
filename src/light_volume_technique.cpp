@@ -54,8 +54,6 @@ void LightVolumeTechnique::doDeferredPass(GBuffer& gBuffer,
                                           const Resolution resolution) {
     gBuffer.blit(GL_DEPTH_BUFFER_BIT, FrameBuffer::View{0}, resolution);
 
-    // glClearColor(clearColor.rep().r, clearColor.rep().g, clearColor.rep().b,
-    //  clearColor.rep().a);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
     drawPointLights(gBuffer, scene, viewTransform, projectionTransform,
@@ -93,13 +91,22 @@ void LightVolumeTechnique::drawPointLights(GBuffer& gBuffer,
     GL::ScopedEnable<GL::StencilWrite> stencilWrite;
 
     {  // stencil pass
-        glCullFace(GL_BACK);
+        // a "perfect" stencil dealio here (which staunchly avoids calculating
+        // any more pixels than necessary for each individual light) requires an
+        // individual stencil pass for each light before rendering it, which is
+        // prohibitively expensive because of all the context switching, and
+        // prevents instancing for both the stencil pass and the final color
+        // pass. instead, the following test is a little imperfect but gets us
+        // close enough (i.e. discards a good number of pixels to calculate in
+        // the ideal case, and is only a little terrible in the worst case) and
+        // doesn't prevent instancing.
+        GL::ScopedDisable<GL::FaceCulling> noFaceCulling;
         GL::ScopedDisable<GL::ColorWrite> noColorWrite;
-        glClearStencil(0);
+        glClearStencil(128);
         glClear(GL_STENCIL_BUFFER_BIT);
-        glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_INCR, GL_DECR);
-        // glStencilOpSeparate(GL_BACK, GL_KEEP, GL_KEEP, GL_DECR);
+        glStencilFunc(GL_LESS, 0, 0xFF);
+        glStencilOpSeparate(GL_FRONT, GL_KEEP, GL_INCR, GL_ZERO);
+        glStencilOpSeparate(GL_BACK, GL_KEEP, GL_DECR, GL_KEEP);
 
         GL_CHECK();
         pointLightVolume.bind();
@@ -112,12 +119,10 @@ void LightVolumeTechnique::drawPointLights(GBuffer& gBuffer,
         }
     }
     glCullFace(GL_FRONT);
-    // GL::ScopedDisable<GL::DepthTest> noDepthTest;
     GL::ScopedEnable<GL::Blending> enableBlending;
     glBlendFunc(GL_ONE, GL_ONE);
-    glStencilFunc(GL_EQUAL, 0, 0xFF);
-    glStencilOp(GL_ZERO, GL_ZERO, GL_ZERO);
-    // GL::StencilWrite::disable();
+    glStencilFunc(GL_GREATER, 128, 0xFF);
+    GL::StencilWrite::disable();
     glDepthFunc(GL_GEQUAL);
     setUniforms(gBuffer, pointLightShader, resolution);
     pointLightShader.setUniform("view", viewTransform);

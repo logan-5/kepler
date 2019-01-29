@@ -46,7 +46,7 @@ void PointLight::debugDraw(const glm::mat4& viewProjectionTransform) {
     data.shader->setUniform("mvp",
                             viewProjectionTransform * this->getModelMatrix());
     data.shader->setUniform("color", this->colors.diffuse.rep());
-    glDrawArrays(GL_TRIANGLES, 0, data.vao->getBuffer().getVertexCount());
+    glDrawArrays(GL_LINES, 0, data.vao->getBuffer().getVertexCount());
 }
 
 auto PointLight::getDebugDrawData() -> DebugDrawData {
