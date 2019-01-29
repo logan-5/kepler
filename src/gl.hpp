@@ -3,19 +3,25 @@
 
 #include <glad/glad.h>
 
+#include <string>
+
+namespace GL {
+std::string getErrorString(const GLenum);
+}
+
 #ifndef NDEBUG
 
 #include <cassert>
 #include <iostream>
 
-#define GL_CHECK(...)                                   \
-    do {                                                \
-        __VA_ARGS__;                                    \
-        const auto error = glGetError();                \
-        if (error != GL_NO_ERROR) {                     \
-            std::cerr << "GL error: " << error << '\n'; \
-            assert(false);                              \
-        }                                               \
+#define GL_CHECK(...)                                                       \
+    do {                                                                    \
+        __VA_ARGS__;                                                        \
+        const auto error = glGetError();                                    \
+        if (error != GL_NO_ERROR) {                                         \
+            std::cerr << "GL error: " << GL::getErrorString(error) << '\n'; \
+            assert(false);                                                  \
+        }                                                                   \
     } while (false)
 
 #else
@@ -75,7 +81,6 @@ struct ScopedDisable {
     ScopedDisable(const ScopedDisable&) = delete;
     ScopedDisable& operator=(const ScopedDisable&) = delete;
 };
-
 }  // namespace GL
 
 #endif

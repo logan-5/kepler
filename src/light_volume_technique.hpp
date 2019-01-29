@@ -8,9 +8,7 @@
 struct DirectionalLight;
 struct PointLight;
 
-struct LightVolumeTechnique final : public DeferredShadingTechnique {
-    LightVolumeTechnique(Shader::private_tag privateShaderAccess);
-
+struct LightVolumeTechnique_base : public DeferredShadingTechnique {
     void doDeferredPass(GBuffer& gBuffer,
                         Scene& scene,
                         const glm::mat4& viewTransform,
@@ -19,7 +17,11 @@ struct LightVolumeTechnique final : public DeferredShadingTechnique {
 
     bool blitsGBufferDepth() const override;
 
-   private:
+   protected:
+    LightVolumeTechnique_base(Shader pointLightShader,
+                              Shader pointLightStencilPassShader,
+                              Shader directionalLightShader);
+
     void setUniforms(GBuffer& gBuffer,
                      Shader& shader,
                      const Resolution resolution);
@@ -30,11 +32,15 @@ struct LightVolumeTechnique final : public DeferredShadingTechnique {
                          const glm::mat4& projectionTransform,
                          const Resolution resolution);
 
-    void drawPointLight(const PointLight& light,
-                        const glm::mat4& viewTransform,
-                        Shader& shader,
-                        bool stencilPass);
+   protected:
+    virtual void drawPointLightsImpl(GBuffer& gBuffer,
+                                     Scene& scene,
+                                     const glm::mat4& viewTransform,
+                                     const glm::mat4& projectionTransform,
+                                     const Resolution resolution,
+                                     bool stencilPass) = 0;
 
+   private:
     void drawDirectionalLights(GBuffer& gBuffer,
                                Scene& scene,
                                const glm::mat4& viewTransform,
@@ -42,12 +48,41 @@ struct LightVolumeTechnique final : public DeferredShadingTechnique {
     void drawDirectionalLight(const DirectionalLight& light,
                               const glm::mat4& viewTransform);
 
-   private:
+   protected:
     Shader pointLightShader, pointLightStencilPassShader;
     VertexArrayObject pointLightVolume;
 
     Shader directionalLightShader;
     VertexArrayObject directionalLightQuad;
+};
+
+struct LightVolumeTechnique final : public LightVolumeTechnique_base {
+    LightVolumeTechnique(Shader::private_tag privateShaderAccess);
+
+   private:
+    void drawPointLightsImpl(GBuffer& gBuffer,
+                             Scene& scene,
+                             const glm::mat4& viewTransform,
+                             const glm::mat4& projectionTransform,
+                             const Resolution resolution,
+                             bool stencilPass) override;
+
+    void drawPointLight(const PointLight& light,
+                        const glm::mat4& viewTransform,
+                        Shader& shader,
+                        bool stencilPass);
+};
+
+struct LightVolumeInstancedTechnique final : public LightVolumeTechnique_base {
+    LightVolumeInstancedTechnique(Shader::private_tag privateShaderAccess);
+
+   private:
+    void drawPointLightsImpl(GBuffer& gBuffer,
+                             Scene& scene,
+                             const glm::mat4& viewTransform,
+                             const glm::mat4& projectionTransform,
+                             const Resolution resolution,
+                             bool stencilPass) override;
 };
 
 #endif

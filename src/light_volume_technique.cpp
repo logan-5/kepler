@@ -11,47 +11,38 @@
 namespace {
 std::array<Vertex, 6> getFullScreenQuad() {
     return {{
-        {{-1.f, -1.f, 0.f}, {}, {0.f, 0.f}, {}},
-        {{1.f, -1.f, 0.f}, {}, {1.f, 0.f}, {}},
-        {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
-        {{1.f, -1.f, 0.f}, {}, {1.f, 0.f}, {}},
-        {{1.f, 1.f, 0.f}, {}, {1.f, 1.f}, {}},
-        {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
+          {{-1.f, -1.f, 0.f}, {}, {0.f, 0.f}, {}},
+          {{1.f, -1.f, 0.f}, {}, {1.f, 0.f}, {}},
+          {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
+          {{1.f, -1.f, 0.f}, {}, {1.f, 0.f}, {}},
+          {{1.f, 1.f, 0.f}, {}, {1.f, 1.f}, {}},
+          {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
     }};
 }
 }  // namespace
 
-LightVolumeTechnique::LightVolumeTechnique(
-    Shader::private_tag privateShaderAccess)
-    : pointLightShader{fs::loadFileAsString(fs::RelativePath(
-                           "shaders/lightVolume_pointLight.vert")),
-                       fs::loadFileAsString(fs::RelativePath(
-                           "shaders/lightVolume_pointLight.frag")),
-                       privateShaderAccess}
-    , pointLightStencilPassShader{fs::loadFileAsString(fs::RelativePath(
-                                      "shaders/"
-                                      "lightVolume_pointLight.vert")),
-                                  util::nullopt, privateShaderAccess}
+LightVolumeTechnique_base::LightVolumeTechnique_base(
+      Shader in_pointLightShader,
+      Shader in_pointLightStencilPassShader,
+      Shader in_directionalLightShader)
+    : pointLightShader{std::move(in_pointLightShader)}
+    , pointLightStencilPassShader{std::move(in_pointLightStencilPassShader)}
     , pointLightVolume{std::make_shared<VertexBuffer>(getCubeVerts()),
                        pointLightShader}
-
-    , directionalLightShader{fs::loadFileAsString(
-                                 fs::RelativePath("shaders/position.vert")),
-                             fs::loadFileAsString(fs::RelativePath(
-                                 "shaders/lightVolume_directionalLight.frag")),
-                             privateShaderAccess}
+    , directionalLightShader{std::move(in_directionalLightShader)}
     , directionalLightQuad{std::make_shared<VertexBuffer>(getFullScreenQuad()),
                            directionalLightShader} {}
 
-bool LightVolumeTechnique::blitsGBufferDepth() const {
+bool LightVolumeTechnique_base::blitsGBufferDepth() const {
     return true;
 }
 
-void LightVolumeTechnique::doDeferredPass(GBuffer& gBuffer,
-                                          Scene& scene,
-                                          const glm::mat4& viewTransform,
-                                          const glm::mat4& projectionTransform,
-                                          const Resolution resolution) {
+void LightVolumeTechnique_base::doDeferredPass(
+      GBuffer& gBuffer,
+      Scene& scene,
+      const glm::mat4& viewTransform,
+      const glm::mat4& projectionTransform,
+      const Resolution resolution) {
     gBuffer.blit(GL_DEPTH_BUFFER_BIT, FrameBuffer::View{0}, resolution);
 
     glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -63,9 +54,9 @@ void LightVolumeTechnique::doDeferredPass(GBuffer& gBuffer,
     GL_CHECK();
 }
 
-void LightVolumeTechnique::setUniforms(GBuffer& gBuffer,
-                                       Shader& shader,
-                                       const Resolution resolution) {
+void LightVolumeTechnique_base::setUniforms(GBuffer& gBuffer,
+                                            Shader& shader,
+                                            const Resolution resolution) {
     auto bindColorTarget = [&](const auto& name, int target) {
         gBuffer.getColorTarget(target).bind(target);
         GL_CHECK(shader.setUniform(name, target));
@@ -78,11 +69,12 @@ void LightVolumeTechnique::setUniforms(GBuffer& gBuffer,
     shader.setUniform("screenResolution", glm::vec2{resolution.rep()});
 }
 
-void LightVolumeTechnique::drawPointLights(GBuffer& gBuffer,
-                                           Scene& scene,
-                                           const glm::mat4& viewTransform,
-                                           const glm::mat4& projectionTransform,
-                                           const Resolution resolution) {
+void LightVolumeTechnique_base::drawPointLights(
+      GBuffer& gBuffer,
+      Scene& scene,
+      const glm::mat4& viewTransform,
+      const glm::mat4& projectionTransform,
+      const Resolution resolution) {
     GL::ScopedDisable<GL::DepthWrite> noDepthWrite;
     GL::ScopedEnable<GL::StencilTest> stencilTest;
     GL::FaceCulling::enable();
@@ -110,13 +102,8 @@ void LightVolumeTechnique::drawPointLights(GBuffer& gBuffer,
 
         GL_CHECK();
         pointLightVolume.bind();
-        pointLightStencilPassShader.setUniform("view", viewTransform);
-        pointLightStencilPassShader.setUniform("projection",
-                                               projectionTransform);
-        for (auto& light : scene.getPointLights()) {
-            drawPointLight(light, viewTransform, pointLightStencilPassShader,
-                           true);
-        }
+        drawPointLightsImpl(gBuffer, scene, viewTransform, projectionTransform,
+                            resolution, true);
     }
     glCullFace(GL_FRONT);
     GL::ScopedEnable<GL::Blending> enableBlending;
@@ -125,33 +112,17 @@ void LightVolumeTechnique::drawPointLights(GBuffer& gBuffer,
     GL::StencilWrite::disable();
     glDepthFunc(GL_GEQUAL);
     setUniforms(gBuffer, pointLightShader, resolution);
-    pointLightShader.setUniform("view", viewTransform);
-    pointLightShader.setUniform("projection", projectionTransform);
-    for (auto& light : scene.getPointLights()) {
-        drawPointLight(light, viewTransform, pointLightShader, false);
-    }
+    drawPointLightsImpl(gBuffer, scene, viewTransform, projectionTransform,
+                        resolution, false);
     glCullFace(GL_BACK);
     glDepthFunc(GL_LEQUAL);
 }
 
-void LightVolumeTechnique::drawPointLight(const PointLight& light,
-                                          const glm::mat4& viewTransform,
-                                          Shader& shader,
-                                          bool stencilPass) {
-    if (!stencilPass) {
-        GL_CHECK(light.applyUniforms("light", shader, viewTransform));
-    }
-    auto transform = light.transform();
-    transform.scale = {2.5f};
-    GL_CHECK(shader.setUniform("model", transform.getModelMatrix()));
-    GL_CHECK(glDrawArrays(GL_TRIANGLES, 0,
-                          pointLightVolume.getBuffer().getVertexCount()));
-}
-
-void LightVolumeTechnique::drawDirectionalLights(GBuffer& gBuffer,
-                                                 Scene& scene,
-                                                 const glm::mat4& viewTransform,
-                                                 const Resolution resolution) {
+void LightVolumeTechnique_base::drawDirectionalLights(
+      GBuffer& gBuffer,
+      Scene& scene,
+      const glm::mat4& viewTransform,
+      const Resolution resolution) {
     GL::ScopedEnable<GL::Blending> enableBlending;
     glBlendFunc(GL_ONE, GL_ONE);
     GL::ScopedDisable<GL::DepthTest> noDepthTest;
@@ -161,11 +132,119 @@ void LightVolumeTechnique::drawDirectionalLights(GBuffer& gBuffer,
     }
 }
 
-void LightVolumeTechnique::drawDirectionalLight(
-    const DirectionalLight& light,
-    const glm::mat4& viewTransform) {
+void LightVolumeTechnique_base::drawDirectionalLight(
+      const DirectionalLight& light,
+      const glm::mat4& viewTransform) {
     light.applyUniforms("light", directionalLightShader, viewTransform);
     directionalLightQuad.bind();
     glDrawArrays(GL_TRIANGLES, 0,
-                 directionalLightQuad.getBuffer().getVertexCount());
+                 directionalLightQuad.getBuffer().getElementCount());
+}
+
+///////
+
+LightVolumeTechnique::LightVolumeTechnique(
+      Shader::private_tag privateShaderAccess)
+    : LightVolumeTechnique_base{
+            Shader{fs::loadFileAsString(fs::RelativePath(
+                         "shaders/lightVolume_pointLight.vert")),
+                   fs::loadFileAsString(fs::RelativePath(
+                         "shaders/lightVolume_pointLight.frag")),
+                   privateShaderAccess},
+            Shader{fs::loadFileAsString(
+                         fs::RelativePath("shaders/"
+                                          "lightVolume_pointLight.vert")),
+                   util::nullopt, privateShaderAccess},
+            Shader{fs::loadFileAsString(
+                         fs::RelativePath("shaders/position.vert")),
+                   fs::loadFileAsString(fs::RelativePath(
+                         "shaders/lightVolume_directionalLight.frag")),
+                   privateShaderAccess}} {}
+
+void LightVolumeTechnique::drawPointLightsImpl(
+      GBuffer&,
+      Scene& scene,
+      const glm::mat4& viewTransform,
+      const glm::mat4& projectionTransform,
+      const Resolution,
+      const bool stencilPass) {
+    Shader& shader =
+          stencilPass ? pointLightStencilPassShader : pointLightShader;
+    shader.setUniform("view", viewTransform);
+    shader.setUniform("projection", projectionTransform);
+    for (auto& light : scene.getPointLights()) {
+        drawPointLight(light, viewTransform, pointLightShader, stencilPass);
+    }
+}
+
+void LightVolumeTechnique::drawPointLight(const PointLight& light,
+                                          const glm::mat4& viewTransform,
+                                          Shader& shader,
+                                          bool stencilPass) {
+    if (!stencilPass) {
+        GL_CHECK(light.applyUniforms("light", shader, viewTransform));
+    }
+    GL_CHECK(shader.setUniform("model", light.getVolumeModelMatrix()));
+    GL_CHECK(glDrawArrays(GL_TRIANGLES, 0,
+                          pointLightVolume.getBuffer().getElementCount()));
+}
+
+//////////
+
+LightVolumeInstancedTechnique::LightVolumeInstancedTechnique(
+      Shader::private_tag privateShaderAccess)
+    : LightVolumeTechnique_base{
+            Shader{fs::loadFileAsString(fs::RelativePath(
+                         "shaders/lightVolume_pointLightInstanced.vert")),
+                   fs::loadFileAsString(fs::RelativePath(
+                         "shaders/lightVolume_pointLightInstanced.frag")),
+                   privateShaderAccess},
+            Shader{fs::loadFileAsString(fs::RelativePath(
+                         "shaders/"
+                         "lightVolume_pointLightInstanced.vert")),
+                   util::nullopt, privateShaderAccess},
+            Shader{fs::loadFileAsString(
+                         fs::RelativePath("shaders/position.vert")),
+                   fs::loadFileAsString(fs::RelativePath(
+                         "shaders/lightVolume_directionalLight.frag")),
+                   privateShaderAccess}} {}
+
+void LightVolumeInstancedTechnique::drawPointLightsImpl(
+      GBuffer&,
+      Scene& scene,
+      const glm::mat4& viewTransform,
+      const glm::mat4& projectionTransform,
+      const Resolution,
+      bool stencilPass) {
+    Shader& shader =
+          stencilPass ? pointLightStencilPassShader : pointLightShader;
+    shader.use();
+    shader.setUniform("view", viewTransform);
+    shader.setUniform("projection", projectionTransform);
+
+    // TODO this needs to live somewhere else
+    std::vector<glm::vec3> positions;
+    const auto pointLights = scene.getPointLights();
+    positions.reserve(pointLights.size());
+    std::transform(std::begin(pointLights), std::end(pointLights),
+                   std::back_inserter(positions), [](const PointLight& light) {
+                       return light.transform().position.rep();
+                   });
+    pointLightVolume.addInstancedBuffer(
+          "worldPos", shader,
+          std::make_shared<VertexAttributeBuffer<glm::vec3>>(positions));
+
+    std::vector<float> radii;
+    radii.reserve(pointLights.size());
+    std::transform(std::begin(pointLights), std::end(pointLights),
+                   std::back_inserter(radii),
+                   [](const PointLight& light) { return light.getRadius(); });
+    pointLightVolume.addInstancedBuffer(
+          "radius", shader,
+          std::make_shared<VertexAttributeBuffer<float>>(radii));
+
+    pointLightVolume.bind();
+    GL_CHECK(glDrawArraysInstanced(
+          GL_TRIANGLES, 0, pointLightVolume.getBuffer().getElementCount(),
+          pointLights.size()));
 }

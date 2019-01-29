@@ -51,7 +51,7 @@ void Object::setUniformsImpl(const glm::mat4& model,
 void Object::render() {
     shader->use();
     vao->bind();
-    glDrawArrays(GL_TRIANGLES, 0, vao->getBuffer().getVertexCount());
+    glDrawArrays(GL_TRIANGLES, 0, vao->getBuffer().getElementCount());
 }
 
 void Object::update(Seconds dt) {

@@ -221,12 +221,16 @@ struct Transform {
     }
     void rotateBy(const Euler& ang) { this->angle.rep() += ang.rep(); }
     void scaleBy(const glm::vec3& scale) { this->scale.rep() *= scale; }
+
+    glm::mat4 getTranslationMatrix() const {
+        return glm::translate(matrix::identity(), this->position.rep());
+    }
+    glm::mat4 getRotationMatrix() const { return this->angle.getMatrix(); }
+    glm::mat4 getScaleMatrix() const {
+        return glm::scale(matrix::identity(), this->scale.rep());
+    }
     glm::mat4 getModelMatrix() const {
-        const auto rotation = this->angle.getMatrix();
-        const auto translation =
-            glm::translate(matrix::identity(), this->position.rep());
-        const auto scale = glm::scale(matrix::identity(), this->scale.rep());
-        return translation * scale * rotation;
+        return getTranslationMatrix() * getScaleMatrix() * getRotationMatrix();
     }
 };
 

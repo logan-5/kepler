@@ -44,7 +44,7 @@ void SimpleTechnique::doDeferredPass(GBuffer& gBuffer,
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
     RAIIBinding<VertexArrayObject> bind{fullscreenQuad};
-    glDrawArrays(GL_TRIANGLES, 0, fullscreenQuad.getBuffer().getVertexCount());
+    glDrawArrays(GL_TRIANGLES, 0, fullscreenQuad.getBuffer().getElementCount());
 }
 
 void SimpleTechnique::setUniforms(GBuffer& gBuffer, Shader& shader) {

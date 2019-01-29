@@ -31,6 +31,46 @@ VertexArrayObject::VertexArrayObject(std::shared_ptr<VertexBuffer> in_vbo,
     configureVertexAttributes(shader);
 }
 
+void VertexArrayObject::addInstancedBuffer(
+    const std::string& attribute,
+    Shader& shader,
+    std::shared_ptr<VertexAttributeBuffer_base> theBuffer,
+    const GLsizei size,
+    const GLsizei stride,
+    const GLuint divisor) {
+    GL_CHECK();
+    shader.use();
+    if (const AttributeLocation location =
+            shader.getAttributeLocation(attribute)) {
+        if (isBufferAlreadySet(location, theBuffer)) {
+            return;
+        }
+        RAIIBinding<VertexArrayObject> bindSelf{*this};
+        RAIIBinding<VertexAttributeBuffer_base> bindTheBuffer{*theBuffer};
+        GL_CHECK(glVertexAttribPointer(location, size, GL_FLOAT, GL_FALSE,
+                                       stride, (GLvoid*)0));
+        GL_CHECK(glEnableVertexAttribArray(location));
+        GL_CHECK();
+        additionalBuffers[location] = std::move(theBuffer);
+        if (divisor != 0) {
+            glVertexAttribDivisor(location, divisor);
+        }
+        GL_CHECK();
+    } else {
+        throw nonexistent_attribute_location{attribute};
+    }
+}
+
+bool VertexArrayObject::isBufferAlreadySet(
+    GLuint location,
+    const std::shared_ptr<VertexAttributeBuffer_base>& theBuffer) const {
+    auto it = additionalBuffers.find(location);
+    if (it != std::end(additionalBuffers)) {
+        return it->second == theBuffer;
+    }
+    return false;
+}
+
 void VertexArrayObject::configureVertexAttributes(Shader& shader) {
     GL_CHECK();
     shader.use();

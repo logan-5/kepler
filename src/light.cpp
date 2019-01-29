@@ -39,14 +39,23 @@ auto PointLight::Attenuation::fromDistance(float distance) -> Attenuation {
     return {1.f, 0.35f, 0.44f};
 }
 
+float PointLight::getRadius() const {
+    return 2.5f;  // TODO
+}
+
+glm::mat4 PointLight::getVolumeModelMatrix() const {
+    return transform().getTranslationMatrix() *
+           glm::scale(matrix::identity(), glm::vec3{getRadius()});
+}
+
 void PointLight::debugDraw(const glm::mat4& viewProjectionTransform) {
     DebugDrawData& data = debugDrawData;
     data.shader->use();
     data.vao->bind();
     data.shader->setUniform("mvp",
-                            viewProjectionTransform * this->getModelMatrix());
+                            viewProjectionTransform * getVolumeModelMatrix());
     data.shader->setUniform("color", this->colors.diffuse.rep());
-    glDrawArrays(GL_LINES, 0, data.vao->getBuffer().getVertexCount());
+    glDrawArrays(GL_LINES, 0, data.vao->getBuffer().getElementCount());
 }
 
 auto PointLight::getDebugDrawData() -> DebugDrawData {

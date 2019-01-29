@@ -1,7 +1,9 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
+#include "binding.hpp"
 #include "common.hpp"
+#include "gl.hpp"
 #include "gl_object.hpp"
 #include "types.hpp"
 
@@ -30,28 +32,39 @@ struct Buffer_base : public GLObject<detail::DeleteBuffer> {
             glGenBuffers(1, &buf);
             return buf;
         }()} {}
+    virtual ~Buffer_base() = default;
 
     void bind() noexcept { bind(this->handle); }
     static void bind(GLuint buf) noexcept { glBindBuffer(target, buf); }
     static void unbind() noexcept { glBindBuffer(target, 0); }
 };
 
-struct VertexBuffer : public Buffer_base<GL_ARRAY_BUFFER> {
-    VertexBuffer() : vertexCount{0} {}
+using VertexAttributeBuffer_base = Buffer_base<GL_ARRAY_BUFFER>;
+
+template <typename T>
+struct VertexAttributeBuffer final : public VertexAttributeBuffer_base {
+    VertexAttributeBuffer() : elementCount{0} {}
     template <typename ContiguousData>
-    VertexBuffer(const ContiguousData& data) : VertexBuffer{} {
-        setVertexData(data);
+    VertexAttributeBuffer(const ContiguousData& data)
+        : VertexAttributeBuffer{} {
+        setData(data);
     }
-    std::size_t getVertexCount() const noexcept { return vertexCount; }
+    std::size_t getElementCount() const noexcept { return elementCount; }
 
     template <typename ContiguousData>
-    void setVertexData(const ContiguousData& data) {
-        _setVertexData(data.size(), data.data());
+    void setData(const ContiguousData& data) {
+        _setData(data.size(), data.data());
     }
 
    private:
-    void _setVertexData(std::size_t count, const Vertex* data);
-    std::size_t vertexCount;
+    void _setData(std::size_t count, const T* data) {
+        RAIIBinding<VertexAttributeBuffer> binding{*this};
+        GL_CHECK(glBufferData(target, count * sizeof(T), data, GL_STATIC_DRAW));
+        this->elementCount = count;
+    }
+    std::size_t elementCount;
 };
+
+using VertexBuffer = VertexAttributeBuffer<Vertex>;
 
 #endif

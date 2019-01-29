@@ -26,7 +26,7 @@ Renderer::Renderer(Resolution in_resolution, std::unique_ptr<Camera> in_camera)
     , camera{std::move(in_camera)}
     , clearFlag{GL_COLOR_BUFFER_BIT}
     , gBuffer{resolution}
-    , deferredTechnique{std::make_unique<LightVolumeTechnique>(
+    , deferredTechnique{std::make_unique<LightVolumeInstancedTechnique>(
           Shader::private_tag{})}
     , debugDrawLights{false} {
     setDepthTestEnabled(true);

@@ -53,6 +53,9 @@ struct PointLight
 
     void debugDraw(const glm::mat4& viewProjectionTransform);
 
+    float getRadius() const;
+    glm::mat4 getVolumeModelMatrix() const;
+
    private:
     struct DebugDrawData {
         std::shared_ptr<Shader> shader;
