@@ -6,17 +6,14 @@ uniform sampler2D normalRGB_roughnessA;
 uniform sampler2D diffuse;
 uniform sampler2D specular;
 
-struct PointLight {
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
+in vec3 lightAmbient;
+in vec3 lightDiffuse;
+in vec3 lightSpecular;
 
-    vec3 position;
-    float constant;
-    float linear;
-    float quadratic;
-};
-uniform PointLight light;
+in vec3 lightPosition;
+in float lightConstant;
+in float lightLinear;
+in float lightQuadratic;
 
 uniform vec2 screenResolution;
 
@@ -33,25 +30,23 @@ void main() {
     vec3 normal = normalize(normalRoughness.xyz);
     float roughness = normalRoughness.a;
 
-    vec3 lightVec = light.position - position;
+    vec3 lightVec = lightPosition - position;
     vec3 lightDir = normalize(lightVec);
 
-    vec4 ambientResult = diffuseColor * vec4(light.ambient, 1.0);
+    vec4 ambientResult = diffuseColor * vec4(lightAmbient, 1.0);
 
-    vec4 diffuseResult = diffuseColor * vec4(light.diffuse, 1.0) *
+    vec4 diffuseResult = diffuseColor * vec4(lightDiffuse, 1.0) *
                          max(dot(normal, lightDir), 0.0);
 
     vec3 cameraRay = -normalize(position);
     vec3 halfway = normalize(cameraRay + lightDir);
     float specularFactor = max(dot(normal, halfway), 0.0);
     vec3 specularResult =
-        light.specular * pow(specularFactor, roughness) * specularColor;
+          lightSpecular * pow(specularFactor, roughness) * specularColor;
 
     float dist = length(lightVec);
-    float attenuation = 1.0 / (light.constant + light.linear * dist +
-                               light.quadratic * dist * dist);
+    float attenuation = 1.0 / (lightConstant + lightLinear * dist +
+                               lightQuadratic * dist * dist);
     out_color = (ambientResult + diffuseResult + vec4(specularResult, 1.0)) *
                 attenuation;
-
-    out_color = vec4(1.0);
 }

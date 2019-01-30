@@ -18,6 +18,8 @@ int getKey(Input::Key key) {
             return GLFW_KEY_Q;
         case Input::Key::E:
             return GLFW_KEY_E;
+        case Input::Key::B:
+            return GLFW_KEY_B;
         case Input::Key::Esc:
             return GLFW_KEY_ESCAPE;
         case Input::Key::LeftArrow:

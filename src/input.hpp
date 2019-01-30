@@ -17,6 +17,7 @@ class Input {
         D,
         Q,
         E,
+        B,
         Esc,
         LeftArrow,
         RightArrow,

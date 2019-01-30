@@ -21,13 +21,32 @@ void setDrawBuffers(GBuffer& gBuffer) {
 }
 }  // namespace
 
+std::unique_ptr<DeferredShadingTechnique> Renderer::debug_getDeferredTechnique(
+      int which) {
+    switch (which % 3) {
+        case 0:
+            std::cout << "deferred shading using light volumes\n";
+            return std::make_unique<LightVolumeTechnique>(
+                  Shader::private_tag{});
+        case 1:
+            std::cout << "deferred shading using instanced light volumes\n";
+            return std::make_unique<LightVolumeInstancedTechnique>(
+                  Shader::private_tag{});
+        case 2:
+            std::cout << "deferred shading using no cleverness\n";
+            return std::make_unique<SimpleTechnique>(Shader::private_tag{});
+    }
+    throw "up";
+}
+
 Renderer::Renderer(Resolution in_resolution, std::unique_ptr<Camera> in_camera)
     : resolution{in_resolution}
     , camera{std::move(in_camera)}
     , clearFlag{GL_COLOR_BUFFER_BIT}
     , gBuffer{resolution}
-    , deferredTechnique{std::make_unique<LightVolumeInstancedTechnique>(
-          Shader::private_tag{})}
+    , debug_currentDeferredTechnique{1}
+    , deferredTechnique{debug_getDeferredTechnique(
+            debug_currentDeferredTechnique)}
     , debugDrawLights{false} {
     setDepthTestEnabled(true);
 
@@ -103,4 +122,9 @@ void Renderer::doForwardPass(Scene& scene,
     for (auto& light : scene.getPointLights()) {
         light.debugDraw(viewProjection);
     }
+}
+
+void Renderer::debug_cycleDeferredTechnique() {
+    deferredTechnique =
+          debug_getDeferredTechnique(++debug_currentDeferredTechnique);
 }

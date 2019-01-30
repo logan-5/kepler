@@ -26,9 +26,9 @@ void PointLight::applyAdditionalUniforms(const std::string& name,
                                          Shader& shader,
                                          const glm::mat4& viewTransform) const {
     shader.setUniform(
-        name + ".position",
-        glm::vec3{viewTransform *
-                  glm::vec4{this->transform().position.rep(), 1.f}});
+          name + ".position",
+          glm::vec3{viewTransform *
+                    glm::vec4{this->transform().position.rep(), 1.f}});
     shader.setUniform(name + ".constant", attenuation.constant);
     shader.setUniform(name + ".linear", attenuation.linear);
     shader.setUniform(name + ".quadratic", attenuation.quadratic);
@@ -40,7 +40,7 @@ auto PointLight::Attenuation::fromDistance(float distance) -> Attenuation {
 }
 
 float PointLight::getRadius() const {
-    return 2.5f;  // TODO
+    return 5.5f;  // TODO
 }
 
 glm::mat4 PointLight::getVolumeModelMatrix() const {
@@ -63,18 +63,18 @@ auto PointLight::getDebugDrawData() -> DebugDrawData {
     theData.shader = Shader::create(fs::RelativePath{"shaders/light.vert"},
                                     fs::RelativePath{"shaders/light.frag"});
     theData.vao = std::make_shared<VertexArrayObject>(
-        std::make_shared<VertexBuffer>(getCubeVerts()), *theData.shader);
+          std::make_shared<VertexBuffer>(getCubeVerts()), *theData.shader);
     return theData;
 }
 
 //
 
 void DirectionalLight::applyAdditionalUniforms(
-    const std::string& name,
-    Shader& shader,
-    const glm::mat4& viewTransform) const {
+      const std::string& name,
+      Shader& shader,
+      const glm::mat4& viewTransform) const {
     shader.setUniform(
-        name + ".direction",
-        glm::normalize(
-            -glm::vec3{viewTransform * glm::vec4{this->direction.rep(), 0.f}}));
+          name + ".direction",
+          glm::normalize(-glm::vec3{viewTransform *
+                                    glm::vec4{this->direction.rep(), 0.f}}));
 }

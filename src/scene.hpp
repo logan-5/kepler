@@ -2,20 +2,30 @@
 #define SCENE_HPP
 
 #include "light.hpp"
+#include "light_data.hpp"
 #include "object.hpp"
 #include "util.hpp"
 
 #include <string>
 #include <vector>
 
-class Scene {
+class Scene
+    : util::NonCopyable
+    , util::NonMovable {
    public:
-    Scene(std::vector<Object> in_objects, std::vector<PointLight> in_pointLights, std::vector<DirectionalLight> in_directionalLights)
-        : objects{std::move(in_objects)}, pointLights{std::move(in_pointLights)}, directionalLights{std::move(in_directionalLights)} {}
+    Scene(std::vector<Object> in_objects,
+          std::vector<PointLight> in_pointLights,
+          std::vector<DirectionalLight> in_directionalLights)
+        : objects{std::move(in_objects)}
+        , pointLights{std::move(in_pointLights)}
+        , directionalLights{std::move(in_directionalLights)}
+        , lightData{*this} {}
 
     void addObject(Object o) { objects.push_back(std::move(o)); }
     void addPointLight(PointLight l) { pointLights.push_back(std::move(l)); }
-    void addDirectionalLight(DirectionalLight d) { directionalLights.push_back(std::move(d)); }
+    void addDirectionalLight(DirectionalLight d) {
+        directionalLights.push_back(std::move(d));
+    }
 
     util::container_view<std::vector<Object>> getObjects() { return {objects}; }
     const std::vector<Object>& getObjects() const { return objects; }
@@ -37,10 +47,13 @@ class Scene {
 
     std::string toString() const;
 
+    const LightData& getLightData() const { return lightData; }
+
    private:
     std::vector<Object> objects;
     std::vector<PointLight> pointLights;
     std::vector<DirectionalLight> directionalLights;
+    LightData lightData;
 };
 
 #endif

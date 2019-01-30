@@ -1,6 +1,8 @@
 #ifndef OPTIONAL_HPP
 #define OPTIONAL_HPP
 
+#include "invoke_result.hpp"
+
 #if __cplusplus >= 201701L
 #include <optional>
 
@@ -30,7 +32,7 @@ constexpr const nullopt_t& nullopt = std::experimental::nullopt;
 namespace util {
 template <typename T,
           typename Func,
-          typename U = decltype(std::declval<Func>()(std::declval<T>()))>
+          typename U = invoke_result_t<Func&, const T&>>
 util::optional<U> map(const optional<T>& opt, Func func) {
     if (opt) {
         return func(*opt);

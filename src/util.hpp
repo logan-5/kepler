@@ -70,7 +70,7 @@ struct wrap {
     template <typename Arg,
               typename... Args,
               typename = std::enable_if_t<
-                  std::is_constructible<T, Arg&&, Args&&...>::value>>
+                    std::is_constructible<T, Arg&&, Args&&...>::value>>
     constexpr wrap(Arg&& arg, Args&&... args)
         : t{std::forward<Arg>(arg), std::forward<Args>(args)...} {}
     constexpr T& get() noexcept { return t; }
@@ -86,7 +86,7 @@ struct wrap<T, true> : private T {
     template <typename Arg,
               typename... Args,
               typename = std::enable_if_t<
-                  std::is_constructible<T, Arg&&, Args&&...>::value>>
+                    std::is_constructible<T, Arg&&, Args&&...>::value>>
     constexpr wrap(Arg&& arg, Args&&... args)
         : T{std::forward<Arg>(arg), std::forward<Args>(args)...} {}
     constexpr T& get() noexcept { return *this; }
@@ -98,14 +98,14 @@ template <typename T>
 struct can_ebo
     : std::integral_constant<bool,
                              std::is_empty<T>::value &&
-                                 !std::is_final<T>::value> {};
+                                   !std::is_final<T>::value> {};
 
 template <typename T, int Which>
 struct compressed_pair_base : wrap<T, can_ebo<T>::value> {
     using base = wrap<T, can_ebo<T>::value>;
     template <
-        typename U,
-        typename = std::enable_if_t<std::is_constructible<base, U&&>::value>>
+          typename U,
+          typename = std::enable_if_t<std::is_constructible<base, U&&>::value>>
     constexpr compressed_pair_base(U&& u) : base{std::forward<U>(u)} {}
 };
 }  // namespace detail
@@ -212,8 +212,8 @@ std::enable_if_t<std::is_integral<Int>::value, Int> random(Int min, Int max) {
 }
 template <typename Float>
 std::enable_if_t<std::is_floating_point<Float>::value, Float> random(
-    Float min,
-    Float max) {
+      Float min,
+      Float max) {
     return std::uniform_real_distribution<Float>{min, max}(detail::engine);
 }
 }  // namespace random

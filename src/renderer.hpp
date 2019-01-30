@@ -31,6 +31,8 @@ class Renderer {
 
     void setDebugDrawLights(bool d) { debugDrawLights = d; }
 
+    void debug_cycleDeferredTechnique();
+
    private:
     void doGeometryPass(Scene& scene,
                         const glm::mat4& viewTransform,
@@ -45,8 +47,13 @@ class Renderer {
     Color clearColor;
     GLuint clearFlag;
     GBuffer gBuffer;
+
+    int debug_currentDeferredTechnique;
     std::unique_ptr<DeferredShadingTechnique> deferredTechnique;
     bool debugDrawLights;
+
+    static std::unique_ptr<DeferredShadingTechnique> debug_getDeferredTechnique(
+          int which);
 };
 
 #endif

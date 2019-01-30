@@ -222,29 +222,26 @@ void LightVolumeInstancedTechnique::drawPointLightsImpl(
     shader.setUniform("view", viewTransform);
     shader.setUniform("projection", projectionTransform);
 
-    // TODO this needs to live somewhere else
-    std::vector<glm::vec3> positions;
-    const auto pointLights = scene.getPointLights();
-    positions.reserve(pointLights.size());
-    std::transform(std::begin(pointLights), std::end(pointLights),
-                   std::back_inserter(positions), [](const PointLight& light) {
-                       return light.transform().position.rep();
-                   });
     pointLightVolume.addInstancedBuffer(
           "worldPos", shader,
-          std::make_shared<VertexAttributeBuffer<glm::vec3>>(positions));
-
-    std::vector<float> radii;
-    radii.reserve(pointLights.size());
-    std::transform(std::begin(pointLights), std::end(pointLights),
-                   std::back_inserter(radii),
-                   [](const PointLight& light) { return light.getRadius(); });
+          scene.getLightData().getPointLightPositionsBuffer());
     pointLightVolume.addInstancedBuffer(
-          "radius", shader,
-          std::make_shared<VertexAttributeBuffer<float>>(radii));
+          "radius", shader, scene.getLightData().getPointLightRadiiBuffer());
+    pointLightVolume.addInstancedBuffer(
+          "ambientColor", shader,
+          scene.getLightData().getPointLightAmbientColorBuffer());
+    pointLightVolume.addInstancedBuffer(
+          "diffuseColor", shader,
+          scene.getLightData().getPointLightDiffuseColorBuffer());
+    pointLightVolume.addInstancedBuffer(
+          "specularColor", shader,
+          scene.getLightData().getPointLightSpecularColorBuffer());
+    pointLightVolume.addInstancedBuffer(
+          "attenuation", shader,
+          scene.getLightData().getPointLightAttenuationBuffer());
 
     pointLightVolume.bind();
     GL_CHECK(glDrawArraysInstanced(
           GL_TRIANGLES, 0, pointLightVolume.getBuffer().getElementCount(),
-          pointLights.size()));
+          scene.getPointLights().size()));
 }

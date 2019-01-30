@@ -59,7 +59,7 @@ std::vector<T> toVec(const std::array<T, N>& arr) {
 
 std::unique_ptr<Camera> createCamera(Window& window) {
     std::unique_ptr<Camera> camera =
-        std::make_unique<PerspectiveCamera>(window.getResolution());
+          std::make_unique<PerspectiveCamera>(window.getResolution());
 
     camera->transform().position.z() = 1.f;
     std::cout << "camera transform: " << camera->transform() << '\n';
@@ -69,53 +69,53 @@ std::unique_ptr<Camera> createCamera(Window& window) {
     auto& input = window.getInput();
     input.setKeyCallback(Input::Key::W, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, 0.f, -cameraMoveSpeed} *
-            window.getDeltaTime().rep());
+              glm::vec3{0.f, 0.f, -cameraMoveSpeed} *
+              window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::S, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, 0.f, +cameraMoveSpeed} *
-            window.getDeltaTime().rep());
+              glm::vec3{0.f, 0.f, +cameraMoveSpeed} *
+              window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::A, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{-cameraMoveSpeed, 0.f, 0.f} *
-            window.getDeltaTime().rep());
+              glm::vec3{-cameraMoveSpeed, 0.f, 0.f} *
+              window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::D, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{+cameraMoveSpeed, 0.f, 0.f} *
-            window.getDeltaTime().rep());
+              glm::vec3{+cameraMoveSpeed, 0.f, 0.f} *
+              window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::Q, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, -cameraMoveSpeed, 0.f} *
-            window.getDeltaTime().rep());
+              glm::vec3{0.f, -cameraMoveSpeed, 0.f} *
+              window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::E, [camera = &*camera, &window] {
         camera->transform().translateByRelative(
-            glm::vec3{0.f, +cameraMoveSpeed, 0.f} *
-            window.getDeltaTime().rep());
+              glm::vec3{0.f, +cameraMoveSpeed, 0.f} *
+              window.getDeltaTime().rep());
     });
     input.setKeyCallback(Input::Key::LeftArrow, [camera = &*camera, &window] {
         camera->transform().rotateBy(
-            Euler{glm::vec3{+cameraRotateSpeed, 0.f, 0.f} *
-                  window.getDeltaTime().rep()});
+              Euler{glm::vec3{+cameraRotateSpeed, 0.f, 0.f} *
+                    window.getDeltaTime().rep()});
     });
     input.setKeyCallback(Input::Key::RightArrow, [camera = &*camera, &window] {
         camera->transform().rotateBy(
-            Euler{glm::vec3{-cameraRotateSpeed, 0.f, 0.f} *
-                  window.getDeltaTime().rep()});
+              Euler{glm::vec3{-cameraRotateSpeed, 0.f, 0.f} *
+                    window.getDeltaTime().rep()});
     });
     input.setKeyCallback(Input::Key::UpArrow, [camera = &*camera, &window] {
         camera->transform().rotateBy(
-            Euler{glm::vec3{0.f, +cameraRotateSpeed, 0.f} *
-                  window.getDeltaTime().rep()});
+              Euler{glm::vec3{0.f, +cameraRotateSpeed, 0.f} *
+                    window.getDeltaTime().rep()});
     });
     input.setKeyCallback(Input::Key::DownArrow, [camera = &*camera, &window] {
         camera->transform().rotateBy(
-            Euler{glm::vec3{0.f, -cameraRotateSpeed, 0.f} *
-                  window.getDeltaTime().rep()});
+              Euler{glm::vec3{0.f, -cameraRotateSpeed, 0.f} *
+                    window.getDeltaTime().rep()});
     });
     return camera;
 }
@@ -128,12 +128,12 @@ Object randomCube(const Object& startingCube) {
     Object ret = startingCube;
     using namespace util::random;
     ret.transform().position =
-        Point{random(-5.f, 5.f), random(-5.f, 5.f), random(0.f, -10.f)};
+          Point{random(-5.f, 5.f), random(-5.f, 5.f), random(0.f, -10.f)};
     ret.transform().scale = Scale{random(0.5f, 1.5f)};
     if (coinFlip()) {
         ret.addBehavior(std::make_unique<RotateForeverBehavior>(
-            Euler{Degrees{random(-5.f, 5.f)}, Degrees{random(-5.f, 5.f)},
-                  Degrees{random(-5.f, 5.f)}}));
+              Euler{Degrees{random(-5.f, 5.f)}, Degrees{random(-5.f, 5.f)},
+                    Degrees{random(-5.f, 5.f)}}));
     }
     return ret;
 }
@@ -142,25 +142,25 @@ Object theFloor() {
     Texture::Params params;
     params.wrapS = params.wrapT = Texture::Wrap::Repeat;
     auto containerTexture = std::make_shared<Texture>(
-        Image{fs::RelativePath{"res/tiles_016_basecolor.jpg"}}, params);
+          Image{fs::RelativePath{"res/tiles_016_basecolor.jpg"}}, params);
     auto containerSpecularTexture = std::make_shared<Texture>(
-        Image{fs::RelativePath{"res/tiles_016_roughness.jpg"}}, params);
+          Image{fs::RelativePath{"res/tiles_016_roughness.jpg"}}, params);
     const Material floorMaterial{containerTexture, containerSpecularTexture,
                                  256.f};
 
     constexpr auto size = 20.f;
     auto verts = {
-        Vertex{{-1.f, 0.f, -1.f}, {0.f, 1.f, 0.f}, {0.f, 0.f}, {}},
-        Vertex{{-1.f, 0.f, +1.f}, {0.f, 1.f, 0.f}, {size, 0.f}, {}},
-        Vertex{{+1.f, 0.f, -1.f}, {0.f, 1.f, 0.f}, {0.f, size}, {}},
-        Vertex{{+1.f, 0.f, -1.f}, {0.f, 1.f, 0.f}, {0.f, size}, {}},
-        Vertex{{-1.f, 0.f, +1.f}, {0.f, 1.f, 0.f}, {size, 0.f}, {}},
-        Vertex{{+1.f, 0.f, +1.f}, {0.f, 1.f, 0.f}, {size, size}, {}},
+          Vertex{{-1.f, 0.f, -1.f}, {0.f, 1.f, 0.f}, {0.f, 0.f}, {}},
+          Vertex{{-1.f, 0.f, +1.f}, {0.f, 1.f, 0.f}, {size, 0.f}, {}},
+          Vertex{{+1.f, 0.f, -1.f}, {0.f, 1.f, 0.f}, {0.f, size}, {}},
+          Vertex{{+1.f, 0.f, -1.f}, {0.f, 1.f, 0.f}, {0.f, size}, {}},
+          Vertex{{-1.f, 0.f, +1.f}, {0.f, 1.f, 0.f}, {size, 0.f}, {}},
+          Vertex{{+1.f, 0.f, +1.f}, {0.f, 1.f, 0.f}, {size, size}, {}},
     };
     return {
-        Transform{Point{0.f, -2.f, 0.f}, Euler{}, Scale{size, 1.f, size}},
-        verts,
-        floorMaterial,
+          Transform{Point{0.f, -2.f, 0.f}, Euler{}, Scale{size, 1.f, size}},
+          verts,
+          floorMaterial,
     };
 }
 
@@ -178,9 +178,10 @@ PointLight randomLight() {
     };
     const auto lightColor = randomColor();
     return PointLight{
-        {randomPoint(), Euler{}, Scale{2.5f}},
-        Light_base::Colors{ColorRGB{0.1f, 0.1f, 0.1f}, lightColor, lightColor},
-        PointLight::Attenuation::fromDistance(50.f),
+          {randomPoint(), Euler{}, Scale{2.5f}},
+          Light_base::Colors{ColorRGB{0.1f, 0.1f, 0.1f}, lightColor,
+                             lightColor},
+          PointLight::Attenuation::fromDistance(50.f),
     };
 }
 auto getRandomLights(std::size_t count) {
@@ -197,23 +198,23 @@ int main() {
                                      [&] { window.requestClose(); });
 
     auto containerTexture = std::make_shared<Texture>(
-        Image{fs::RelativePath{"res/container2.png"}});
+          Image{fs::RelativePath{"res/container2.png"}});
     auto containerSpecularTexture = std::make_shared<Texture>(
-        Image{fs::RelativePath{"res/container2_specular.png"}});
+          Image{fs::RelativePath{"res/container2_specular.png"}});
     assert(glGetError() == GL_NO_ERROR);
 
     auto cubeBuffer = std::make_shared<VertexBuffer>(getCubeVerts());
     GL_CHECK();
 
     PointLight light{
-        {Point{1.f, 1.f, -1.f}, Euler{}, Scale{0.5f}},
-        {{0.1f, 0.1f, 0.1f}, {1.f, 0.5f, 1.f}, {1.f, 0.5f, 1.f}},
-        PointLight::Attenuation::fromDistance(50.f),
+          {Point{1.f, 1.f, -1.f}, Euler{}, Scale{0.5f}},
+          {{0.1f, 0.1f, 0.1f}, {1.f, 0.5f, 1.f}, {1.f, 0.5f, 1.f}},
+          PointLight::Attenuation::fromDistance(50.f),
     };
     PointLight light2{
-        {Point{1.f, -1.f, -10.f}, Euler{}, Scale{0.5f}},
-        {{0.1f, 0.1f, 0.1f}, {0.f, 0.5f, 1.f}, {0.f, 0.5f, 1.f}},
-        PointLight::Attenuation::fromDistance(25.f),
+          {Point{1.f, -1.f, -10.f}, Euler{}, Scale{0.5f}},
+          {{0.1f, 0.1f, 0.1f}, {0.f, 0.5f, 1.f}, {0.f, 0.5f, 1.f}},
+          PointLight::Attenuation::fromDistance(25.f),
     };
     const Material cubeMaterial{containerTexture, containerSpecularTexture,
                                 512.f};
@@ -222,6 +223,9 @@ int main() {
     Renderer theRenderer{window.getResolution(), createCamera(window)};
     theRenderer.setBackgroundColor({0.05f, 0.05f, 0.06f, 1.f});
     theRenderer.setDebugDrawLights(true);
+    window.getInput().setKeyCallback(Input::Key::B, [&theRenderer] {
+        theRenderer.debug_cycleDeferredTechnique();
+    });
 
     Object cube{Transform{Point{0.f, 1.f, -4.f},
                           Euler{Degrees{0.f}, Degrees{0.f}, Degrees{0.f}},
@@ -240,8 +244,8 @@ int main() {
     Scene mainScene{std::move(cubes), getRandomLights(numberOfPointLights), {}};
     mainScene.addObject(theFloor());
     mainScene.addDirectionalLight(DirectionalLight{
-        Direction{0.f, -1.f, 0.f},
-        {{0.1f, 0.1f, 0.1f}, {0.5f, 0.4f, 0.3f}, {0.5f, 0.4f, 0.3f}}});
+          Direction{0.f, -1.f, 0.f},
+          {{0.1f, 0.1f, 0.1f}, {0.5f, 0.4f, 0.3f}, {0.5f, 0.4f, 0.3f}}});
 
     window.setWindowSizeCallback([&](const Resolution newResolution) {
         std::cout << "window size changed to " << newResolution << '\n';
