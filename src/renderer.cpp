@@ -10,6 +10,7 @@
 #include "types.hpp"
 
 #include <array>
+#include <iostream>
 #include <string>
 
 namespace {
