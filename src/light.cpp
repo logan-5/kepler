@@ -36,11 +36,15 @@ void PointLight::applyAdditionalUniforms(const std::string& name,
 
 auto PointLight::Attenuation::fromDistance(float distance) -> Attenuation {
     (void)distance;  // TODO
-    return {1.f, 0.35f, 0.44f};
+    return {1.f, 1.9975f, 2.999994f};
 }
 
 float PointLight::getRadius() const {
-    return 5.5f;  // TODO
+    const auto brightest = std::max(
+          {colors.diffuse.r(), colors.diffuse.g(), colors.diffuse.b()});
+    const auto &a = attenuation.quadratic, &b = attenuation.linear;
+    const auto c = attenuation.constant - brightest * (256.f / 2.f);
+    return (-b + std::sqrt(std::pow(b, 2.f) - 4.f * a * c)) / (2.f * a);
 }
 
 glm::mat4 PointLight::getVolumeModelMatrix() const {
