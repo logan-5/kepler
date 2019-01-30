@@ -19,12 +19,21 @@ class Scene
         : objects{std::move(in_objects)}
         , pointLights{std::move(in_pointLights)}
         , directionalLights{std::move(in_directionalLights)}
-        , lightData{*this} {}
+        , lightData{*this} {
+        startAll();
+    }
 
-    void addObject(Object o) { objects.push_back(std::move(o)); }
-    void addPointLight(PointLight l) { pointLights.push_back(std::move(l)); }
+    void addObject(Object o) {
+        objects.push_back(std::move(o));
+        objects.back().start();
+    }
+    void addPointLight(PointLight l) {
+        pointLights.push_back(std::move(l));
+        pointLights.back().start();
+    }
     void addDirectionalLight(DirectionalLight d) {
         directionalLights.push_back(std::move(d));
+        directionalLights.back().start();
     }
 
     util::container_view<std::vector<Object>> getObjects() { return {objects}; }
@@ -50,6 +59,8 @@ class Scene
     const LightData& getLightData() const { return lightData; }
 
    private:
+    void startAll();
+
     std::vector<Object> objects;
     std::vector<PointLight> pointLights;
     std::vector<DirectionalLight> directionalLights;

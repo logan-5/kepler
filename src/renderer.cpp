@@ -45,7 +45,7 @@ Renderer::Renderer(Resolution in_resolution, std::unique_ptr<Camera> in_camera)
     , camera{std::move(in_camera)}
     , clearFlag{GL_COLOR_BUFFER_BIT}
     , gBuffer{resolution}
-    , debug_currentDeferredTechnique{1}
+    , debug_currentDeferredTechnique{0}
     , deferredTechnique{debug_getDeferredTechnique(
             debug_currentDeferredTechnique)}
     , debugDrawLights{false} {

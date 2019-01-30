@@ -37,22 +37,19 @@ class MeshRenderable : public Renderable {
     std::shared_ptr<VertexArrayObject> vao;
 };
 
-class Object : public MeshRenderable {
+class Object
+    : public MeshRenderable
+    , public Actor<Object> {
    public:
     Object(const Transform& transform,
            const std::vector<Vertex>& vertices,
-           Material mat,
-           BehaviorList behaviors = {});
+           Material mat);
 
     void render() override;
 
-    void addBehavior(BehaviorList::List::value_type behavior) {
-        behaviors.push(std::move(behavior));
-    }
-
-    void update(Seconds dt);
-
     std::string toString() const;
+
+    Object& getActor() override { return *this; }
 
    protected:
     void setUniformsImpl(const glm::mat4& model,
@@ -60,7 +57,6 @@ class Object : public MeshRenderable {
                          const glm::mat4& projection) override;
 
     Material material;
-    BehaviorList behaviors;
 };
 
 #endif

@@ -7,9 +7,9 @@
 namespace {
 std::shared_ptr<Shader> phongShader() {
     static const fs::AbsolutePath vertPath =
-        fs::RelativePath{"shaders/phong.vert"};
+          fs::RelativePath{"shaders/phong.vert"};
     static const fs::AbsolutePath fragPath =
-        fs::RelativePath{"shaders/phong.frag"};
+          fs::RelativePath{"shaders/phong.frag"};
     auto shader = Shader::create(vertPath, fragPath);
     GL_CHECK();
     return shader;
@@ -26,16 +26,14 @@ MeshRenderable::MeshRenderable(const Transform& transform,
                                const std::vector<Vertex>& vertices)
     : Renderable{transform, std::move(shader)}
     , vao{std::make_shared<VertexArrayObject>(
-          std::make_shared<VertexBuffer>(vertices),
-          *this->shader)} {}
+            std::make_shared<VertexBuffer>(vertices),
+            *this->shader)} {}
 
 Object::Object(const Transform& transform,
                const std::vector<Vertex>& vertices,
-               Material mat,
-               BehaviorList in_behaviors)
+               Material mat)
     : MeshRenderable{transform, phongShader(), vertices}
-    , material{std::move(mat)}
-    , behaviors{std::move(in_behaviors)} {}
+    , material{std::move(mat)} {}
 
 void Object::setUniformsImpl(const glm::mat4& model,
                              const glm::mat4& view,
@@ -52,12 +50,6 @@ void Object::render() {
     shader->use();
     vao->bind();
     glDrawArrays(GL_TRIANGLES, 0, vao->getBuffer().getElementCount());
-}
-
-void Object::update(Seconds dt) {
-    for (auto& behavior : behaviors.get()) {
-        behavior->update(dt, *this);
-    }
 }
 
 std::string Object::toString() const {

@@ -1,6 +1,7 @@
 #ifndef LIGHT_HPP
 #define LIGHT_HPP
 
+#include "behavior.hpp"
 #include "lazy.hpp"
 #include "types.hpp"
 
@@ -25,14 +26,15 @@ struct Light_base {
 
    protected:
     virtual void applyAdditionalUniforms(
-        const std::string& name,
-        Shader& shader,
-        const glm::mat4& viewTransform) const = 0;
+          const std::string& name,
+          Shader& shader,
+          const glm::mat4& viewTransform) const = 0;
 };
 
 struct PointLight
     : public Transformed
-    , public Light_base {
+    , public Light_base
+    , public Actor<PointLight> {
     struct Attenuation {
         float constant;
         float linear;
@@ -56,6 +58,8 @@ struct PointLight
     float getRadius() const;
     glm::mat4 getVolumeModelMatrix() const;
 
+    PointLight& getActor() override { return *this; }
+
    private:
     struct DebugDrawData {
         std::shared_ptr<Shader> shader;
@@ -69,7 +73,9 @@ struct PointLight
                                  const glm::mat4& viewTransform) const override;
 };
 
-struct DirectionalLight : public Light_base {
+struct DirectionalLight
+    : public Light_base
+    , public Actor<DirectionalLight> {
    public:
     DirectionalLight(const Direction& in_direction,
                      const Light_base::Colors& colors)
@@ -79,6 +85,8 @@ struct DirectionalLight : public Light_base {
     void setDirection(const Direction& newDirection) {
         direction = {glm::normalize(newDirection.rep())};
     }
+
+    DirectionalLight& getActor() override { return *this; }
 
    private:
     Direction direction;

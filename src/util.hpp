@@ -189,6 +189,8 @@ class container_view {
     typename Container::reference at(std::size_t idx) {
         return c.get().at(idx);
     }
+    typename Container::reference front() { return c.get().front(); }
+    typename Container::reference back() { return c.get().back(); }
 
     bool empty() const { return c.get().empty(); }
     std::size_t size() const { return c.get().size(); }

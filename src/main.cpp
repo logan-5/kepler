@@ -1,3 +1,4 @@
+#include "behaviors.hpp"
 #include "binding.hpp"
 #include "buffer.hpp"
 #include "camera.hpp"
@@ -131,9 +132,9 @@ Object randomCube(const Object& startingCube) {
           Point{random(-5.f, 5.f), random(-5.f, 5.f), random(0.f, -10.f)};
     ret.transform().scale = Scale{random(0.5f, 1.5f)};
     if (coinFlip()) {
-        ret.addBehavior(std::make_unique<RotateForeverBehavior>(
+        ret.addBehavior(RotateForeverBehavior{
               Euler{Degrees{random(-5.f, 5.f)}, Degrees{random(-5.f, 5.f)},
-                    Degrees{random(-5.f, 5.f)}}));
+                    Degrees{random(-5.f, 5.f)}}});
     }
     return ret;
 }
@@ -177,12 +178,16 @@ PointLight randomLight() {
         return ColorRGB{random(0.f, 1.f), random(0.f, 1.f), random(0.f, 1.f)};
     };
     const auto lightColor = randomColor();
-    return PointLight{
+    auto theLight = PointLight{
           {randomPoint(), Euler{}, Scale{2.5f}},
           Light_base::Colors{ColorRGB{0.1f, 0.1f, 0.1f}, lightColor,
                              lightColor},
           PointLight::Attenuation::fromDistance(50.f),
     };
+    if (coinFlip()) {
+        theLight.addBehavior(BobBehavior{glm::vec3{0.f, 1.f, 0.f}});
+    }
+    return theLight;
 }
 auto getRandomLights(std::size_t count) {
     std::vector<PointLight> lights;
