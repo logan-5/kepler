@@ -1,5 +1,6 @@
 #include "gbuffer.hpp"
 
+#include <numeric>
 #include <vector>
 
 namespace {
@@ -17,7 +18,7 @@ std::vector<T> drop(const std::vector<T>& vec) {
 auto getColorFormats() {
     std::vector<Texture::Format> formats(GBuffer::Target::MAX);
     formats[GBuffer::Target::PositionRGB_SpecularA] = {
-        GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA16F};
+          GL_RGBA, GL_UNSIGNED_BYTE, GL_RGBA16F};
     formats[GBuffer::Target::NormalRGB_RoughnessA] = {GL_RGBA, GL_UNSIGNED_BYTE,
                                                       GL_RGBA16F};
     formats[GBuffer::Target::Diffuse] = {GL_RGB, GL_UNSIGNED_BYTE};

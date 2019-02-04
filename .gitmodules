@@ -4,3 +4,6 @@
 [submodule "libs/glm"]
 	path = libs/glm
 	url = https://github.com/g-truc/glm.git
+[submodule "libs/optional-lite"]
+	path = libs/optional-lite
+	url = https://github.com/martinmoene/optional-lite.git

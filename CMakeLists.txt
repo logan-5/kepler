@@ -71,6 +71,8 @@ set(STB_DIR ${LIB_DIR}/stb)
 set(STB_INCLUDE ${STB_DIR})
 set(INCLUDE_DIRS ${INCLUDE_DIRS} ${STB_INCLUDE})
 
+set(INCLUDE_DIRS ${INCLUDE_DIRS} ${LIB_DIR}/optional-lite/include)
+
 # validate shaders
 add_custom_target(validate_shaders 
     COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/validate_shaders.py ${CMAKE_CURRENT_SOURCE_DIR}/shaders)
