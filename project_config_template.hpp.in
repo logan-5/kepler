@@ -14,6 +14,13 @@ enum {
 };
 }}
 
+#if @PROJECT_OPENGL_VERSION_MAJOR@ >= 4
+#define KEPLER_GL_HAS_TESSELLATION_SHADERS true
+    #if @PROJECT_OPENGL_VERSION_MINOR@ >= 3
+        #define KEPLER_GL_HAS_COMPUTE_SHADERS false
+    #endif
+#endif
+
 namespace fs {
 inline constexpr const char* projectPath() {
     return "@PROJECT_PATH@";

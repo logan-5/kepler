@@ -1,4 +1,3 @@
-#version 330 core
 out vec4 out_color;
 
 uniform sampler2D positionRGB_specularA;
@@ -51,7 +50,7 @@ vec4 getLightColor(vec4 diffuseColor,
     vec3 halfway = normalize(cameraRay + lightDir);
     float specularFactor = max(dot(normalVal, halfway), 0.0);
     vec3 specularResult =
-        lightSpecular * pow(specularFactor, roughness) * specularVal;
+          lightSpecular * pow(specularFactor, roughness) * specularVal;
     return ambientResult + diffuseResult + vec4(specularResult, 1.0);
 }
 
@@ -76,21 +75,21 @@ void main() {
 
     for (int i = 0; i < pointLightCount; ++i) {
         float attenuation =
-            getAttenuation(pointLights[i].constant, pointLights[i].linear,
-                           pointLights[i].quadratic,
-                           length(pointLights[i].position - position));
+              getAttenuation(pointLights[i].constant, pointLights[i].linear,
+                             pointLights[i].quadratic,
+                             length(pointLights[i].position - position));
         out_color +=
-            getLightColor(diffuseColor, specularColor, position, normal,
-                          roughness, pointLights[i].ambient,
-                          pointLights[i].diffuse, pointLights[i].specular,
-                          normalize(pointLights[i].position - position)) *
-            attenuation;
+              getLightColor(diffuseColor, specularColor, position, normal,
+                            roughness, pointLights[i].ambient,
+                            pointLights[i].diffuse, pointLights[i].specular,
+                            normalize(pointLights[i].position - position)) *
+              attenuation;
     }
 
     for (int i = 0; i < directionalLightCount; ++i) {
         out_color += getLightColor(
-            diffuseColor, specularColor, position, normal, roughness,
-            directionalLights[i].ambient, directionalLights[i].diffuse,
-            directionalLights[i].specular, directionalLights[i].direction);
+              diffuseColor, specularColor, position, normal, roughness,
+              directionalLights[i].ambient, directionalLights[i].diffuse,
+              directionalLights[i].specular, directionalLights[i].direction);
     }
 }

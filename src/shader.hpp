@@ -30,15 +30,13 @@ struct DeleteShader {
 };
 }  // namespace detail
 
+struct ShaderSources;
+
 class Shader final : public GLObject<detail::DeleteShader> {
    private:
-    static GLuint create_impl(const char* const vertexSource,
-                              util::optional<const char*> const fragmentSource);
+    static GLuint create_impl(const ShaderSources& sources);
 
-    static std::map<std::tuple<std::string, std::string>,
-                    std::shared_ptr<Shader>,
-                    std::less<>>
-        cache;
+    static std::map<ShaderSources, std::shared_ptr<Shader>> cache;
 
    public:
     struct private_tag {
@@ -50,14 +48,21 @@ class Shader final : public GLObject<detail::DeleteShader> {
         friend class Renderer;
     };
 
-    Shader(const std::string& vertexSource,
-           const util::optional<std::string>& fragmentSource,
-           private_tag)
-        : GLObject{create_impl(
-              vertexSource.c_str(),
-              util::map(fragmentSource, [](const std::string& source) {
-                  return source.c_str();
-              }))} {}
+    enum class Type {
+        Vertex,
+        Fragment,
+        Geometry,
+#ifdef KEPLER_GL_HAS_TESSELLATION_SHADERS
+        TessellationControl,
+        TessellationEvaluation,
+#endif
+#ifdef KEPLER_GL_HAS_COMPUTE_SHADERS
+        Compute,
+#endif
+    };
+
+    Shader(const ShaderSources& sources, private_tag)
+        : GLObject{create_impl(sources)} {}
 
     static void clearCache() { cache.clear(); }
 
@@ -65,6 +70,7 @@ class Shader final : public GLObject<detail::DeleteShader> {
         using runtime_error::runtime_error;
     };
 
+    static std::shared_ptr<Shader> create(const ShaderSources& sources);
     static std::shared_ptr<Shader> create(const fs::AbsolutePath& vertexPath,
                                           const fs::AbsolutePath& fragmentPath);
 
@@ -117,6 +123,30 @@ class Shader final : public GLObject<detail::DeleteShader> {
     }
 
     void setUniform(const std::string& name, const Material& material) noexcept;
+};
+
+struct ShaderSources {
+   public:
+    using Sources = std::multimap<Shader::Type, std::vector<std::string>>;
+
+    ShaderSources(Sources in_sources) noexcept
+        : sources{std::move(in_sources)} {}
+
+    static ShaderSources withVertAndFrag(std::string vert, std::string frag);
+
+    static Sources::value_type emptyVertexShader();
+    static Sources::value_type emptyFragmentShader();
+
+    bool operator<(const ShaderSources& other) const {
+        return sources < other.sources;
+    }
+
+   private:
+    Sources sources;
+
+    static const std::string& versionString();
+    friend class Shader;
+    static std::vector<const char*> getCompilable(const Sources::mapped_type&);
 };
 
 NS_KEPLER_END

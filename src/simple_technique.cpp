@@ -12,19 +12,22 @@ NS_KEPLER_BEGIN
 namespace {
 std::array<Vertex, 6> getFullScreenQuad() {
     return {{
-        {{-1.f, -1.f, 0.f}, {}, {0.f, 0.f}, {}},
-        {{1.f, -1.f, 0.f}, {}, {1.f, 0.f}, {}},
-        {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
-        {{1.f, -1.f, 0.f}, {}, {1.f, 0.f}, {}},
-        {{1.f, 1.f, 0.f}, {}, {1.f, 1.f}, {}},
-        {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
+          {{-1.f, -1.f, 0.f}, {}, {0.f, 0.f}, {}},
+          {{1.f, -1.f, 0.f}, {}, {1.f, 0.f}, {}},
+          {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
+          {{1.f, -1.f, 0.f}, {}, {1.f, 0.f}, {}},
+          {{1.f, 1.f, 0.f}, {}, {1.f, 1.f}, {}},
+          {{-1.f, 1.f, 0.f}, {}, {0.f, 1.f}, {}},
     }};
 }
 }  // namespace
 
 SimpleTechnique::SimpleTechnique(Shader::private_tag privateShaderAccess)
-    : shader{fs::loadFileAsString(fs::RelativePath("shaders/deferred.vert")),
-             fs::loadFileAsString(fs::RelativePath("shaders/deferred.frag")),
+    : shader{ShaderSources::withVertAndFrag(
+                   fs::loadFileAsString(
+                         fs::RelativePath("shaders/deferred.vert")),
+                   fs::loadFileAsString(
+                         fs::RelativePath("shaders/deferred.frag"))),
              privateShaderAccess}
     , fullscreenQuad{std::make_shared<VertexBuffer>(getFullScreenQuad()),
                      shader} {}
@@ -69,8 +72,8 @@ void SimpleTechnique::setLights(Scene& scene,
         auto pointLights = scene.getPointLights();
         for (std::size_t i = 0; i < pointLights.size(); ++i) {
             GL_CHECK(pointLights[i].applyUniforms(
-                "pointLights[" + std::to_string(i) + ']', shader,
-                viewTransform));
+                  "pointLights[" + std::to_string(i) + ']', shader,
+                  viewTransform));
         }
         shader.setUniform("pointLightCount",
                           static_cast<int>(pointLights.size()));
@@ -79,8 +82,8 @@ void SimpleTechnique::setLights(Scene& scene,
         auto directionalLights = scene.getDirectionalLights();
         for (std::size_t i = 0; i < directionalLights.size(); ++i) {
             GL_CHECK(directionalLights[i].applyUniforms(
-                "directionalLights[" + std::to_string(i) + ']', shader,
-                viewTransform));
+                  "directionalLights[" + std::to_string(i) + ']', shader,
+                  viewTransform));
         }
         shader.setUniform("directionalLightCount",
                           static_cast<int>(directionalLights.size()));

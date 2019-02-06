@@ -1,4 +1,3 @@
-#version 330 core
 out vec4 out_color;
 
 uniform sampler2D positionRGB_specularA;
@@ -45,7 +44,7 @@ void main() {
     vec3 halfway = normalize(cameraRay + lightDir);
     float specularFactor = max(dot(normal, halfway), 0.0);
     vec3 specularResult =
-        light.specular * pow(specularFactor, roughness) * specularColor;
+          light.specular * pow(specularFactor, roughness) * specularColor;
 
     float dist = length(lightVec);
     float attenuation = 1.0 / (light.constant + light.linear * dist +

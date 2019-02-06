@@ -6,7 +6,7 @@ import os
 import subprocess
 import sys
 
-_VALIDATOR = 'glslangValidator'
+_VALIDATOR = 'glslangValidator_TODO'
 _EXTS = ['.vert', '.tesc', '.tese', '.geom', '.frag', '.comp']
 
 
