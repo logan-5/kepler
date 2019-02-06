@@ -7,8 +7,8 @@ glm::mat4 getPerspectiveProjectionMatrix(
       Resolution resolution,
       const PerspectiveCamera::Config& config) {
     return glm::perspective(Radians{config.fov}.rep(),
-                            resolution.getAspectRatio().rep(), config.near,
-                            config.far);
+                            resolution.getAspectRatio().rep(), config.nearPlane,
+                            config.farPlane);
 }
 
 glm::vec3 getUpVector(const glm::vec3& dir) {

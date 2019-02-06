@@ -39,7 +39,7 @@ struct FPSTimer {
     void printFPS() {
         std::cout << "fps: " << static_cast<float>(frames) / seconds.rep()
                   << '\n';
-        frames = 0.f;
+        frames = 0;
         seconds = {};
     }
 
@@ -71,52 +71,52 @@ std::unique_ptr<Camera> createCamera(Window& window) {
     constexpr auto cameraMoveSpeed = 4.f;
     constexpr auto cameraRotateSpeed = 2.5f;
     auto& input = window.getInput();
-    input.setKeyCallback(Input::Key::W, [camera = &*camera, &window] {
+    input.setKeyCallback(Input::Key::W, [&, camera = &*camera] {
         camera->transform().translateByRelative(
               glm::vec3{0.f, 0.f, -cameraMoveSpeed} *
               window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::S, [camera = &*camera, &window] {
+    input.setKeyCallback(Input::Key::S, [&, camera = &*camera] {
         camera->transform().translateByRelative(
               glm::vec3{0.f, 0.f, +cameraMoveSpeed} *
               window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::A, [camera = &*camera, &window] {
+    input.setKeyCallback(Input::Key::A, [&, camera = &*camera] {
         camera->transform().translateByRelative(
               glm::vec3{-cameraMoveSpeed, 0.f, 0.f} *
               window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::D, [camera = &*camera, &window] {
+    input.setKeyCallback(Input::Key::D, [&, camera = &*camera] {
         camera->transform().translateByRelative(
               glm::vec3{+cameraMoveSpeed, 0.f, 0.f} *
               window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::Q, [camera = &*camera, &window] {
+    input.setKeyCallback(Input::Key::Q, [&, camera = &*camera] {
         camera->transform().translateByRelative(
               glm::vec3{0.f, -cameraMoveSpeed, 0.f} *
               window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::E, [camera = &*camera, &window] {
+    input.setKeyCallback(Input::Key::E, [&, camera = &*camera] {
         camera->transform().translateByRelative(
               glm::vec3{0.f, +cameraMoveSpeed, 0.f} *
               window.getDeltaTime().rep());
     });
-    input.setKeyCallback(Input::Key::LeftArrow, [camera = &*camera, &window] {
+    input.setKeyCallback(Input::Key::LeftArrow, [&, camera = &*camera] {
         camera->transform().rotateBy(
               Euler{glm::vec3{+cameraRotateSpeed, 0.f, 0.f} *
                     window.getDeltaTime().rep()});
     });
-    input.setKeyCallback(Input::Key::RightArrow, [camera = &*camera, &window] {
+    input.setKeyCallback(Input::Key::RightArrow, [&, camera = &*camera] {
         camera->transform().rotateBy(
               Euler{glm::vec3{-cameraRotateSpeed, 0.f, 0.f} *
                     window.getDeltaTime().rep()});
     });
-    input.setKeyCallback(Input::Key::UpArrow, [camera = &*camera, &window] {
+    input.setKeyCallback(Input::Key::UpArrow, [&, camera = &*camera] {
         camera->transform().rotateBy(
               Euler{glm::vec3{0.f, +cameraRotateSpeed, 0.f} *
                     window.getDeltaTime().rep()});
     });
-    input.setKeyCallback(Input::Key::DownArrow, [camera = &*camera, &window] {
+    input.setKeyCallback(Input::Key::DownArrow, [&, camera = &*camera] {
         camera->transform().rotateBy(
               Euler{glm::vec3{0.f, -cameraRotateSpeed, 0.f} *
                     window.getDeltaTime().rep()});
@@ -182,7 +182,7 @@ PointLight randomLight() {
     };
     const auto lightColor = randomColor();
     auto theLight = PointLight{
-          {randomPoint(), Euler{}, Scale{2.5f}},
+          Transform{randomPoint(), Euler{}, Scale{2.5f}},
           Light_base::Colors{ColorRGB{0.1f, 0.1f, 0.1f}, lightColor,
                              lightColor},
           PointLight::Attenuation::fromDistance(50.f),

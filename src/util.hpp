@@ -226,6 +226,11 @@ std::enable_if_t<std::is_floating_point<Float>::value, Float> random(
       Float max) {
     return std::uniform_real_distribution<Float>{min, max}(detail::engine);
 }
+
+inline bool random(bool min, bool max) {
+    return static_cast<bool>(
+          random(static_cast<int>(min), static_cast<int>(max)));
+}
 }  // namespace random
 
 template <typename... Ts>

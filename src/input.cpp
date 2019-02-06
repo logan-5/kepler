@@ -1,6 +1,8 @@
 #include "input.hpp"
 #include "input.inl"
 
+#include <cassert>
+
 NS_KEPLER_BEGIN
 
 namespace {

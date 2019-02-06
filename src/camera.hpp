@@ -22,8 +22,8 @@ class PerspectiveCamera : public Camera {
    public:
     struct Config {
         Config() {}  // workaround for clang quirk
-        float near = 0.1f;
-        float far = 100.f;
+        float nearPlane = 0.1f;
+        float farPlane = 100.f;
         Degrees fov{45.f};
     };
     PerspectiveCamera(Resolution resolution, const Config& = {});
