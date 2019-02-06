@@ -3,36 +3,50 @@
 from __future__ import print_function
 import argparse
 import os
-import subprocess
+import subprocess as sp
 import sys
 
-_VALIDATOR = 'glslangValidator_TODO'
+_VALIDATOR = 'glslangValidator'
 _EXTS = ['.vert', '.tesc', '.tese', '.geom', '.frag', '.comp']
 
 
-def validate_shaders(dir_):
+def validate_shaders(dir_, version_string):
     for file_name in os.listdir(dir_):
-        if os.path.splitext(file_name)[1] in _EXTS:
+        ext = os.path.splitext(file_name)[1]
+        if ext in _EXTS:
             name = os.path.join(dir_, file_name)
-            error = subprocess.call([_VALIDATOR, name])
-            if error != 0:
-                return error
+            with open(name, r'r') as shader:
+                source = version_string + shader.read()
+                p = sp.Popen(
+                    [_VALIDATOR, '--stdin', '-S', ext[1:]], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE)
+                error = p.communicate(input=source)[0]
+                if p.returncode != 0:
+                    # validator prints 'stdin' first when printing
+                    # errors in source read from stdin, trim that off
+                    print(error.split('\n', 1)[1])
+                    return p.returncode
     return 0
 
 
 def main():
     with open(os.devnull) as devnull:
         try:
-            subprocess.call([_VALIDATOR, '-v'], stdout=devnull, stderr=devnull)
+            sp.call([_VALIDATOR, '-v'], stdout=devnull, stderr=devnull)
         except OSError:
-            print("warning: {} not installed, shaders cannot be validated at build time".format(_VALIDATOR), file=sys.stderr)
+            print("warning: {} not installed, shaders cannot be validated at build time".format(
+                _VALIDATOR), file=sys.stderr)
             exit(0)
 
     parser = argparse.ArgumentParser()
     parser.add_argument('directory')
+    parser.add_argument('versionMajor')
+    parser.add_argument('versionMinor')
     args = parser.parse_args()
 
-    exit(validate_shaders(args.directory))
+    version_string = '#version {}{}0 core\n'.format(
+        args.versionMajor, args.versionMinor)
+
+    exit(validate_shaders(args.directory, version_string))
 
 
 if __name__ == "__main__":
