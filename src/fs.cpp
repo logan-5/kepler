@@ -1,6 +1,6 @@
 #include "fs.hpp"
 
-#include "project_path.hpp"
+#include "kepler_config.hpp"
 #include "util.hpp"
 
 #include <fstream>
@@ -13,7 +13,7 @@ std::string absolutePathFromRelative(const std::string& rel) {
     // not tryna bring in boost::filesystem just for this
     const auto projectPath = fs::projectPath();
     const bool needsSlash =
-        !(util::ends_with(projectPath, '/') || util::starts_with(rel, '/'));
+          !(util::ends_with(projectPath, '/') || util::starts_with(rel, '/'));
     std::string path = projectPath;
     if (needsSlash) {
         path += '/';

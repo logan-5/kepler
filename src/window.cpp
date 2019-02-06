@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "common.hpp"
 #include "input.inl"
 #include "util.hpp"
 
@@ -48,14 +49,14 @@ struct Window::Impl : Window_base {
     Impl(Resolution resolution, const std::string& title, ErrorCallback err)
         : Window_base{err}
         , window{[&] {
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, GL::Version::Major);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, GL::Version::Minor);
             glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
             auto* const window =
-                glfwCreateWindow(resolution.width(), resolution.height(),
-                                 title.c_str(), nullptr, nullptr);
+                  glfwCreateWindow(resolution.width(), resolution.height(),
+                                   title.c_str(), nullptr, nullptr);
             if (!window) {
                 throw initialization_error{"Unable to create window"};
             }

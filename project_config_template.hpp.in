@@ -1,0 +1,25 @@
+#ifndef @PROJECT_UPPER_NAME@_CONFIG_HPP
+#define @PROJECT_UPPER_NAME@_CONFIG_HPP
+
+#define NS_@PROJECT_UPPER_NAME@_BEGIN namespace @PROJECT_NAME@ { inline namespace v@PROJECT_VERSION@ {
+#define NS_@PROJECT_UPPER_NAME@_END } }
+#define USING_NS_@PROJECT_UPPER_NAME@ using namespace @PROJECT_NAME@;
+
+//NS_@PROJECT_UPPER_NAME@_BEGIN
+
+namespace GL { namespace Version {
+enum {
+    Major = @PROJECT_OPENGL_VERSION_MAJOR@,
+    Minor = @PROJECT_OPENGL_VERSION_MINOR@,
+};
+}}
+
+namespace fs {
+inline constexpr const char* projectPath() {
+    return "@PROJECT_PATH@";
+}
+}
+
+//NS_@PROJECT_UPPER_NAME@_END
+
+#endif

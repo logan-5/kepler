@@ -1,6 +1,7 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
+#include "kepler_config.hpp"
 #include "util.hpp"
 
 #include <glad/glad.h>
