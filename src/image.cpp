@@ -9,6 +9,8 @@
 #include "stb_image.h"
 #pragma GCC diagnostic pop
 
+NS_KEPLER_BEGIN
+
 namespace {
 GLenum channelsToFormat(int channels) {
     switch (channels) {
@@ -54,3 +56,5 @@ Resolution Image::getResolution() const {
 GLenum Image::getFormat() const {
     return channelsToFormat(impl->channels);
 }
+
+NS_KEPLER_END

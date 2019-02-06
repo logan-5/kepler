@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+NS_KEPLER_BEGIN
+
 namespace {
 GLuint create() {
     GLuint fbo;
@@ -19,7 +21,7 @@ auto FrameBuffer::Attachments::create(Resolution resolution,
     RAIIBinding<FrameBuffer> bind{fbo};
 
     Attachments attachments{
-        Texture{resolution, options.mainColorFormat, Texture::Params{}}};
+          Texture{resolution, options.mainColorFormat, Texture::Params{}}};
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                          attachments.mainColor.getHandle(), 0);
 
@@ -41,10 +43,10 @@ auto FrameBuffer::Attachments::create(Resolution resolution,
             attachments.depth = std::move(depth);
         } else {
             Texture depth{
-                resolution,
-                Texture::Format{GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8,
-                                GL_DEPTH24_STENCIL8},
-                Texture::Params{}};
+                  resolution,
+                  Texture::Format{GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8,
+                                  GL_DEPTH24_STENCIL8},
+                  Texture::Params{}};
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
                                  depth.getHandle(), 0);
             attachments.depth = std::move(depth);
@@ -82,3 +84,5 @@ void FrameBuffer::blit(GLbitfield mask,
                                0, resolution.width(), resolution.height(), mask,
                                getFilter(mask)));
 }
+
+NS_KEPLER_END

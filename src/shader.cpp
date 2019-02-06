@@ -7,6 +7,8 @@
 #include <cassert>
 #include <memory>
 
+NS_KEPLER_BEGIN
+
 namespace {
 constexpr const auto emptyFragmentShader = R"_(
 #version 330 core
@@ -23,12 +25,12 @@ struct DeleteShader {
 std::map<std::tuple<std::string, std::string>,
          std::shared_ptr<Shader>,
          std::less<>>
-    Shader::cache;
+      Shader::cache;
 
 GLuint Shader::create_impl(const char* const vertexSource,
                            util::optional<const char*> const fragmentSource) {
     util::RAII<GLuint, DeleteShader> vertexShader{
-        glCreateShader(GL_VERTEX_SHADER)};
+          glCreateShader(GL_VERTEX_SHADER)};
 
     glShaderSource(vertexShader, 1, &vertexSource, NULL);
     glCompileShader(vertexShader);
@@ -44,7 +46,7 @@ GLuint Shader::create_impl(const char* const vertexSource,
     }
 
     util::RAII<GLuint, DeleteShader> fragmentShader{
-        glCreateShader(GL_FRAGMENT_SHADER)};
+          glCreateShader(GL_FRAGMENT_SHADER)};
     const auto fragmentSource_ = fragmentSource.value_or(emptyFragmentShader);
     glShaderSource(fragmentShader, 1, &fragmentSource_, NULL);
     glCompileShader(fragmentShader);
@@ -94,11 +96,13 @@ std::shared_ptr<Shader> Shader::create(const fs::AbsolutePath& vertexPath,
     auto existing = cache.find(std::tie(vertexPath.get(), fragmentPath.get()));
     if (existing == std::end(cache)) {
         return cache
-            .emplace(std::make_tuple(vertexPath.get(), fragmentPath.get()),
-                     std::make_shared<Shader>(
-                         fs::loadFileAsString(vertexPath),
-                         fs::loadFileAsString(fragmentPath), private_tag{}))
-            .first->second;
+              .emplace(std::make_tuple(vertexPath.get(), fragmentPath.get()),
+                       std::make_shared<Shader>(
+                             fs::loadFileAsString(vertexPath),
+                             fs::loadFileAsString(fragmentPath), private_tag{}))
+              .first->second;
     }
     return existing->second;
 }
+
+NS_KEPLER_END

@@ -3,6 +3,8 @@
 #include "light.hpp"
 #include "scene.hpp"
 
+NS_KEPLER_BEGIN
+
 namespace {
 template <typename Fn,
           typename AttributeType = util::invoke_result_t<Fn, const PointLight&>>
@@ -56,3 +58,5 @@ LightData::LightData(const Scene& in_scene)
               scene,
               [](const PointLight& light) { return toVec(light.attenuation); });
     }} {}
+
+NS_KEPLER_END

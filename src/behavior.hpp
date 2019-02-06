@@ -8,6 +8,8 @@
 #include <memory>
 #include <vector>
 
+NS_KEPLER_BEGIN
+
 namespace util {
 template <typename T,
           typename Func,
@@ -165,5 +167,7 @@ struct Actor {
     BehaviorList behaviors;
     bool started;
 };
+
+NS_KEPLER_END
 
 #endif

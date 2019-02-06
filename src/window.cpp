@@ -7,6 +7,8 @@
 
 #include <GLFW/glfw3.h>
 
+NS_KEPLER_BEGIN
+
 namespace {
 Window::WindowSizeCallback global_windowSizeCallback;
 bool global_windowSizeDirty = false;
@@ -146,3 +148,5 @@ Resolution Window::getResolution() const {
 void Window::requestClose() {
     glfwSetWindowShouldClose(impl->window, GLFW_TRUE);
 }
+
+NS_KEPLER_END

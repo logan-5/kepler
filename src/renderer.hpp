@@ -7,6 +7,8 @@
 #include "shader.hpp"
 #include "vertex_array.hpp"
 
+NS_KEPLER_BEGIN
+
 class Scene;
 struct PointLight;
 struct DeferredShadingTechnique;
@@ -55,5 +57,7 @@ class Renderer {
     static std::unique_ptr<DeferredShadingTechnique> debug_getDeferredTechnique(
           int which);
 };
+
+NS_KEPLER_END
 
 #endif

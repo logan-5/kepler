@@ -2,8 +2,11 @@
 #define SIMPLE_TECHNIQUE_HPP
 
 #include "deferred_shading_technique.hpp"
+#include "kepler_config.hpp"
 #include "shader.hpp"
 #include "vertex_array.hpp"
+
+NS_KEPLER_BEGIN
 
 struct SimpleTechnique final : public DeferredShadingTechnique {
     SimpleTechnique(Shader::private_tag privateShaderAccess);
@@ -24,5 +27,7 @@ struct SimpleTechnique final : public DeferredShadingTechnique {
     Shader shader;
     VertexArrayObject fullscreenQuad;
 };
+
+NS_KEPLER_END
 
 #endif

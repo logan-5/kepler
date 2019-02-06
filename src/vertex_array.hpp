@@ -9,6 +9,8 @@
 #include <memory>
 #include <unordered_map>
 
+NS_KEPLER_BEGIN
+
 class Shader;
 
 namespace detail {
@@ -81,5 +83,7 @@ struct VertexArrayObject : public GLObject<detail::DeleteVAO> {
     std::unordered_map<GLuint, std::shared_ptr<VertexAttributeBuffer_base>>
         additionalBuffers;
 };
+
+NS_KEPLER_END
 
 #endif

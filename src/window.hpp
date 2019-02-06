@@ -1,12 +1,15 @@
 #ifndef WINDOW_H
 #define WINDOW_H
 
+#include "common.hpp"
 #include "types.hpp"
 
 #include <exception>
 #include <functional>
 #include <memory>
 #include <string>
+
+NS_KEPLER_BEGIN
 
 class Input;
 
@@ -44,5 +47,7 @@ class Window {
     struct Impl;
     std::unique_ptr<Impl> impl;
 };
+
+NS_KEPLER_END
 
 #endif

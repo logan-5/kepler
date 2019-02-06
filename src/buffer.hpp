@@ -11,6 +11,8 @@
 #include <type_traits>
 #include <vector>
 
+NS_KEPLER_BEGIN
+
 namespace detail {
 struct DeleteBuffer {
     void operator()(GLuint buf) const noexcept {
@@ -66,5 +68,7 @@ struct VertexAttributeBuffer final : public VertexAttributeBuffer_base {
 };
 
 using VertexBuffer = VertexAttributeBuffer<Vertex>;
+
+NS_KEPLER_END
 
 #endif

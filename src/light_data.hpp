@@ -9,6 +9,8 @@
 #include <memory>
 #include <vector>
 
+NS_KEPLER_BEGIN
+
 struct DirectionalLight;
 struct PointLight;
 class Scene;
@@ -43,5 +45,7 @@ class LightData {
 
 #undef POINT_LIGHT_DATA_LAZY_BUFFER
 };
+
+NS_KEPLER_END
 
 #endif

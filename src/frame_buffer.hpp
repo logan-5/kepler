@@ -9,6 +9,8 @@
 #include <cassert>
 #include <vector>
 
+NS_KEPLER_BEGIN
+
 namespace detail {
 struct DeleteFBO {
     void operator()(GLuint fbo) const {
@@ -63,5 +65,7 @@ class FrameBuffer : public GLObject<detail::DeleteFBO> {
     operator View() const { return View{getHandle()}; }
     void blit(GLbitfield mask, View destination, Resolution resolution);
 };
+
+NS_KEPLER_END
 
 #endif

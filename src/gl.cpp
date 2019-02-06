@@ -1,5 +1,7 @@
 #include "gl.hpp"
 
+NS_KEPLER_BEGIN
+
 std::string GL::getErrorString(const GLenum error) {
     switch (error) {
         case GL_NO_ERROR:
@@ -22,3 +24,5 @@ std::string GL::getErrorString(const GLenum error) {
             return "<Unknown error: " + std::to_string(error) + '>';
     }
 }
+
+NS_KEPLER_END

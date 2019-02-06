@@ -1,9 +1,11 @@
 #include "camera.hpp"
 
+NS_KEPLER_BEGIN
+
 namespace {
 glm::mat4 getPerspectiveProjectionMatrix(
-    Resolution resolution,
-    const PerspectiveCamera::Config& config) {
+      Resolution resolution,
+      const PerspectiveCamera::Config& config) {
     return glm::perspective(Radians{config.fov}.rep(),
                             resolution.getAspectRatio().rep(), config.near,
                             config.far);
@@ -28,7 +30,9 @@ void PerspectiveCamera::resolutionChanged(Resolution newResolution) {
 glm::mat4 PerspectiveCamera::getViewMatrix() const {
     const auto pos = this->transform().position.rep();
     const auto dir = glm::normalize(
-        glm::vec3{this->transform().angle.rotateVector({0.f, 0.f, -1.f})});
+          glm::vec3{this->transform().angle.rotateVector({0.f, 0.f, -1.f})});
     const auto target = pos + dir;
     return glm::lookAt(pos, target, getUpVector(dir));
 }
+
+NS_KEPLER_END

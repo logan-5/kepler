@@ -3,6 +3,8 @@
 #include "shader.hpp"
 #include "vertex_array.hpp"
 
+NS_KEPLER_BEGIN
+
 void Light_base::applyUniforms(const std::string& name,
                                Shader& shader,
                                const glm::mat4& viewTransform) const {
@@ -82,3 +84,5 @@ void DirectionalLight::applyAdditionalUniforms(
           glm::normalize(-glm::vec3{viewTransform *
                                     glm::vec4{this->direction.rep(), 0.f}}));
 }
+
+NS_KEPLER_END

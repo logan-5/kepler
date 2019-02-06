@@ -1,6 +1,7 @@
 #ifndef SCENE_HPP
 #define SCENE_HPP
 
+#include "kepler_config.hpp"
 #include "light.hpp"
 #include "light_data.hpp"
 #include "object.hpp"
@@ -8,6 +9,8 @@
 
 #include <string>
 #include <vector>
+
+NS_KEPLER_BEGIN
 
 class Scene
     : util::NonCopyable
@@ -66,5 +69,7 @@ class Scene
     std::vector<DirectionalLight> directionalLights;
     LightData lightData;
 };
+
+NS_KEPLER_END
 
 #endif

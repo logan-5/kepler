@@ -1,8 +1,11 @@
 #include "input.hpp"
+#include "kepler_config.hpp"
 
 #include <glad/glad.h>
 
 #include <GLFW/glfw3.h>
+
+NS_KEPLER_BEGIN
 
 // this is all horrifyingly bad
 
@@ -19,3 +22,5 @@ struct Input::Impl {
     ~Impl() { glfwSetKeyCallback(window, NULL); }
     GLFWwindow* window;
 };
+
+NS_KEPLER_END

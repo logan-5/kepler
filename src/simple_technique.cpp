@@ -7,6 +7,8 @@
 
 #include <array>
 
+NS_KEPLER_BEGIN
+
 namespace {
 std::array<Vertex, 6> getFullScreenQuad() {
     return {{
@@ -84,3 +86,5 @@ void SimpleTechnique::setLights(Scene& scene,
                           static_cast<int>(directionalLights.size()));
     }
 }
+
+NS_KEPLER_END

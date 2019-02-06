@@ -13,6 +13,8 @@
 #include <iostream>
 #include <string>
 
+NS_KEPLER_BEGIN
+
 namespace {
 void setDrawBuffers(GBuffer& gBuffer) {
     RAIIBinding<FrameBuffer> bind{gBuffer.getFrameBufferHandle()};
@@ -129,3 +131,5 @@ void Renderer::debug_cycleDeferredTechnique() {
     deferredTechnique =
           debug_getDeferredTechnique(++debug_currentDeferredTechnique);
 }
+
+NS_KEPLER_END

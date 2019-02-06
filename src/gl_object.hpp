@@ -3,6 +3,8 @@
 
 #include "common.hpp"
 
+NS_KEPLER_BEGIN
+
 template <typename Deleter, typename MovePolicy = util::Movable>
 class GLObject {
    public:
@@ -12,5 +14,7 @@ class GLObject {
     GLObject(GLuint in_handle) : handle{in_handle} {}
     util::RAII<GLuint, Deleter, MovePolicy> handle;
 };
+
+NS_KEPLER_END
 
 #endif

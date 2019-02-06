@@ -4,6 +4,8 @@
 #include "common.hpp"
 #include "types.hpp"
 
+NS_KEPLER_BEGIN
+
 class Camera : public Transformed {
    public:
     virtual ~Camera() = default;
@@ -39,5 +41,7 @@ class PerspectiveCamera : public Camera {
     Config config;
     glm::mat4 projection;
 };
+
+NS_KEPLER_END
 
 #endif

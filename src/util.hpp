@@ -1,9 +1,13 @@
 #ifndef UTIL_HPP
 #define UTIL_HPP
 
+#include "kepler_config.hpp"
+
 #include <cstring>
 #include <string>
 #include <type_traits>
+
+NS_KEPLER_BEGIN
 
 namespace util {
 template <typename String>
@@ -200,7 +204,11 @@ class container_view {
 };
 }  // namespace util
 
+NS_KEPLER_END
+
 #include <random>
+
+NS_KEPLER_BEGIN
 
 namespace util {
 namespace random {
@@ -238,5 +246,7 @@ std::enable_if_t<util::detail::has_toString<ToStringable>::value, std::ostream&>
 operator<<(std::ostream& out, const ToStringable& t) {
     return out << t.toString();
 }
+
+NS_KEPLER_END
 
 #endif

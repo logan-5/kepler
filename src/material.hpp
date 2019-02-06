@@ -1,10 +1,13 @@
 #ifndef MATERIAL_HPP
 #define MATERIAL_HPP
 
+#include "kepler_config.hpp"
 #include "texture.hpp"
 #include "types.hpp"
 
 #include <memory>
+
+NS_KEPLER_BEGIN
 
 struct Material {
     std::shared_ptr<Texture> diffuse;
@@ -19,5 +22,7 @@ struct Material {
         TextureUnit() = delete;
     };
 };
+
+NS_KEPLER_END
 
 #endif

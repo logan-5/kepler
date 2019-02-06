@@ -2,8 +2,11 @@
 #define GBUFFER_HPP
 
 #include "frame_buffer.hpp"
+#include "kepler_config.hpp"
 
 #include <array>
+
+NS_KEPLER_BEGIN
 
 struct GBuffer {
     struct Target {
@@ -45,5 +48,7 @@ struct GBuffer {
    private:
     FrameBuffer frameBuffer;
 };
+
+NS_KEPLER_END
 
 #endif

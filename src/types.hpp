@@ -1,6 +1,7 @@
 #ifndef TYPES_HPP
 #define TYPES_HPP
 
+#include "kepler_config.hpp"
 #include "util.hpp"
 
 #include <glm/glm.hpp>
@@ -12,6 +13,8 @@
 
 #include <ostream>
 #include <type_traits>
+
+NS_KEPLER_BEGIN
 
 template <typename T>
 struct Rep : private util::wrap<T> {
@@ -181,12 +184,12 @@ struct Euler : Rep<glm::vec3> {
     constexpr float_type roll() const { return rep().z; }
 
     glm::mat4 getMatrix() const {
-        const auto p =
-            glm::rotate(matrix::identity(), pitch(), glm::vec3{0.f, 1.f, 0.f});
+        const auto p = glm::rotate(matrix::identity(), pitch(),
+                                   glm::vec3{0.f, 1.f, 0.f});
         const auto y =
-            glm::rotate(matrix::identity(), yaw(), glm::vec3{1.f, 0.f, 0.f});
+              glm::rotate(matrix::identity(), yaw(), glm::vec3{1.f, 0.f, 0.f});
         const auto r =
-            glm::rotate(matrix::identity(), roll(), glm::vec3{0.f, 0.f, 1.f});
+              glm::rotate(matrix::identity(), roll(), glm::vec3{0.f, 0.f, 1.f});
         return p * y * r;
     }
     glm::vec3 rotateVector(const glm::vec3& vec) const {
@@ -280,15 +283,17 @@ struct has_glm_toString<T,
 
 template <typename T>
 std::enable_if_t<detail::has_glm_toString<T>::value, std::ostream&> operator<<(
-    std::ostream& out,
-    const Rep<T>& t) {
+      std::ostream& out,
+      const Rep<T>& t) {
     return out << glm::to_string(t.rep());
 }
 template <typename T>
 std::enable_if_t<!detail::has_glm_toString<T>::value, std::ostream&> operator<<(
-    std::ostream& out,
-    const Rep<T>& t) {
+      std::ostream& out,
+      const Rep<T>& t) {
     return out << t.rep();
 }
+
+NS_KEPLER_END
 
 #endif

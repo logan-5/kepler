@@ -4,6 +4,8 @@
 #include "common.hpp"
 #include "shader.hpp"
 
+NS_KEPLER_BEGIN
+
 struct GBuffer;
 class Scene;
 struct Resolution;
@@ -18,5 +20,7 @@ struct DeferredShadingTechnique {
                                 const Resolution resolution) = 0;
     virtual bool blitsGBufferDepth() const = 0;
 };
+
+NS_KEPLER_END
 
 #endif

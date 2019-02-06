@@ -7,6 +7,8 @@
 
 #include <memory>
 
+NS_KEPLER_BEGIN
+
 class Image {
    public:
     Image(const fs::AbsolutePath& path);
@@ -20,5 +22,7 @@ class Image {
     struct Impl;
     std::unique_ptr<Impl> impl;
 };
+
+NS_KEPLER_END
 
 #endif

@@ -3,6 +3,8 @@
 #include <numeric>
 #include <vector>
 
+NS_KEPLER_BEGIN
+
 namespace {
 template <std::size_t Count, typename T>
 std::vector<T> drop(const std::vector<T>& vec) {
@@ -65,3 +67,5 @@ const Texture& GBuffer::getColorTarget(std::size_t target) const {
     }
     return frameBuffer.attachments.additionalColors[target - 1];
 }
+
+NS_KEPLER_END

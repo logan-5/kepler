@@ -5,6 +5,8 @@
 #include "lazy.hpp"
 #include "types.hpp"
 
+NS_KEPLER_BEGIN
+
 class Shader;
 struct VertexArrayObject;
 
@@ -95,5 +97,7 @@ struct DirectionalLight
                                  Shader& shader,
                                  const glm::mat4& viewTransform) const override;
 };
+
+NS_KEPLER_END
 
 #endif

@@ -5,6 +5,8 @@
 #include "shader.hpp"
 #include "vertex_array.hpp"
 
+NS_KEPLER_BEGIN
+
 struct DirectionalLight;
 struct PointLight;
 
@@ -84,5 +86,7 @@ struct LightVolumeInstancedTechnique final : public LightVolumeTechnique_base {
                              const Resolution resolution,
                              bool stencilPass) override;
 };
+
+NS_KEPLER_END
 
 #endif

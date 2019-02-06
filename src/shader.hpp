@@ -16,6 +16,8 @@
 #include <string>
 #include <tuple>
 
+NS_KEPLER_BEGIN
+
 struct Light;
 struct Material;
 
@@ -116,5 +118,7 @@ class Shader final : public GLObject<detail::DeleteShader> {
 
     void setUniform(const std::string& name, const Material& material) noexcept;
 };
+
+NS_KEPLER_END
 
 #endif

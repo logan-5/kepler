@@ -2,6 +2,8 @@
 
 #include <array>
 
+NS_KEPLER_BEGIN
+
 inline constexpr std::array<Vertex, 36> getCubeVerts() {
     constexpr std::array<Vertex, 36> cubeVerts = {{
         {{-0.5f, -0.5f, -0.5f},
@@ -156,3 +158,5 @@ inline constexpr std::array<Vertex, 36> getCubeVerts() {
     }};
     return cubeVerts;
 }
+
+NS_KEPLER_END

@@ -2,6 +2,8 @@
 #include "gl.hpp"
 #include "image.hpp"
 
+NS_KEPLER_BEGIN
+
 namespace {
 GLenum convertWrap(const Texture::Wrap wrap) {
     switch (wrap) {
@@ -61,3 +63,5 @@ GLuint Texture::create(Resolution resolution,
                        const Params& params) {
     return createTexture(resolution, format, nullptr, params);
 }
+
+NS_KEPLER_END

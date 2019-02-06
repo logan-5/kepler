@@ -3,9 +3,9 @@
 
 #define NS_@PROJECT_UPPER_NAME@_BEGIN namespace @PROJECT_NAME@ { inline namespace v@PROJECT_VERSION@ {
 #define NS_@PROJECT_UPPER_NAME@_END } }
-#define USING_NS_@PROJECT_UPPER_NAME@ using namespace @PROJECT_NAME@;
+#define USING_NS_@PROJECT_UPPER_NAME@ using namespace @PROJECT_NAME@
 
-//NS_@PROJECT_UPPER_NAME@_BEGIN
+NS_@PROJECT_UPPER_NAME@_BEGIN
 
 namespace GL { namespace Version {
 enum {
@@ -20,6 +20,6 @@ inline constexpr const char* projectPath() {
 }
 }
 
-//NS_@PROJECT_UPPER_NAME@_END
+NS_@PROJECT_UPPER_NAME@_END
 
 #endif

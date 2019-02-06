@@ -2,6 +2,8 @@
 
 #include <sstream>
 
+NS_KEPLER_BEGIN
+
 void Scene::update(Seconds dt) {
     for (auto& object : objects) {
         object.update(dt);
@@ -35,3 +37,5 @@ std::string Scene::toString() const {
     stream << '}';
     return stream.str();
 }
+
+NS_KEPLER_END

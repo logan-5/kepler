@@ -9,6 +9,8 @@
 
 #include <cassert>
 
+NS_KEPLER_BEGIN
+
 class Image;
 
 namespace detail {
@@ -68,5 +70,7 @@ class Texture : public GLObject<detail::DeleteTexture> {
         glBindTexture(GL_TEXTURE_2D, this->handle);
     }
 };
+
+NS_KEPLER_END
 
 #endif

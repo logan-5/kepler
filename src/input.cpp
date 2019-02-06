@@ -1,6 +1,8 @@
 #include "input.hpp"
 #include "input.inl"
 
+NS_KEPLER_BEGIN
+
 namespace {
 Input* instance = nullptr;
 
@@ -66,3 +68,5 @@ void Input::update() {
 //         }
 //     }
 // }
+
+NS_KEPLER_END

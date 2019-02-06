@@ -7,6 +7,8 @@
 #include <sstream>
 #include <string>
 
+NS_KEPLER_BEGIN
+
 namespace {
 std::string absolutePathFromRelative(const std::string& rel) {
     // not portable, but
@@ -37,3 +39,5 @@ std::string loadFileAsString(const AbsolutePath& path) {
     return buffer.str();
 }
 }  // namespace fs
+
+NS_KEPLER_END

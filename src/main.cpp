@@ -8,6 +8,7 @@
 #include "gl.hpp"
 #include "image.hpp"
 #include "input.hpp"
+#include "kepler_config.hpp"
 #include "light.hpp"
 #include "material.hpp"
 #include "object.hpp"
@@ -22,6 +23,8 @@
 
 #include <array>
 #include <iostream>
+
+USING_NS_KEPLER;
 
 namespace {
 struct FPSTimer {

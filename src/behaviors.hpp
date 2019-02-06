@@ -4,6 +4,8 @@
 #include "behavior.hpp"
 #include "types.hpp"
 
+NS_KEPLER_BEGIN
+
 template <typename A>
 struct DoNothingBehavior : Behavior<A> {
     void update(Seconds, A&) override {}
@@ -24,5 +26,7 @@ struct BobBehavior : Behavior<Transformed> {
     void start(Transformed& object);
     void update(Seconds dt, Transformed& object);
 };
+
+NS_KEPLER_END
 
 #endif

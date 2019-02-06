@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+NS_KEPLER_BEGIN
+
 namespace {
 std::shared_ptr<Shader> phongShader() {
     static const fs::AbsolutePath vertPath =
@@ -55,3 +57,5 @@ void Object::render() {
 std::string Object::toString() const {
     return "object: { " + transform().toString() + " }";
 }
+
+NS_KEPLER_END

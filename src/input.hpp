@@ -1,10 +1,14 @@
 #ifndef INPUT_HPP
 #define INPUT_HPP
 
+#include "kepler_config.hpp"
+
 #include <functional>
 #include <map>
 #include <utility>
 #include <vector>
+
+NS_KEPLER_BEGIN
 
 class Input {
     struct Impl;
@@ -42,5 +46,7 @@ class Input {
     friend class Window;
     std::unique_ptr<Impl> impl;
 };
+
+NS_KEPLER_END
 
 #endif

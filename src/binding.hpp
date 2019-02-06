@@ -5,6 +5,8 @@
 #include "gl_object.hpp"
 #include "util.hpp"
 
+NS_KEPLER_BEGIN
+
 template <typename Bindable>
 struct RAIIBinding {
     RAIIBinding(GLuint handle) noexcept(noexcept(Bindable::bind(handle)))
@@ -25,5 +27,7 @@ struct RAIIBinding {
     };
     util::RAII<Nothing, Unbind> binding;
 };
+
+NS_KEPLER_END
 
 #endif

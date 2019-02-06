@@ -2,6 +2,7 @@
 #define OBJECT_HPP
 
 #include "behavior.hpp"
+#include "kepler_config.hpp"
 #include "material.hpp"
 #include "shader.hpp"
 #include "types.hpp"
@@ -9,6 +10,8 @@
 
 #include <memory>
 #include <vector>
+
+NS_KEPLER_BEGIN
 
 class Renderable : public Transformed {
    public:
@@ -58,5 +61,7 @@ class Object
 
     Material material;
 };
+
+NS_KEPLER_END
 
 #endif

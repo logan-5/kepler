@@ -1,9 +1,13 @@
 #ifndef GL_HPP
 #define GL_HPP
 
+#include "kepler_config.hpp"
+
 #include <glad/glad.h>
 
 #include <string>
+
+NS_KEPLER_BEGIN
 
 namespace GL {
 std::string getErrorString(const GLenum);
@@ -11,8 +15,10 @@ std::string getErrorString(const GLenum);
 
 #ifndef NDEBUG
 
+NS_KEPLER_END
 #include <cassert>
 #include <iostream>
+NS_KEPLER_BEGIN
 
 #define GL_CHECK(...)                                                       \
     do {                                                                    \
@@ -82,5 +88,7 @@ struct ScopedDisable {
     ScopedDisable& operator=(const ScopedDisable&) = delete;
 };
 }  // namespace GL
+
+NS_KEPLER_END
 
 #endif

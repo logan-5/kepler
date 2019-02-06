@@ -6,6 +6,8 @@
 
 #include <cassert>
 
+NS_KEPLER_BEGIN
+
 namespace {
 constexpr const auto positionAttributeName = "position";
 constexpr const auto normalAttributeName = "normal";
@@ -32,16 +34,16 @@ VertexArrayObject::VertexArrayObject(std::shared_ptr<VertexBuffer> in_vbo,
 }
 
 void VertexArrayObject::addInstancedBuffer(
-    const std::string& attribute,
-    Shader& shader,
-    std::shared_ptr<VertexAttributeBuffer_base> theBuffer,
-    const GLsizei size,
-    const GLsizei stride,
-    const GLuint divisor) {
+      const std::string& attribute,
+      Shader& shader,
+      std::shared_ptr<VertexAttributeBuffer_base> theBuffer,
+      const GLsizei size,
+      const GLsizei stride,
+      const GLuint divisor) {
     GL_CHECK();
     shader.use();
     if (const AttributeLocation location =
-            shader.getAttributeLocation(attribute)) {
+              shader.getAttributeLocation(attribute)) {
         if (isBufferAlreadySet(location, theBuffer)) {
             return;
         }
@@ -62,8 +64,8 @@ void VertexArrayObject::addInstancedBuffer(
 }
 
 bool VertexArrayObject::isBufferAlreadySet(
-    GLuint location,
-    const std::shared_ptr<VertexAttributeBuffer_base>& theBuffer) const {
+      GLuint location,
+      const std::shared_ptr<VertexAttributeBuffer_base>& theBuffer) const {
     auto it = additionalBuffers.find(location);
     if (it != std::end(additionalBuffers)) {
         return it->second == theBuffer;
@@ -80,7 +82,7 @@ void VertexArrayObject::configureVertexAttributes(Shader& shader) {
     GL_CHECK();
 
     if (const AttributeLocation positionLocation =
-            shader.getAttributeLocation(positionAttributeName)) {
+              shader.getAttributeLocation(positionAttributeName)) {
         glVertexAttribPointer(positionLocation, sizeof(Point) / sizeof(float),
                               GL_FLOAT, GL_FALSE, sizeof(Vertex),
                               (GLvoid*)offsetof(Vertex, position));
@@ -88,7 +90,7 @@ void VertexArrayObject::configureVertexAttributes(Shader& shader) {
         GL_CHECK();
     }
     if (const AttributeLocation normalLocation =
-            shader.getAttributeLocation(normalAttributeName)) {
+              shader.getAttributeLocation(normalAttributeName)) {
         glVertexAttribPointer(normalLocation, sizeof(Normal) / sizeof(float),
                               GL_FLOAT, GL_FALSE, sizeof(Vertex),
                               (GLvoid*)offsetof(Vertex, normal));
@@ -96,7 +98,7 @@ void VertexArrayObject::configureVertexAttributes(Shader& shader) {
         GL_CHECK();
     }
     if (const AttributeLocation texCoordLocation =
-            shader.getAttributeLocation(texCoordAttributeName)) {
+              shader.getAttributeLocation(texCoordAttributeName)) {
         glVertexAttribPointer(texCoordLocation, sizeof(Point2D) / sizeof(float),
                               GL_FLOAT, GL_FALSE, sizeof(Vertex),
                               (GLvoid*)offsetof(Vertex, texCoord));
@@ -104,7 +106,7 @@ void VertexArrayObject::configureVertexAttributes(Shader& shader) {
         GL_CHECK();
     }
     if (const AttributeLocation colorLocation =
-            shader.getAttributeLocation(colorAttributeName)) {
+              shader.getAttributeLocation(colorAttributeName)) {
         glVertexAttribPointer(colorLocation, sizeof(Color) / sizeof(float),
                               GL_FLOAT, GL_FALSE, sizeof(Vertex),
                               (GLvoid*)offsetof(Vertex, color));
@@ -113,3 +115,5 @@ void VertexArrayObject::configureVertexAttributes(Shader& shader) {
     }
     GL_CHECK();
 }
+
+NS_KEPLER_END

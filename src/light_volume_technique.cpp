@@ -8,6 +8,8 @@
 #include "scene.hpp"
 #include "types.hpp"
 
+NS_KEPLER_BEGIN
+
 namespace {
 std::array<Vertex, 6> getFullScreenQuad() {
     return {{
@@ -245,3 +247,5 @@ void LightVolumeInstancedTechnique::drawPointLightsImpl(
           GL_TRIANGLES, 0, pointLightVolume.getBuffer().getElementCount(),
           scene.getPointLights().size()));
 }
+
+NS_KEPLER_END

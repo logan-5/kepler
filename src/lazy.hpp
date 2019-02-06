@@ -5,6 +5,8 @@
 
 #include <functional>
 
+NS_KEPLER_BEGIN
+
 namespace util {
 
 // TODO noexcept
@@ -41,5 +43,7 @@ Lazy<T, Getter> make_lazy(Getter g) {
 }
 
 }  // namespace util
+
+NS_KEPLER_END
 
 #endif

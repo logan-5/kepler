@@ -6,6 +6,8 @@
 #include <exception>
 #include <string>
 
+NS_KEPLER_BEGIN
+
 namespace fs {
 namespace detail {
 template <typename PathTag>
@@ -28,5 +30,7 @@ struct error_opening_file : std::runtime_error {
 };
 std::string loadFileAsString(const AbsolutePath& path);
 }  // namespace fs
+
+NS_KEPLER_END
 
 #endif
