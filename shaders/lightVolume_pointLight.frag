@@ -11,13 +11,16 @@ struct PointLight {
     vec3 specular;
 
     vec3 position;
-    float constant;
-    float linear;
-    float quadratic;
+    float radius;
 };
 uniform PointLight light;
 
 uniform vec2 screenResolution;
+
+float getAttenuation(float radius, float dist) {
+    return pow(clamp(1.0 - pow(dist / radius, 1.0), 0.0, 1.0), 2.0) /
+           (dist * dist + 1.0);
+}
 
 void main() {
     vec2 uv = gl_FragCoord.xy / screenResolution;
@@ -47,8 +50,7 @@ void main() {
           light.specular * pow(specularFactor, roughness) * specularColor;
 
     float dist = length(lightVec);
-    float attenuation = 1.0 / (light.constant + light.linear * dist +
-                               light.quadratic * dist * dist);
+    float attenuation = getAttenuation(light.radius, dist);
     out_color = (ambientResult + diffuseResult + vec4(specularResult, 1.0)) *
                 attenuation;
 }

@@ -21,6 +21,7 @@ def validate_shaders(dir_, version_string):
                     [_VALIDATOR, '--stdin', '-S', ext[1:]], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE)
                 error = p.communicate(input=source)[0]
                 if p.returncode != 0:
+                    print(file_name)
                     # validator prints 'stdin' first when printing
                     # errors in source read from stdin, trim that off
                     print(error.split('\n', 1)[1])

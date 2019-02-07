@@ -17,10 +17,6 @@ getPointLightsAttributeBuffer(const Scene& scene, Fn fn) {
                    std::back_inserter(attributes), fn);
     return std::make_shared<VertexAttributeBuffer<AttributeType>>(attributes);
 }
-
-glm::vec3 toVec(const PointLight::Attenuation& a) {
-    return {a.constant, a.linear, a.quadratic};
-}
 }  // namespace
 
 LightData::LightData(const Scene& in_scene)
@@ -33,7 +29,8 @@ LightData::LightData(const Scene& in_scene)
     }}
     , pointLightRadiiBuffer{[this] {
         return getPointLightsAttributeBuffer(
-              scene, [](const PointLight& light) { return light.getRadius(); });
+              scene,
+              [](const PointLight& light) { return light.radius.rep(); });
     }}
     , pointLightAmbientColorBuffer{[this] {
         return getPointLightsAttributeBuffer(
@@ -52,11 +49,6 @@ LightData::LightData(const Scene& in_scene)
               scene, [](const PointLight& light) {
                   return light.colors.specular.rep();
               });
-    }}
-    , pointLightAttenuationBuffer{[this] {
-        return getPointLightsAttributeBuffer(
-              scene,
-              [](const PointLight& light) { return toVec(light.attenuation); });
     }} {}
 
 NS_KEPLER_END

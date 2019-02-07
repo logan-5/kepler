@@ -13,6 +13,7 @@
 #include "material.hpp"
 #include "object.hpp"
 #include "optional.hpp"
+#include "random.hpp"
 #include "renderer.hpp"
 #include "scene.hpp"
 #include "shader.hpp"
@@ -124,17 +125,13 @@ std::unique_ptr<Camera> createCamera(Window& window) {
     return camera;
 }
 
-bool coinFlip() {
-    return util::random::random(false, true);
-}
-
 Object randomCube(const Object& startingCube) {
+    using util::random;
     Object ret = startingCube;
-    using namespace util::random;
     ret.transform().position =
           Point{random(-5.f, 5.f), random(-5.f, 5.f), random(0.f, -10.f)};
     ret.transform().scale = Scale{random(0.5f, 1.5f)};
-    if (coinFlip()) {
+    if (util::randomBool()) {
         ret.addBehavior(RotateForeverBehavior{
               Euler{Degrees{random(-5.f, 5.f)}, Degrees{random(-5.f, 5.f)},
                     Degrees{random(-5.f, 5.f)}}});
@@ -169,26 +166,27 @@ Object theFloor() {
 }
 
 PointLight randomLight() {
-    using namespace util::random;
+    using util::random;
     constexpr auto areaSize = 10.f;
-    constexpr auto areaVertOffset = 2.5f;
+    constexpr auto areaVertOffset = 5.f;
     auto randomPoint = [] {
         return Point{random(-areaSize, areaSize),
                      random(-areaSize, areaSize) + areaVertOffset,
                      random(-areaSize, areaSize)};
     };
     auto randomColor = [] {
-        return ColorRGB{random(0.f, 1.f), random(0.f, 1.f), random(0.f, 1.f)};
+        return ColorRGB{util::randomOnUnitSphere() * 0.333f +
+                        glm::vec3{0.667f}};
     };
     const auto lightColor = randomColor();
     auto theLight = PointLight{
           Transform{randomPoint(), Euler{}, Scale{2.5f}},
           Light_base::Colors{ColorRGB{0.1f, 0.1f, 0.1f}, lightColor,
                              lightColor},
-          PointLight::Attenuation::fromDistance(50.f),
+          PointLight::Radius{random(2.5f, 7.5f)},
     };
-    if (coinFlip()) {
-        theLight.addBehavior(BobBehavior{glm::vec3{0.f, 1.f, 0.f}});
+    if (util::randomBool(0.2f)) {
+        theLight.addBehavior(PulseBehavior{random(0.f, 2.f)});
     }
     return theLight;
 }
@@ -217,12 +215,12 @@ int main() {
     PointLight light{
           {Point{1.f, 1.f, -1.f}, Euler{}, Scale{0.5f}},
           {{0.1f, 0.1f, 0.1f}, {1.f, 0.5f, 1.f}, {1.f, 0.5f, 1.f}},
-          PointLight::Attenuation::fromDistance(50.f),
+          PointLight::Radius{5.f},
     };
     PointLight light2{
           {Point{1.f, -1.f, -10.f}, Euler{}, Scale{0.5f}},
           {{0.1f, 0.1f, 0.1f}, {0.f, 0.5f, 1.f}, {0.f, 0.5f, 1.f}},
-          PointLight::Attenuation::fromDistance(25.f),
+          PointLight::Radius{5.f},
     };
     const Material cubeMaterial{containerTexture, containerSpecularTexture,
                                 512.f};
@@ -230,7 +228,7 @@ int main() {
 
     Renderer theRenderer{window.getResolution(), createCamera(window)};
     theRenderer.setBackgroundColor({0.05f, 0.05f, 0.06f, 1.f});
-    theRenderer.setDebugDrawLights(true);
+    // theRenderer.setDebugDrawLights(true);
     window.getInput().setKeyCallback(Input::Key::B, [&theRenderer] {
         theRenderer.debug_cycleDeferredTechnique();
     });

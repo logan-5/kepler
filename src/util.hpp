@@ -202,36 +202,6 @@ class container_view {
    private:
     std::reference_wrapper<Container> c;
 };
-}  // namespace util
-
-NS_KEPLER_END
-
-#include <random>
-
-NS_KEPLER_BEGIN
-
-namespace util {
-namespace random {
-namespace detail {
-extern std::mt19937 engine;
-}
-
-template <typename Int>
-std::enable_if_t<std::is_integral<Int>::value, Int> random(Int min, Int max) {
-    return std::uniform_int_distribution<Int>{min, max}(detail::engine);
-}
-template <typename Float>
-std::enable_if_t<std::is_floating_point<Float>::value, Float> random(
-      Float min,
-      Float max) {
-    return std::uniform_real_distribution<Float>{min, max}(detail::engine);
-}
-
-inline bool random(bool min, bool max) {
-    return static_cast<bool>(
-          random(static_cast<int>(min), static_cast<int>(max)));
-}
-}  // namespace random
 
 template <typename... Ts>
 using void_t = void;

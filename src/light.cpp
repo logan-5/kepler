@@ -18,10 +18,10 @@ void Light_base::applyUniforms(const std::string& name,
 
 PointLight::PointLight(const Transform& transform,
                        const Light_base::Colors& colors,
-                       Attenuation in_attenuation)
+                       Radius in_radius)
     : Transformed{transform}
     , Light_base{colors}
-    , attenuation{in_attenuation}
+    , radius{in_radius}
     , debugDrawData{getDebugDrawData} {}
 
 void PointLight::applyAdditionalUniforms(const std::string& name,
@@ -31,27 +31,12 @@ void PointLight::applyAdditionalUniforms(const std::string& name,
           name + ".position",
           glm::vec3{viewTransform *
                     glm::vec4{this->transform().position.rep(), 1.f}});
-    shader.setUniform(name + ".constant", attenuation.constant);
-    shader.setUniform(name + ".linear", attenuation.linear);
-    shader.setUniform(name + ".quadratic", attenuation.quadratic);
-}
-
-auto PointLight::Attenuation::fromDistance(float distance) -> Attenuation {
-    (void)distance;  // TODO
-    return {1.f, 1.9975f, 2.999994f};
-}
-
-float PointLight::getRadius() const {
-    const auto brightest = std::max(
-          {colors.diffuse.r(), colors.diffuse.g(), colors.diffuse.b()});
-    const auto &a = attenuation.quadratic, &b = attenuation.linear;
-    const auto c = attenuation.constant - brightest * (256.f / 2.f);
-    return (-b + std::sqrt(std::pow(b, 2.f) - 4.f * a * c)) / (2.f * a);
+    shader.setUniform(name + ".radius", radius.rep());
 }
 
 glm::mat4 PointLight::getVolumeModelMatrix() const {
     return transform().getTranslationMatrix() *
-           glm::scale(matrix::identity(), glm::vec3{getRadius()});
+           glm::scale(matrix::identity(), glm::vec3{radius.rep()});
 }
 
 void PointLight::debugDraw(const glm::mat4& viewProjectionTransform) {

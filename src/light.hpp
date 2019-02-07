@@ -37,27 +37,18 @@ struct PointLight
     : public Transformed
     , public Light_base
     , public Actor<PointLight> {
-    struct Attenuation {
-        float constant;
-        float linear;
-        float quadratic;
-
-        static Attenuation fromDistance(float distance);
+    struct Radius : Rep<float> {
+        using Rep::Rep;
     };
-    PointLight(const Transform& transform,
-               const Light_base::Colors& colors,
-               Attenuation in_attenuation);
 
     PointLight(const Transform& transform,
                const Light_base::Colors& colors,
-               float range)
-        : PointLight(transform, colors, Attenuation::fromDistance(range)) {}
+               Radius in_radius);
 
-    Attenuation attenuation;
+    Radius radius;
 
     void debugDraw(const glm::mat4& viewProjectionTransform);
 
-    float getRadius() const;
     glm::mat4 getVolumeModelMatrix() const;
 
     PointLight& getActor() override { return *this; }

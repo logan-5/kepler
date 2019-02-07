@@ -2,6 +2,7 @@
 #define BEHAVIORS_HPP
 
 #include "behavior.hpp"
+#include "light.hpp"
 #include "types.hpp"
 
 NS_KEPLER_BEGIN
@@ -25,6 +26,15 @@ struct BobBehavior : Behavior<Transformed> {
     Point startingPos;
     void start(Transformed& object);
     void update(Seconds dt, Transformed& object);
+};
+
+struct PulseBehavior : Behavior<PointLight> {
+    PulseBehavior(float amount) : time{0.f}, amount{amount} {}
+    float time;
+    float amount;
+    PointLight::Radius startingRadius;
+    void start(PointLight& light);
+    void update(Seconds dt, PointLight& light);
 };
 
 NS_KEPLER_END

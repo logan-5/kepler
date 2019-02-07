@@ -41,7 +41,6 @@ class LightData {
     POINT_LIGHT_DATA_LAZY_BUFFER(glm::vec3, AmbientColor)
     POINT_LIGHT_DATA_LAZY_BUFFER(glm::vec3, DiffuseColor)
     POINT_LIGHT_DATA_LAZY_BUFFER(glm::vec3, SpecularColor)
-    POINT_LIGHT_DATA_LAZY_BUFFER(glm::vec3, Attenuation)
 
 #undef POINT_LIGHT_DATA_LAZY_BUFFER
 };

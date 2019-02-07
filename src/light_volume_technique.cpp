@@ -252,9 +252,6 @@ void LightVolumeInstancedTechnique::drawPointLightsImpl(
     pointLightVolume.addInstancedBuffer(
           "specularColor", shader,
           scene.getLightData().getPointLightSpecularColorBuffer());
-    pointLightVolume.addInstancedBuffer(
-          "attenuation", shader,
-          scene.getLightData().getPointLightAttenuationBuffer());
 
     pointLightVolume.bind();
     GL_CHECK(glDrawArraysInstanced(

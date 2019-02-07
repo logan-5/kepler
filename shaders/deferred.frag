@@ -12,9 +12,7 @@ struct PointLight {
     vec3 specular;
 
     vec3 position;
-    float constant;
-    float linear;
-    float quadratic;
+    float radius;
 };
 uniform PointLight pointLights[MAX_POINT_LIGHTS];
 uniform int pointLightCount;
@@ -54,12 +52,9 @@ vec4 getLightColor(vec4 diffuseColor,
     return ambientResult + diffuseResult + vec4(specularResult, 1.0);
 }
 
-float getAttenuation(float constant,
-                     float linear,
-                     float quadratic,
-                     float distance) {
-    return 1.0 /
-           (constant + linear * distance + quadratic * distance * distance);
+float getAttenuation(float radius, float dist) {
+    return pow(clamp(1.0 - pow(dist / radius, 1.0), 0.0, 1.0), 2.0) /
+           (dist * dist + 1.0);
 }
 
 void main() {
@@ -75,8 +70,7 @@ void main() {
 
     for (int i = 0; i < pointLightCount; ++i) {
         float attenuation =
-              getAttenuation(pointLights[i].constant, pointLights[i].linear,
-                             pointLights[i].quadratic,
+              getAttenuation(pointLights[i].radius,
                              length(pointLights[i].position - position));
         out_color +=
               getLightColor(diffuseColor, specularColor, position, normal,

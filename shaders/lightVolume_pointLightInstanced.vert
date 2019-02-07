@@ -4,16 +4,13 @@ layout(location = 2) in float radius;
 layout(location = 3) in vec3 ambientColor;
 layout(location = 4) in vec3 diffuseColor;
 layout(location = 5) in vec3 specularColor;
-layout(location = 6) in vec3 attenuation;
 
 out vec3 lightAmbient;
 out vec3 lightDiffuse;
 out vec3 lightSpecular;
 
 out vec3 lightPosition;
-out float lightConstant;
-out float lightLinear;
-out float lightQuadratic;
+out float lightRadius;
 
 uniform mat4 view;
 uniform mat4 projection;
@@ -25,7 +22,5 @@ void main() {
     lightDiffuse = diffuseColor;
     lightSpecular = specularColor;
     lightPosition = vec3(view * vec4(worldPos, 1.0));
-    lightConstant = attenuation.r;
-    lightLinear = attenuation.g;
-    lightQuadratic = attenuation.b;
+    lightRadius = radius;
 }
