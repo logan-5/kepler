@@ -48,7 +48,7 @@ struct Movable {
     constexpr Movable() : _moved{false} {}
     Movable(const Movable&) = delete;
     Movable& operator=(const Movable&) = delete;
-    Movable(Movable&& other) noexcept { other._moved = true; }
+    Movable(Movable&& other) noexcept : Movable{} { other._moved = true; }
     Movable& operator=(Movable&& other) noexcept {
         if (this != &other) {
             other._moved = true;
@@ -63,8 +63,13 @@ struct Movable {
     bool _moved;
 };
 
-template <typename... Ts>
 struct NoOp {
+    template <typename... Ts>
+    constexpr void operator()(Ts&&...) const {}
+};
+
+template <typename... Ts>
+struct TypedNoOp {
     constexpr void operator()(const Ts&...) const {}
 };
 
@@ -170,6 +175,11 @@ struct RAII : MovePolicy {
    private:
     compressed_pair<T, Deleter> data;
 };
+struct Dess {
+    void operator()(int) const;
+};
+
+static_assert(std::is_move_constructible<RAII<int, Dess, Movable>>::value, "");
 
 // allows for non-const access of container elements,
 // without allowing the container itself to be modified (e.g. push_back)

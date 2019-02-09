@@ -2,3 +2,4 @@
 build
 xcode
 build_release
+gcc
