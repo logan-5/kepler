@@ -22,6 +22,17 @@ GLenum convertFilter(const Texture::Filter filter) {
     }
 }
 
+GLenum convertFormatSRGB(const GLenum format) {
+    switch (format) {
+        case GL_RGB:
+            return GL_SRGB;
+        case GL_RGBA:
+            return GL_SRGB_ALPHA;
+    }
+    assert(false && "can't convert format to SRGB");
+    return format;
+}
+
 void setTexParams(GLuint texID, const Texture::Params& params) {
     glBindTexture(GL_TEXTURE_2D, texID);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
@@ -52,10 +63,13 @@ GLuint createTexture(Resolution resolution,
 }
 }  // namespace
 
-GLuint Texture::create(const Image& img, const Params& params) {
-    return createTexture(img.getResolution(),
-                         {img.getFormat(), GL_UNSIGNED_BYTE}, img.data(),
-                         params);
+GLuint Texture::create(const Image& img, bool srgb, const Params& params) {
+    return createTexture(
+          img.getResolution(),
+          {img.getFormat(), GL_UNSIGNED_BYTE,
+           srgb ? util::make_optional(convertFormatSRGB(img.getFormat()))
+                : util::nullopt},
+          img.data(), params);
 }
 
 GLuint Texture::create(Resolution resolution,

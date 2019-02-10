@@ -13,6 +13,7 @@
 #include "gl/vertex_array.hpp"
 #include "kepler_config.hpp"
 #include "renderer/postprocessing_pipeline.hpp"
+#include "renderer/postprocessing_step.hpp"
 #include "renderer/renderer.hpp"
 #include "scene/behaviors.hpp"
 #include "scene/camera.hpp"
@@ -146,9 +147,10 @@ Object theFloor() {
     Texture::Params params;
     params.wrapS = params.wrapT = Texture::Wrap::Repeat;
     auto containerTexture = std::make_shared<Texture>(
-          Image{fs::RelativePath{"res/tiles_016_basecolor.jpg"}}, params);
+          Image{fs::RelativePath{"res/tiles_016_basecolor.jpg"}}, true, params);
     auto containerSpecularTexture = std::make_shared<Texture>(
-          Image{fs::RelativePath{"res/tiles_016_roughness.jpg"}}, params);
+          Image{fs::RelativePath{"res/tiles_016_roughness.jpg"}}, false,
+          params);
     const Material floorMaterial{containerTexture, containerSpecularTexture,
                                  256.f};
 
@@ -201,19 +203,22 @@ auto getRandomLights(std::size_t count) {
 }
 
 PostprocessingPipeline getPostprocessingPipeline() {
-    return PostprocessingPipeline{{}};
+    return PostprocessingPipeline{PostprocessingPipeline::Descriptor{
+          {PostprocessingStep{"gamma_correction"}}}};
 }
 }  // namespace
 
 int main() {
+    std::ios::sync_with_stdio(false);
+
     Window window{{1280, 720}, "kepler", errorCallback};
     window.getInput().setKeyCallback(Input::Key::Esc,
                                      [&] { window.requestClose(); });
 
     auto containerTexture = std::make_shared<Texture>(
-          Image{fs::RelativePath{"res/container2.png"}});
+          Image{fs::RelativePath{"res/container2.png"}}, true);
     auto containerSpecularTexture = std::make_shared<Texture>(
-          Image{fs::RelativePath{"res/container2_specular.png"}});
+          Image{fs::RelativePath{"res/container2_specular.png"}}, false);
     assert(glGetError() == GL_NO_ERROR);
 
     auto cubeBuffer = std::make_shared<VertexBuffer>(getCubeVerts());
@@ -259,7 +264,7 @@ int main() {
     mainScene.addObject(theFloor());
     mainScene.addDirectionalLight(DirectionalLight{
           Direction{0.f, -1.f, 0.f},
-          {{0.1f, 0.1f, 0.1f}, {0.5f, 0.4f, 0.3f}, {0.5f, 0.4f, 0.3f}}});
+          {{0.f, 0.f, 0.f}, {0.05f, 0.05f, 0.05f}, {0.1f, 0.05f, 0.05f}}});
 
     window.setWindowSizeCallback([&](const Resolution newResolution) {
         std::cout << "window size changed to " << newResolution << '\n';

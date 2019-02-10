@@ -3,25 +3,13 @@
 
 #include "common/types.hpp"
 #include "util/invoke_result.hpp"
+#include "util/map.hpp"
 #include "util/util.hpp"
 
 #include <memory>
 #include <vector>
 
 NS_KEPLER_BEGIN
-
-namespace util {
-template <typename T,
-          typename Func,
-          typename U = invoke_result_t<Func&, const T&>>
-std::vector<U> map(const std::vector<T>& vec, Func func) {
-    std::vector<U> ret;
-    ret.reserve(vec.size());
-    std::transform(std::begin(vec), std::end(vec), std::back_inserter(ret),
-                   func);
-    return ret;
-}
-}  // namespace util
 
 template <typename ActorType>
 struct Behavior {

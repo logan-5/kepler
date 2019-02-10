@@ -47,7 +47,7 @@ class Texture : public GLObject<detail::DeleteTexture> {
     };
 
    private:
-    static GLuint create(const Image& img, const Params& params);
+    static GLuint create(const Image& img, bool srgb, const Params& params);
     static GLuint create(Resolution resolution,
                          Format format,
                          const Params& params);
@@ -59,8 +59,8 @@ class Texture : public GLObject<detail::DeleteTexture> {
     }
 
    public:
-    Texture(const Image& img, const Params& params = {})
-        : GLObject{create(img, params)} {}
+    Texture(const Image& img, bool srgb, const Params& params = {})
+        : GLObject{create(img, srgb, params)} {}
     Texture(const Resolution& res, Format format, const Params& params)
         : GLObject{create(res, format, params)} {}
 

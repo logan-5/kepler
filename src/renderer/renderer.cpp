@@ -24,8 +24,7 @@ void setDrawBuffers(GBuffer& gBuffer) {
 }
 
 auto postprocessorFramebufferOptions() {
-    return FrameBuffer::Attachments::Options{
-          {GL_RGBA, GL_UNSIGNED_BYTE}, true, false};
+    return FrameBuffer::Attachments::Options{{GL_RGBA, GL_FLOAT}, true, false};
 }
 
 FrameBuffer::View screenOutputFramebuffer() {

@@ -175,11 +175,6 @@ struct RAII : MovePolicy {
    private:
     compressed_pair<T, Deleter> data;
 };
-struct Dess {
-    void operator()(int) const;
-};
-
-static_assert(std::is_move_constructible<RAII<int, Dess, Movable>>::value, "");
 
 // allows for non-const access of container elements,
 // without allowing the container itself to be modified (e.g. push_back)
