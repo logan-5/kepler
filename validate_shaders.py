@@ -11,21 +11,22 @@ _EXTS = ['.vert', '.tesc', '.tese', '.geom', '.frag', '.comp']
 
 
 def validate_shaders(dir_, version_string):
-    for file_name in os.listdir(dir_):
-        ext = os.path.splitext(file_name)[1]
-        if ext in _EXTS:
-            name = os.path.join(dir_, file_name)
-            with open(name, r'r') as shader:
-                source = version_string + shader.read()
-                p = sp.Popen(
-                    [_VALIDATOR, '--stdin', '-S', ext[1:]], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE)
-                error = p.communicate(input=source)[0]
-                if p.returncode != 0:
-                    print(file_name)
-                    # validator prints 'stdin' first when printing
-                    # errors in source read from stdin, trim that off
-                    print(error.split('\n', 1)[1])
-                    return p.returncode
+    for dirpath, _, filenames in os.walk(dir_):
+        for file_name in filenames:
+            ext = os.path.splitext(file_name)[1]
+            if ext in _EXTS:
+                name = os.path.join(dirpath, file_name)
+                with open(name, r'r') as shader:
+                    source = version_string + shader.read()
+                    p = sp.Popen(
+                        [_VALIDATOR, '--stdin', '-S', ext[1:]], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE)
+                    error = p.communicate(input=source)[0]
+                    if p.returncode != 0:
+                        print(file_name)
+                        # validator prints 'stdin' first when printing
+                        # errors in source read from stdin, trim that off
+                        print(error.split('\n', 1)[1])
+                        return p.returncode
     return 0
 
 

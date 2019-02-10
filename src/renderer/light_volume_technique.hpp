@@ -12,6 +12,7 @@ struct PointLight;
 
 struct LightVolumeTechnique_base : public DeferredShadingTechnique {
     void doDeferredPass(GBuffer& gBuffer,
+                        FrameBuffer::View outputFrameBuffer,
                         Scene& scene,
                         const glm::mat4& viewTransform,
                         const glm::mat4& projectionTransform,

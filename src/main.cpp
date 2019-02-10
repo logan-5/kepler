@@ -12,6 +12,7 @@
 #include "gl/texture.hpp"
 #include "gl/vertex_array.hpp"
 #include "kepler_config.hpp"
+#include "renderer/postprocessing_pipeline.hpp"
 #include "renderer/renderer.hpp"
 #include "scene/behaviors.hpp"
 #include "scene/camera.hpp"
@@ -198,6 +199,10 @@ auto getRandomLights(std::size_t count) {
     std::generate_n(std::back_inserter(lights), count, randomLight);
     return lights;
 }
+
+PostprocessingPipeline getPostprocessingPipeline() {
+    return PostprocessingPipeline{{}};
+}
 }  // namespace
 
 int main() {
@@ -228,7 +233,8 @@ int main() {
                                 512.f};
     GL_CHECK();
 
-    Renderer theRenderer{window.getResolution(), createCamera(window)};
+    Renderer theRenderer{window.getResolution(), createCamera(window),
+                         getPostprocessingPipeline()};
     theRenderer.setBackgroundColor({0.05f, 0.05f, 0.06f, 1.f});
     // theRenderer.setDebugDrawLights(true);
     window.getInput().setKeyCallback(Input::Key::B, [&theRenderer] {

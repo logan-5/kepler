@@ -22,6 +22,15 @@ void setDrawBuffers(GBuffer& gBuffer) {
     auto buffers = gBuffer.getBuffers();
     GL_CHECK(glDrawBuffers(buffers.size(), buffers.data()));
 }
+
+auto postprocessorFramebufferOptions() {
+    return FrameBuffer::Attachments::Options{
+          {GL_RGBA, GL_UNSIGNED_BYTE}, true, false};
+}
+
+FrameBuffer::View screenOutputFramebuffer() {
+    return FrameBuffer::View{0};
+}
 }  // namespace
 
 std::unique_ptr<DeferredShadingTechnique> Renderer::debug_getDeferredTechnique(
@@ -42,11 +51,15 @@ std::unique_ptr<DeferredShadingTechnique> Renderer::debug_getDeferredTechnique(
     throw "up";
 }
 
-Renderer::Renderer(Resolution in_resolution, std::unique_ptr<Camera> in_camera)
+Renderer::Renderer(Resolution in_resolution,
+                   std::unique_ptr<Camera> in_camera,
+                   PostprocessingPipeline in_pipeline)
     : resolution{in_resolution}
     , camera{std::move(in_camera)}
     , clearFlag{GL_COLOR_BUFFER_BIT}
     , gBuffer{resolution}
+    , postprocessorFramebuffer{resolution, postprocessorFramebufferOptions()}
+    , postprocessor{std::move(in_pipeline)}
     , debug_currentDeferredTechnique{0}
     , deferredTechnique{debug_getDeferredTechnique(
             debug_currentDeferredTechnique)}
@@ -64,6 +77,8 @@ Renderer::~Renderer() = default;
 void Renderer::resolutionChanged(Resolution newResolution) {
     this->resolution = newResolution;
     gBuffer = GBuffer{resolution};
+    postprocessorFramebuffer =
+          FrameBuffer{resolution, postprocessorFramebufferOptions()};
     setDrawBuffers(gBuffer);
     camera->resolutionChanged(resolution);
 }
@@ -88,11 +103,15 @@ void Renderer::renderScene(Scene& scene) {
     const auto view = camera->getViewMatrix();
 
     GL_CHECK(doGeometryPass(scene, view, projection));
-    GL_CHECK(deferredTechnique->doDeferredPass(this->gBuffer, scene, view,
-                                               projection, this->resolution));
+    GL_CHECK(deferredTechnique->doDeferredPass(
+          this->gBuffer, postprocessorFramebuffer, scene, view, projection,
+          this->resolution));
     if (needsForwardPass()) {
         GL_CHECK(doForwardPass(scene, view, projection));
     }
+
+    postprocessor.execute(postprocessorFramebuffer.attachments.mainColor,
+                          screenOutputFramebuffer());
 }
 
 void Renderer::doGeometryPass(Scene& scene,
@@ -119,7 +138,7 @@ void Renderer::doForwardPass(Scene& scene,
                              const glm::mat4& viewTransform,
                              const glm::mat4& projectionTransform) {
     if (!deferredTechnique->blitsGBufferDepth()) {
-        gBuffer.blit(GL_DEPTH_BUFFER_BIT, FrameBuffer::View{0}, resolution);
+        gBuffer.blit(GL_DEPTH_BUFFER_BIT, postprocessorFramebuffer, resolution);
     }
     const auto viewProjection = projectionTransform * viewTransform;
     for (auto& light : scene.getPointLights()) {

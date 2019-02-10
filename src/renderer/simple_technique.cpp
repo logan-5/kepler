@@ -25,7 +25,7 @@ std::array<Vertex, 6> getFullScreenQuad() {
 SimpleTechnique::SimpleTechnique(Shader::private_tag privateShaderAccess)
     : shader{ShaderSources::withVertAndFrag(
                    fs::loadFileAsString(
-                         fs::RelativePath("shaders/deferred.vert")),
+                         fs::RelativePath("shaders/position_texcoord.vert")),
                    fs::loadFileAsString(
                          fs::RelativePath("shaders/deferred.frag"))),
              privateShaderAccess}
@@ -37,6 +37,7 @@ bool SimpleTechnique::blitsGBufferDepth() const {
 }
 
 void SimpleTechnique::doDeferredPass(GBuffer& gBuffer,
+                                     FrameBuffer::View outputFrameBuffer,
                                      Scene& scene,
                                      const glm::mat4& viewTransform,
                                      const glm::mat4& projectionTransform,
@@ -46,6 +47,7 @@ void SimpleTechnique::doDeferredPass(GBuffer& gBuffer,
     setUniforms(gBuffer, shader);
     setLights(scene, viewTransform, projectionTransform);
 
+    outputFrameBuffer.bind();
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
     RAIIBinding<VertexArrayObject> bind{fullscreenQuad};

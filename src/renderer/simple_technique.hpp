@@ -11,6 +11,7 @@ NS_KEPLER_BEGIN
 struct SimpleTechnique final : public DeferredShadingTechnique {
     SimpleTechnique(Shader::private_tag privateShaderAccess);
     void doDeferredPass(GBuffer& gBuffer,
+                        FrameBuffer::View outputFrameBuffer,
                         Scene& scene,
                         const glm::mat4& viewTransform,
                         const glm::mat4& projectionTransform,

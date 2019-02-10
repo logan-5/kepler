@@ -47,6 +47,7 @@ class Shader final : public GLObject<detail::DeleteShader> {
        private:
         private_tag() = default;
         friend class Renderer;
+        friend struct PostprocessingPipeline;
     };
 
     enum class Type {
@@ -128,12 +129,18 @@ class Shader final : public GLObject<detail::DeleteShader> {
 
 struct ShaderSources {
    public:
-    using Sources = std::multimap<Shader::Type, std::vector<std::string>>;
+    struct SourceUnit : util::wrap<std::string, false> {
+        using wrap::wrap;
+        bool operator<(const SourceUnit& other) const {
+            return get() < other.get();
+        }
+    };
+    using Sources = std::multimap<Shader::Type, std::vector<SourceUnit>>;
 
     ShaderSources(Sources in_sources) noexcept
         : sources{std::move(in_sources)} {}
 
-    static ShaderSources withVertAndFrag(std::string vert, std::string frag);
+    static ShaderSources withVertAndFrag(SourceUnit vert, SourceUnit frag);
 
     static Sources::value_type emptyVertexShader();
     static Sources::value_type emptyFragmentShader();
@@ -145,7 +152,7 @@ struct ShaderSources {
    private:
     Sources sources;
 
-    static const std::string& versionString();
+    static const SourceUnit& versionString();
     friend class Shader;
     static std::vector<const char*> getCompilable(const Sources::mapped_type&);
 };

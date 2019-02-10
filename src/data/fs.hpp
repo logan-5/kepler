@@ -13,7 +13,7 @@ namespace fs {
 namespace detail {
 template <typename PathTag>
 struct Path : public util::wrap<std::string, false> {
-    using util::wrap<std::string, false>::wrap;
+    using wrap::wrap;
 };
 struct Absolute_Tag {};
 struct Relative_Tag {};

@@ -5,6 +5,7 @@
 #include "gl/shader.hpp"
 #include "gl/vertex_array.hpp"
 #include "renderer/gbuffer.hpp"
+#include "renderer/postprocessor.hpp"
 #include "scene/camera.hpp"
 
 NS_KEPLER_BEGIN
@@ -15,7 +16,9 @@ struct DeferredShadingTechnique;
 
 class Renderer {
    public:
-    Renderer(Resolution resolution, std::unique_ptr<Camera> in_camera);
+    Renderer(Resolution resolution,
+             std::unique_ptr<Camera> in_camera,
+             PostprocessingPipeline pipeline);
     ~Renderer();
 
     void renderScene(Scene& scene);
@@ -49,6 +52,8 @@ class Renderer {
     Color clearColor;
     GLuint clearFlag;
     GBuffer gBuffer;
+    FrameBuffer postprocessorFramebuffer;
+    Postprocessor postprocessor;
 
     int debug_currentDeferredTechnique;
     std::unique_ptr<DeferredShadingTechnique> deferredTechnique;

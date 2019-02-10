@@ -31,9 +31,17 @@ class FrameBuffer : public GLObject<detail::DeleteFBO> {
 
        public:
         struct Options {
-            bool depth = true;
-            bool stencil = false;
+            explicit Options(Texture::Format main,
+                             bool depth = true,
+                             bool stencil = false,
+                             std::vector<Texture::Format> additional = {})
+                : mainColorFormat{main}
+                , depth{depth}
+                , stencil{stencil}
+                , additionalColorFormats{std::move(additional)} {}
             Texture::Format mainColorFormat;
+            bool depth;
+            bool stencil;
             std::vector<Texture::Format> additionalColorFormats;
         };
 
@@ -61,6 +69,9 @@ class FrameBuffer : public GLObject<detail::DeleteFBO> {
         View(const View&) = default;
         View& operator=(const View&) = default;
         GLuint fbo;
+
+        void bind() noexcept { FrameBuffer::bind(fbo); }
+        static void unbind() noexcept { FrameBuffer::unbind(); }
     };
     operator View() const { return View{getHandle()}; }
     void blit(GLbitfield mask, View destination, Resolution resolution);

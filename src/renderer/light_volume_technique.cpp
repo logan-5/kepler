@@ -41,11 +41,13 @@ bool LightVolumeTechnique_base::blitsGBufferDepth() const {
 
 void LightVolumeTechnique_base::doDeferredPass(
       GBuffer& gBuffer,
+      FrameBuffer::View outputFrameBuffer,
       Scene& scene,
       const glm::mat4& viewTransform,
       const glm::mat4& projectionTransform,
       const Resolution resolution) {
-    gBuffer.blit(GL_DEPTH_BUFFER_BIT, FrameBuffer::View{0}, resolution);
+    outputFrameBuffer.bind();
+    gBuffer.blit(GL_DEPTH_BUFFER_BIT, outputFrameBuffer, resolution);
 
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -149,26 +151,26 @@ LightVolumeTechnique::LightVolumeTechnique(
       Shader::private_tag privateShaderAccess)
     : LightVolumeTechnique_base{
             Shader{ShaderSources::withVertAndFrag(
-                         fs::loadFileAsString(
+                         {fs::loadFileAsString(
                                fs::RelativePath("shaders/"
                                                 "lightVolume_"
-                                                "pointLight.vert")),
-                         fs::loadFileAsString(
+                                                "pointLight.vert"))},
+                         {fs::loadFileAsString(
                                fs::RelativePath("shaders/"
                                                 "lightVolume_"
-                                                "pointLight.frag"))),
+                                                "pointLight.frag"))}),
                    privateShaderAccess},
             Shader{ShaderSources{{{Shader::Type::Vertex,
-                                   {fs::loadFileAsString(fs::RelativePath(
+                                   {{fs::loadFileAsString(fs::RelativePath(
                                          "shaders/"
-                                         "lightVolume_pointLight.vert"))}},
+                                         "lightVolume_pointLight.vert"))}}},
                                   ShaderSources::emptyFragmentShader()}},
                    privateShaderAccess},
             Shader{ShaderSources::withVertAndFrag(
-                         fs::loadFileAsString(
-                               fs::RelativePath("shaders/position.vert")),
-                         fs::loadFileAsString(fs::RelativePath(
-                               "shaders/lightVolume_directionalLight.frag"))),
+                         {fs::loadFileAsString(
+                               fs::RelativePath("shaders/position.vert"))},
+                         {fs::loadFileAsString(fs::RelativePath(
+                               "shaders/lightVolume_directionalLight.frag"))}),
                    privateShaderAccess}} {}
 
 void LightVolumeTechnique::drawPointLightsImpl(
@@ -206,23 +208,24 @@ LightVolumeInstancedTechnique::LightVolumeInstancedTechnique(
     : LightVolumeTechnique_base{
             Shader{
                   ShaderSources::withVertAndFrag(
-                        fs::loadFileAsString(fs::RelativePath(
-                              "shaders/lightVolume_pointLightInstanced.vert")),
-                        fs::loadFileAsString(fs::RelativePath(
-                              "shaders/lightVolume_pointLightInstanced.frag"))),
+                        {fs::loadFileAsString(fs::RelativePath(
+                              "shaders/lightVolume_pointLightInstanced.vert"))},
+                        {fs::loadFileAsString(fs::RelativePath(
+                              "shaders/"
+                              "lightVolume_pointLightInstanced.frag"))}),
                   privateShaderAccess},
             Shader{ShaderSources{
                          {{Shader::Type::Vertex,
-                           {fs::loadFileAsString(fs::RelativePath(
+                           {{fs::loadFileAsString(fs::RelativePath(
                                  "shaders/"
-                                 "lightVolume_pointLightInstanced.vert"))}},
+                                 "lightVolume_pointLightInstanced.vert"))}}},
                           ShaderSources::emptyFragmentShader()}},
                    privateShaderAccess},
             Shader{ShaderSources::withVertAndFrag(
-                         fs::loadFileAsString(
-                               fs::RelativePath("shaders/position.vert")),
-                         fs::loadFileAsString(fs::RelativePath(
-                               "shaders/lightVolume_directionalLight.frag"))),
+                         {fs::loadFileAsString(
+                               fs::RelativePath("shaders/position.vert"))},
+                         {fs::loadFileAsString(fs::RelativePath(
+                               "shaders/lightVolume_directionalLight.frag"))}),
                    privateShaderAccess}} {}
 
 void LightVolumeInstancedTechnique::drawPointLightsImpl(

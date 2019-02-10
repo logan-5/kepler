@@ -2,6 +2,7 @@
 #define DEFERRED_TECHNIQUE_HPP
 
 #include "common/common.hpp"
+#include "gl/frame_buffer.hpp"
 #include "gl/shader.hpp"
 
 NS_KEPLER_BEGIN
@@ -14,6 +15,7 @@ struct DeferredShadingTechnique {
     virtual ~DeferredShadingTechnique() = default;
 
     virtual void doDeferredPass(GBuffer& gBuffer,
+                                FrameBuffer::View outputFrameBuffer,
                                 Scene& scene,
                                 const glm::mat4& viewTransform,
                                 const glm::mat4& projectionTransform,

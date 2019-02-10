@@ -27,16 +27,13 @@ auto getColorFormats() {
     return formats;
 }
 auto getAttachmentConfig() {
-    FrameBuffer::Attachments::Options options;
-
-    options.depth = true;
-    options.stencil = false;
-
     const auto formats = getColorFormats();
-    options.mainColorFormat = formats[0];
-    options.additionalColorFormats = drop<1>(formats);
-
-    return options;
+    return FrameBuffer::Attachments::Options{
+          formats[0],
+          true,
+          false,
+          drop<1>(formats),
+    };
 }
 }  // namespace
 

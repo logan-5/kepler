@@ -42,7 +42,7 @@ GLenum shaderType(const Shader::Type type) {
     }
 }
 
-std::string shaderTypeName(const Shader::Type type) {
+const char* shaderTypeName(const Shader::Type type) {
     switch (type) {
         case Shader::Type::Vertex:
             return "vertex shader";
@@ -84,7 +84,7 @@ GLuint Shader::create_impl(const ShaderSources& sources) {
             char info[512];
             GLsizei len;
             glGetShaderInfoLog(shader, 512, &len, info);
-            throw compile_error{"(" + shaderTypeName(sourcePair.first) + ") " +
+            throw compile_error{"("s + shaderTypeName(sourcePair.first) + ") " +
                                 std::string(info, len)};
         }
     }
@@ -137,28 +137,27 @@ std::shared_ptr<Shader> Shader::create(const ShaderSources& sources) {
 std::shared_ptr<Shader> Shader::create(const fs::AbsolutePath& vertexPath,
                                        const fs::AbsolutePath& fragmentPath) {
     return create(
-          ShaderSources::withVertAndFrag(fs::loadFileAsString(vertexPath),
-                                         fs::loadFileAsString(fragmentPath)));
+          ShaderSources::withVertAndFrag({fs::loadFileAsString(vertexPath)},
+                                         {fs::loadFileAsString(fragmentPath)}));
 }
 
-ShaderSources ShaderSources::withVertAndFrag(std::string vert,
-                                             std::string frag) {
+ShaderSources ShaderSources::withVertAndFrag(SourceUnit vert, SourceUnit frag) {
     return ShaderSources{
           {{Shader::Type::Vertex, {std::move(vert)}},
            {Shader::Type::Fragment, {std::move(frag)}}},
     };
 }
 
-const std::string& ShaderSources::versionString() {
-    static const std::string versionString =
+auto ShaderSources::versionString() -> const SourceUnit& {
+    static const SourceUnit versionString{
           "#version " + std::to_string(GL::Version::Major) +
-          std::to_string(GL::Version::Minor) + "0 core\n";
+          std::to_string(GL::Version::Minor) + "0 core\n"};
     return versionString;
 }
 
 namespace {
 ShaderSources::Sources::mapped_type emptyShader() {
-    return {"void main() {}"s};
+    return {{"void main() {}"s}};
 }
 }  // namespace
 
@@ -174,10 +173,10 @@ std::vector<const char*> ShaderSources::getCompilable(
       const Sources::mapped_type& sources) {
     std::vector<const char*> ret;
     ret.reserve(sources.size() + 1);
-    ret.push_back(versionString().c_str());
+    ret.push_back(versionString().get().c_str());
     std::transform(std::begin(sources), std::end(sources),
                    std::back_inserter(ret),
-                   [](const std::string& str) { return str.c_str(); });
+                   [](const SourceUnit& str) { return str.get().c_str(); });
     return ret;
 }
 
