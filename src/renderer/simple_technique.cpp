@@ -22,13 +22,11 @@ std::array<Vertex, 6> getFullScreenQuad() {
 }
 }  // namespace
 
-SimpleTechnique::SimpleTechnique(Shader::private_tag privateShaderAccess)
+SimpleTechnique::SimpleTechnique()
     : shader{ShaderSources::withVertAndFrag(
-                   fs::loadFileAsString(
-                         fs::RelativePath("shaders/position_texcoord.vert")),
-                   fs::loadFileAsString(
-                         fs::RelativePath("shaders/deferred.frag"))),
-             privateShaderAccess}
+            fs::loadFileAsString(
+                  fs::RelativePath("shaders/position_texcoord.vert")),
+            fs::loadFileAsString(fs::RelativePath("shaders/deferred.frag")))}
     , fullscreenQuad{std::make_shared<VertexBuffer>(getFullScreenQuad()),
                      shader} {}
 

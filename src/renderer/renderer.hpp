@@ -5,7 +5,7 @@
 #include "gl/shader.hpp"
 #include "gl/vertex_array.hpp"
 #include "renderer/gbuffer.hpp"
-#include "renderer/postprocessor.hpp"
+#include "renderer/postprocessing/postprocessing_pipeline.hpp"
 #include "scene/camera.hpp"
 
 NS_KEPLER_BEGIN
@@ -18,7 +18,7 @@ class Renderer {
    public:
     Renderer(Resolution resolution,
              std::unique_ptr<Camera> in_camera,
-             PostprocessingPipeline pipeline);
+             PostprocessingPipeline postprocessor);
     ~Renderer();
 
     void renderScene(Scene& scene);
@@ -53,7 +53,7 @@ class Renderer {
     GLuint clearFlag;
     GBuffer gBuffer;
     FrameBuffer postprocessorFramebuffer;
-    Postprocessor postprocessor;
+    PostprocessingPipeline postprocessor;
 
     int debug_currentDeferredTechnique;
     std::unique_ptr<DeferredShadingTechnique> deferredTechnique;

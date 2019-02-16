@@ -126,9 +126,7 @@ void Shader::setUniform(const std::string& name,
 std::shared_ptr<Shader> Shader::create(const ShaderSources& sources) {
     auto existing = cache.find(sources);
     if (existing == std::end(cache)) {
-        return cache
-              .emplace(sources,
-                       std::make_shared<Shader>(sources, private_tag{}))
+        return cache.emplace(sources, std::make_shared<Shader>(sources))
               .first->second;
     }
     return existing->second;

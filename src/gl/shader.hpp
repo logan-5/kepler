@@ -40,16 +40,6 @@ class Shader final : public GLObject<detail::DeleteShader> {
     static std::map<ShaderSources, std::shared_ptr<Shader>> cache;
 
    public:
-    struct private_tag {
-        private_tag(const private_tag&) = default;
-        private_tag& operator=(const private_tag&) = default;
-
-       private:
-        private_tag() = default;
-        friend class Renderer;
-        friend struct PostprocessingPipeline;
-    };
-
     enum class Type {
         Vertex,
         Fragment,
@@ -63,8 +53,7 @@ class Shader final : public GLObject<detail::DeleteShader> {
 #endif
     };
 
-    Shader(const ShaderSources& sources, private_tag)
-        : GLObject{create_impl(sources)} {}
+    Shader(const ShaderSources& sources) : GLObject{create_impl(sources)} {}
 
     static void clearCache() { cache.clear(); }
 

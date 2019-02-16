@@ -12,8 +12,8 @@
 #include "gl/texture.hpp"
 #include "gl/vertex_array.hpp"
 #include "kepler_config.hpp"
-#include "renderer/postprocessing_pipeline.hpp"
-#include "renderer/postprocessing_step.hpp"
+#include "renderer/postprocessing/postprocessing_pipeline.hpp"
+#include "renderer/postprocessing/simple_postprocessing_step.hpp"
 #include "renderer/renderer.hpp"
 #include "scene/behaviors.hpp"
 #include "scene/camera.hpp"
@@ -203,8 +203,9 @@ auto getRandomLights(std::size_t count) {
 }
 
 PostprocessingPipeline getPostprocessingPipeline() {
-    return PostprocessingPipeline{PostprocessingPipeline::Descriptor{
-          {PostprocessingStep{"gamma_correction"}}}};
+    return std::make_unique<SimplePostprocessingStep>(
+          std::vector<SimplePostprocessingStep::StepDescriptor>{
+                {"gamma_correction"}});
 }
 }  // namespace
 

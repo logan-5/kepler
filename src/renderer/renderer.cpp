@@ -37,15 +37,13 @@ std::unique_ptr<DeferredShadingTechnique> Renderer::debug_getDeferredTechnique(
     switch (which % 3) {
         case 0:
             std::cout << "deferred shading using light volumes\n";
-            return std::make_unique<LightVolumeTechnique>(
-                  Shader::private_tag{});
+            return std::make_unique<LightVolumeTechnique>();
         case 1:
             std::cout << "deferred shading using instanced light volumes\n";
-            return std::make_unique<LightVolumeInstancedTechnique>(
-                  Shader::private_tag{});
+            return std::make_unique<LightVolumeInstancedTechnique>();
         case 2:
             std::cout << "deferred shading using no cleverness\n";
-            return std::make_unique<SimpleTechnique>(Shader::private_tag{});
+            return std::make_unique<SimpleTechnique>();
     }
     throw "up";
 }
@@ -109,8 +107,9 @@ void Renderer::renderScene(Scene& scene) {
         GL_CHECK(doForwardPass(scene, view, projection));
     }
 
-    postprocessor.execute(postprocessorFramebuffer.attachments.mainColor,
-                          screenOutputFramebuffer());
+    postprocessor->execute(gBuffer,
+                           postprocessorFramebuffer.attachments.mainColor,
+                           screenOutputFramebuffer());
 }
 
 void Renderer::doGeometryPass(Scene& scene,

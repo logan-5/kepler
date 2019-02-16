@@ -60,7 +60,7 @@ struct LightVolumeTechnique_base : public DeferredShadingTechnique {
 };
 
 struct LightVolumeTechnique final : public LightVolumeTechnique_base {
-    LightVolumeTechnique(Shader::private_tag privateShaderAccess);
+    LightVolumeTechnique();
 
    private:
     void drawPointLightsImpl(GBuffer& gBuffer,
@@ -77,7 +77,7 @@ struct LightVolumeTechnique final : public LightVolumeTechnique_base {
 };
 
 struct LightVolumeInstancedTechnique final : public LightVolumeTechnique_base {
-    LightVolumeInstancedTechnique(Shader::private_tag privateShaderAccess);
+    LightVolumeInstancedTechnique();
 
    private:
     void drawPointLightsImpl(GBuffer& gBuffer,
