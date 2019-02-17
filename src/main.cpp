@@ -133,7 +133,7 @@ Object randomCube(const Object& startingCube) {
     using util::random;
     Object ret = startingCube;
     ret.transform().position =
-          Point{random(-5.f, 5.f), random(-5.f, 5.f), random(0.f, -10.f)};
+          Point{random(-5.f, 5.f), random(-5.f, 5.f), random(-10.f, 0.f)};
     ret.transform().scale = Scale{random(0.5f, 1.5f)};
     if (util::randomBool()) {
         ret.addBehavior(RotateForeverBehavior{
