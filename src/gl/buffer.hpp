@@ -8,7 +8,6 @@
 #include "gl/gl_object.hpp"
 
 #include <array>
-#include <type_traits>
 #include <vector>
 
 NS_KEPLER_BEGIN

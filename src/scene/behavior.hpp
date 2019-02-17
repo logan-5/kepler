@@ -7,6 +7,7 @@
 #include "util/util.hpp"
 
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 NS_KEPLER_BEGIN

@@ -174,12 +174,12 @@ PointLight randomLight() {
     using util::random;
     constexpr auto areaSize = 10.f;
     constexpr auto areaVertOffset = 5.f;
-    auto randomPoint = [] {
+    auto randomPoint = [&] {
         return Point{random(-areaSize, areaSize),
                      random(-areaSize, areaSize) + areaVertOffset,
                      random(-areaSize, areaSize)};
     };
-    auto randomColor = [] {
+    auto randomColor = [&] {
         return ColorRGB{util::randomOnUnitSphere() * 0.333f +
                         glm::vec3{0.667f}};
     };

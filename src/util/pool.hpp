@@ -6,6 +6,8 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <utility>
+#include <vector>
 
 NS_KEPLER_BEGIN
 

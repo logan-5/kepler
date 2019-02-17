@@ -4,7 +4,9 @@
 #include "gl/frame_buffer.hpp"
 #include "gl/vertex_array.hpp"
 
+#include <cassert>
 #include <functional>
+#include <memory>
 #include <utility>
 
 NS_KEPLER_BEGIN

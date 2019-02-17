@@ -7,6 +7,7 @@
 #include "gl/gl_object.hpp"
 
 #include <memory>
+#include <string>
 #include <unordered_map>
 
 NS_KEPLER_BEGIN

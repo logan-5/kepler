@@ -8,6 +8,8 @@
 #include "renderer/postprocessing/postprocessing_step.hpp"
 #include "scene/camera.hpp"
 
+#include <memory>
+
 NS_KEPLER_BEGIN
 
 class Scene;

@@ -5,6 +5,7 @@
 #include "scene/material.hpp"
 #include "util/util.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <memory>
 #include <string>

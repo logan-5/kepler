@@ -5,6 +5,7 @@
 #include "util/util.hpp"
 
 #include <cassert>
+#include <memory>
 
 NS_KEPLER_BEGIN
 

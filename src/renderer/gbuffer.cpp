@@ -1,5 +1,6 @@
 #include "renderer/gbuffer.hpp"
 
+#include <algorithm>
 #include <numeric>
 #include <vector>
 

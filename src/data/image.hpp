@@ -14,6 +14,9 @@ class Image {
     Image(const fs::AbsolutePath& path);
     ~Image();
 
+    Image(Image&&) = default;
+    Image& operator=(Image&&) = default;
+
     const unsigned char* data() const;
     Resolution getResolution() const;
     GLenum getFormat() const;

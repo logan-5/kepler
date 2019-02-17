@@ -5,6 +5,9 @@
 #include "scene/behavior.hpp"
 #include "util/lazy.hpp"
 
+#include <memory>
+#include <string>
+
 NS_KEPLER_BEGIN
 
 class Shader;

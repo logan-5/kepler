@@ -6,6 +6,7 @@
 #include "renderer/postprocessing/postprocessing_step.hpp"
 
 #include <string>
+#include <vector>
 
 NS_KEPLER_BEGIN
 

@@ -7,7 +7,9 @@
 #include "util/optional.hpp"
 #include "util/pool.hpp"
 
+#include <memory>
 #include <string>
+#include <vector>
 
 NS_KEPLER_BEGIN
 

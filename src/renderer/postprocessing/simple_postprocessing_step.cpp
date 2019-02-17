@@ -2,6 +2,10 @@
 #include "gl/vertex_array.hpp"
 #include "util/map.hpp"
 
+#include <string>
+#include <utility>
+#include <vector>
+
 NS_KEPLER_BEGIN
 
 namespace {

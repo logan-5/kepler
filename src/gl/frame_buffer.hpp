@@ -7,6 +7,7 @@
 #include "util/optional.hpp"
 
 #include <cassert>
+#include <utility>
 #include <vector>
 
 NS_KEPLER_BEGIN

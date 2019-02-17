@@ -117,8 +117,10 @@ set(INCLUDE_DIRS ${INCLUDE_DIRS} ${STB_INCLUDE})
 set(INCLUDE_DIRS ${INCLUDE_DIRS} ${LIB_DIR}/optional-lite/include)
 
 # validate shaders
+find_package(PythonInterp 2.7 REQUIRED)
+
 add_custom_target(validate_shaders 
-    COMMAND python ${CMAKE_CURRENT_SOURCE_DIR}/validate_shaders.py ${CMAKE_CURRENT_SOURCE_DIR}/shaders ${PROJECT_OPENGL_VERSION_MAJOR} ${PROJECT_OPENGL_VERSION_MINOR})
+    COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/validate_shaders.py ${CMAKE_CURRENT_SOURCE_DIR}/shaders ${PROJECT_OPENGL_VERSION_MAJOR} ${PROJECT_OPENGL_VERSION_MINOR})
 
 # main target
 add_executable(${PROJECT_NAME} ${SRC})

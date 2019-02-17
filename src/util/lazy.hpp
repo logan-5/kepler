@@ -4,6 +4,7 @@
 #include "util/optional.hpp"
 
 #include <functional>
+#include <utility>
 
 NS_KEPLER_BEGIN
 
