@@ -203,9 +203,18 @@ auto getRandomLights(std::size_t count) {
 }
 
 PostprocessingPipeline getPostprocessingPipeline() {
-    return std::make_unique<SimplePostprocessingStep>(
+    auto grouped = std::make_unique<GroupedPostprocessingStep>();
+    auto gamma = std::make_unique<SimplePostprocessingStep>(
           std::vector<SimplePostprocessingStep::StepDescriptor>{
-                {"gamma_correction"}});
+                {"gamma_correction"},
+          });
+    auto invert = std::make_unique<SimplePostprocessingStep>(
+          std::vector<SimplePostprocessingStep::StepDescriptor>{
+                {"inversion"},
+          });
+    grouped->append(std::move(gamma));
+    grouped->append(std::move(invert));
+    return grouped;
 }
 }  // namespace
 

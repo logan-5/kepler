@@ -23,10 +23,6 @@ void setDrawBuffers(GBuffer& gBuffer) {
     GL_CHECK(glDrawBuffers(buffers.size(), buffers.data()));
 }
 
-auto postprocessorFramebufferOptions() {
-    return FrameBuffer::Attachments::Options{{GL_RGBA, GL_FLOAT}, true, false};
-}
-
 FrameBuffer::View screenOutputFramebuffer() {
     return FrameBuffer::View{0};
 }
@@ -55,7 +51,7 @@ Renderer::Renderer(Resolution in_resolution,
     , camera{std::move(in_camera)}
     , clearFlag{GL_COLOR_BUFFER_BIT}
     , gBuffer{resolution}
-    , postprocessorFramebuffer{resolution, postprocessorFramebufferOptions()}
+    , postprocessorFramebuffer{PostprocessingStep::createFBO(resolution)}
     , postprocessor{std::move(in_pipeline)}
     , debug_currentDeferredTechnique{0}
     , deferredTechnique{debug_getDeferredTechnique(
@@ -74,8 +70,7 @@ Renderer::~Renderer() = default;
 void Renderer::resolutionChanged(Resolution newResolution) {
     this->resolution = newResolution;
     gBuffer = GBuffer{resolution};
-    postprocessorFramebuffer =
-          FrameBuffer{resolution, postprocessorFramebufferOptions()};
+    postprocessorFramebuffer = PostprocessingStep::createFBO(resolution);
     setDrawBuffers(gBuffer);
     camera->resolutionChanged(resolution);
 }
@@ -101,14 +96,14 @@ void Renderer::renderScene(Scene& scene) {
 
     GL_CHECK(doGeometryPass(scene, view, projection));
     GL_CHECK(deferredTechnique->doDeferredPass(
-          this->gBuffer, postprocessorFramebuffer, scene, view, projection,
+          this->gBuffer, *postprocessorFramebuffer, scene, view, projection,
           this->resolution));
     if (needsForwardPass()) {
         GL_CHECK(doForwardPass(scene, view, projection));
     }
 
     postprocessor->execute(gBuffer,
-                           postprocessorFramebuffer.attachments.mainColor,
+                           postprocessorFramebuffer->attachments.mainColor,
                            screenOutputFramebuffer());
 }
 
@@ -136,7 +131,8 @@ void Renderer::doForwardPass(Scene& scene,
                              const glm::mat4& viewTransform,
                              const glm::mat4& projectionTransform) {
     if (!deferredTechnique->blitsGBufferDepth()) {
-        gBuffer.blit(GL_DEPTH_BUFFER_BIT, postprocessorFramebuffer, resolution);
+        gBuffer.blit(GL_DEPTH_BUFFER_BIT, *postprocessorFramebuffer,
+                     resolution);
     }
     const auto viewProjection = projectionTransform * viewTransform;
     for (auto& light : scene.getPointLights()) {

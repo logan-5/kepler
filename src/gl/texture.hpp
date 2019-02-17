@@ -59,16 +59,19 @@ class Texture : public GLObject<detail::DeleteTexture> {
     }
 
    public:
-    Texture(const Image& img, bool srgb, const Params& params = {})
-        : GLObject{create(img, srgb, params)} {}
-    Texture(const Resolution& res, Format format, const Params& params)
-        : GLObject{create(res, format, params)} {}
+    Texture(const Image& img, bool srgb, const Params& params = {});
+    Texture(const Resolution& res, Format format, const Params& params);
 
     void bind(GLenum unit) {
         assert((unit + 1) <= maxBoundTextures());
         glActiveTexture(GL_TEXTURE0 + unit);
         glBindTexture(GL_TEXTURE_2D, this->handle);
     }
+
+    Resolution getResolution() const noexcept { return resolution; }
+
+   private:
+    Resolution resolution;
 };
 
 NS_KEPLER_END

@@ -35,8 +35,9 @@ ShaderSources buildShaderSources(const std::vector<Descriptor>& descriptors) {
 
 SimplePostprocessingStep::StepDescriptor::StepDescriptor(std::string in_name)
     : name{std::move(in_name)}
-    , source{fs::loadFileAsString(
-            fs::RelativePath{"shaders/postprocessing/" + name + ".frag"})} {}
+    , source{fs::loadFileAsString(fs::RelativePath{"shaders/postprocessing/" +
+                                                   name + ".frag"}) +
+             '\n'} {}
 
 SimplePostprocessingStep::SimplePostprocessingStep(
       const std::vector<StepDescriptor>& descriptors)

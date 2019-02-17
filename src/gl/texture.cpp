@@ -78,4 +78,10 @@ GLuint Texture::create(Resolution resolution,
     return createTexture(resolution, format, nullptr, params);
 }
 
+Texture::Texture(const Image& img, bool srgb, const Params& params)
+    : GLObject{create(img, srgb, params)}, resolution{img.getResolution()} {}
+
+Texture::Texture(const Resolution& res, Format format, const Params& params)
+    : GLObject{create(res, format, params)}, resolution{res} {}
+
 NS_KEPLER_END

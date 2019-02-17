@@ -4,6 +4,8 @@
 #include "gl/frame_buffer.hpp"
 #include "gl/shader.hpp"
 #include "kepler_config.hpp"
+#include "util/optional.hpp"
+#include "util/pool.hpp"
 
 #include <string>
 
@@ -21,11 +23,17 @@ struct PostprocessingStep {
                          FrameBuffer::View output) = 0;
 
     static std::shared_ptr<VertexArrayObject> fullScreenVAO();
+
+    static std::unique_ptr<FrameBuffer> createFBO(Resolution resolution);
 };
 
 struct GroupedPostprocessingStep : PostprocessingStep {
     using Steps = std::vector<std::unique_ptr<PostprocessingStep>>;
-    GroupedPostprocessingStep(Steps in_steps) : steps{std::move(in_steps)} {}
+
+    explicit GroupedPostprocessingStep(Steps in_steps = {});
+
+    void append(Steps::value_type step);
+    void append(Steps steps);
 
     void execute(const GBuffer& gBuffer,
                  Texture& input,
@@ -33,6 +41,13 @@ struct GroupedPostprocessingStep : PostprocessingStep {
 
    private:
     Steps steps;
+    struct FBOPool {
+        util::Pool<FrameBuffer> pool;
+        Resolution resolution;
+    };
+    util::optional<FBOPool> fboPool;
+
+    void setUpPool(Resolution resolution);
 };
 
 NS_KEPLER_END

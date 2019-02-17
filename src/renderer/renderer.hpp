@@ -52,7 +52,7 @@ class Renderer {
     Color clearColor;
     GLuint clearFlag;
     GBuffer gBuffer;
-    FrameBuffer postprocessorFramebuffer;
+    std::unique_ptr<FrameBuffer> postprocessorFramebuffer;
     PostprocessingPipeline postprocessor;
 
     int debug_currentDeferredTechnique;
