@@ -5,27 +5,26 @@
 #include "gl/gl_object.hpp"
 #include "util/util.hpp"
 
+#include <functional>
+
 NS_KEPLER_BEGIN
 
 template <typename Bindable>
 struct RAIIBinding {
-    RAIIBinding(GLuint handle) noexcept(noexcept(Bindable::bind(handle)))
-        : binding{{}} {
-        Bindable::bind(handle);
-    }
     template <typename... Ts>
-    RAIIBinding(const GLObject<Ts...>& obj) noexcept(
-          noexcept(Bindable::bind(obj.getHandle())))
-        : RAIIBinding(obj.getHandle()) {}
+    RAIIBinding(Bindable& bindable) noexcept(noexcept(bindable.bind()))
+        : binding{bindable, {}} {
+        bindable.bind();
+    }
 
    private:
-    struct Nothing {};
     struct Unbind {
-        void operator()(Nothing) const noexcept(noexcept(Bindable::unbind())) {
-            Bindable::unbind();
+        void operator()(Bindable& bindable) const
+              noexcept(noexcept(bindable.unbind())) {
+            bindable.unbind();
         };
     };
-    util::RAII<Nothing, Unbind> binding;
+    util::RAII<std::reference_wrapper<Bindable>, Unbind> binding;
 };
 
 NS_KEPLER_END

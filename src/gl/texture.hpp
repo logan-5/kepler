@@ -22,7 +22,7 @@ struct DeleteTexture {
 };
 }  // namespace detail
 
-class Texture : public GLObject<detail::DeleteTexture> {
+class Texture : public GLObject<void, detail::DeleteTexture> {
    public:
     enum class Wrap {
         Clamp,
@@ -62,7 +62,7 @@ class Texture : public GLObject<detail::DeleteTexture> {
     Texture(const Image& img, bool srgb, const Params& params = {});
     Texture(const Resolution& res, Format format, const Params& params);
 
-    void bind(GLenum unit) {
+    void bind(GLenum unit) noexcept {
         assert((unit + 1) <= maxBoundTextures());
         glActiveTexture(GL_TEXTURE0 + unit);
         glBindTexture(GL_TEXTURE_2D, this->handle);

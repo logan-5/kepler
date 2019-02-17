@@ -35,7 +35,6 @@ struct GBuffer {
         return *frameBuffer.attachments.depth;
     }
 
-    GLuint getFrameBufferHandle() const { return frameBuffer.getHandle(); }
     void bind() { frameBuffer.bind(); }
     void unbind() { frameBuffer.unbind(); }
 

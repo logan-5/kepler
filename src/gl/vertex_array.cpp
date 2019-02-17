@@ -42,7 +42,7 @@ void VertexArrayObject::addInstancedBuffer(
       const GLsizei stride,
       const GLuint divisor) {
     GL_CHECK();
-    shader.use();
+    shader.bind();
     if (const AttributeLocation location =
               shader.getAttributeLocation(attribute)) {
         if (isBufferAlreadySet(location, theBuffer)) {
@@ -76,10 +76,10 @@ bool VertexArrayObject::isBufferAlreadySet(
 
 void VertexArrayObject::configureVertexAttributes(Shader& shader) {
     GL_CHECK();
-    shader.use();
-    RAIIBinding<VertexArrayObject> bindSelf{this->handle};
+    shader.bind();
+    this->bind();
     assert(vbo);
-    RAIIBinding<VertexBuffer> bindBuffer{vbo->getHandle()};
+    vbo->bind();
     GL_CHECK();
 
     if (const AttributeLocation positionLocation =

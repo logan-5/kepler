@@ -17,7 +17,7 @@ NS_KEPLER_BEGIN
 
 namespace {
 void setDrawBuffers(GBuffer& gBuffer) {
-    RAIIBinding<FrameBuffer> bind{gBuffer.getFrameBufferHandle()};
+    gBuffer.bind();
     GL_CHECK();
     auto buffers = gBuffer.getBuffers();
     GL_CHECK(glDrawBuffers(buffers.size(), buffers.data()));
@@ -119,8 +119,6 @@ void Renderer::doGeometryPass(Scene& scene,
         GL_CHECK(object.setUniforms(viewTransform, projectionTransform));
         GL_CHECK(object.render());
     }
-
-    GL_CHECK(gBuffer.unbind());
 }
 
 bool Renderer::needsForwardPass() const {

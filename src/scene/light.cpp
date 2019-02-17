@@ -41,7 +41,7 @@ glm::mat4 PointLight::getVolumeModelMatrix() const {
 
 void PointLight::debugDraw(const glm::mat4& viewProjectionTransform) {
     DebugDrawData& data = debugDrawData;
-    data.shader->use();
+    data.shader->bind();
     data.vao->bind();
     data.shader->setUniform("mvp",
                             viewProjectionTransform * getVolumeModelMatrix());

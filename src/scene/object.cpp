@@ -40,7 +40,7 @@ Object::Object(const Transform& transform,
 void Object::setUniformsImpl(const glm::mat4& model,
                              const glm::mat4& view,
                              const glm::mat4& projection) {
-    shader->use();
+    shader->bind();
     const auto modelView = view * model;
     shader->setUniform("modelView", modelView);
     shader->setUniform("projection", projection);
@@ -49,7 +49,7 @@ void Object::setUniformsImpl(const glm::mat4& model,
 }
 
 void Object::render() {
-    shader->use();
+    shader->bind();
     vao->bind();
     glDrawArrays(GL_TRIANGLES, 0, vao->getBuffer().getElementCount());
 }

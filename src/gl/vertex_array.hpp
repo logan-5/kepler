@@ -15,6 +15,12 @@ NS_KEPLER_BEGIN
 class Shader;
 
 namespace detail {
+struct BindVAO {
+    static void bind(GLuint buf) noexcept {
+        GL_CHECK(glBindVertexArray(buf));
+        assert(glIsVertexArray(buf));
+    }
+};
 struct DeleteVAO {
     void operator()(GLuint vao) const noexcept {
         assert(glIsVertexArray(vao));
@@ -23,20 +29,13 @@ struct DeleteVAO {
 };
 }  // namespace detail
 
-struct VertexArrayObject : public GLObject<detail::DeleteVAO> {
+struct VertexArrayObject : public GLObject<detail::BindVAO, detail::DeleteVAO> {
     struct nonexistent_attribute_location : std::runtime_error {
         nonexistent_attribute_location(const std::string& name)
             : runtime_error{"no attribute named \"" + name + '"'} {}
     };
 
     VertexArrayObject(std::shared_ptr<VertexBuffer> in_vbo, Shader& shader);
-
-    void bind() noexcept { bind(this->handle); }
-    static void bind(GLuint buf) noexcept {
-        GL_CHECK(glBindVertexArray(buf));
-        assert(glIsVertexArray(buf));
-    }
-    static void unbind() noexcept { GL_CHECK(glBindVertexArray(0)); }
 
     const VertexBuffer& getBuffer() const noexcept {
         assert(vbo);

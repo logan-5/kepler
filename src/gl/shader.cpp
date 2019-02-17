@@ -116,7 +116,7 @@ GLuint Shader::create_impl(const ShaderSources& sources) {
 
 void Shader::setUniform(const std::string& name,
                         const Material& material) noexcept {
-    use();
+    bind();
     material.diffuse->bind(Material::TextureUnit::Diffuse);
     setUniform(name + ".diffuse", Material::TextureUnit::Diffuse);
     material.specular->bind(Material::TextureUnit::Specular);

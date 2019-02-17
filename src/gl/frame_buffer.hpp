@@ -13,6 +13,11 @@
 NS_KEPLER_BEGIN
 
 namespace detail {
+struct BindFBO {
+    static void bind(GLuint buf) noexcept {
+        glBindFramebuffer(GL_FRAMEBUFFER, buf);
+    }
+};
 struct DeleteFBO {
     void operator()(GLuint fbo) const {
         assert(glIsFramebuffer(fbo));
@@ -21,8 +26,24 @@ struct DeleteFBO {
 };
 }  // namespace detail
 
-class FrameBuffer : public GLObject<detail::DeleteFBO> {
+class FrameBuffer : public GLObject<detail::BindFBO, detail::DeleteFBO> {
    public:
+    struct View {
+        explicit View(GLuint fbo) : fbo{fbo} {}
+        View(const View&) = default;
+        View& operator=(const View&) = default;
+        GLuint fbo;
+
+        void bind() noexcept {
+            if (this->fbo != FrameBuffer::currentlyBound) {
+                GL_CHECK(detail::BindFBO::bind(this->fbo));
+                currentlyBound = this->fbo;
+            }
+        }
+        static void unbind() noexcept {}
+    };
+    operator View() const { return View{getHandle()}; }
+
     struct Attachments {
        private:
         friend class FrameBuffer;
@@ -52,29 +73,13 @@ class FrameBuffer : public GLObject<detail::DeleteFBO> {
 
        private:
         static Attachments create(Resolution resolution,
-                                  GLuint fbo,
+                                  FrameBuffer::View fbo,
                                   const Options& options);
     };
     FrameBuffer(Resolution resolution, const Attachments::Options& options);
 
-    void bind() noexcept { bind(this->handle); }
-    static void bind(GLuint buf) noexcept {
-        glBindFramebuffer(GL_FRAMEBUFFER, buf);
-    }
-    static void unbind() noexcept { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
-
     Attachments attachments;
 
-    struct View {
-        explicit View(GLuint fbo) : fbo{fbo} {}
-        View(const View&) = default;
-        View& operator=(const View&) = default;
-        GLuint fbo;
-
-        void bind() noexcept { FrameBuffer::bind(fbo); }
-        static void unbind() noexcept { FrameBuffer::unbind(); }
-    };
-    operator View() const { return View{getHandle()}; }
     void blit(GLbitfield mask, View destination, Resolution resolution);
 };
 

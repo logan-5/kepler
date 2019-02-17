@@ -13,6 +13,10 @@
 NS_KEPLER_BEGIN
 
 namespace detail {
+template <GLenum Target>
+struct BindBuffer {
+    static void bind(GLuint buf) noexcept { glBindBuffer(Target, buf); }
+};
 struct DeleteBuffer {
     void operator()(GLuint buf) const noexcept {
         assert(glIsBuffer(buf));
@@ -22,22 +26,19 @@ struct DeleteBuffer {
 }  // namespace detail
 
 template <GLenum Target>
-struct Buffer_base : public GLObject<detail::DeleteBuffer> {
+struct Buffer_base
+    : public GLObject<detail::BindBuffer<Target>, detail::DeleteBuffer> {
    protected:
     static constexpr const GLenum target = Target;
 
    public:
     Buffer_base()
-        : GLObject{[] {
+        : GLObject<detail::BindBuffer<Target>, detail::DeleteBuffer>{[] {
             GLuint buf;
             glGenBuffers(1, &buf);
             return buf;
         }()} {}
     virtual ~Buffer_base() = default;
-
-    void bind() noexcept { bind(this->handle); }
-    static void bind(GLuint buf) noexcept { glBindBuffer(target, buf); }
-    static void unbind() noexcept { glBindBuffer(target, 0); }
 };
 
 using VertexAttributeBuffer_base = Buffer_base<GL_ARRAY_BUFFER>;

@@ -15,10 +15,10 @@ GLuint create() {
 }  // namespace
 
 auto FrameBuffer::Attachments::create(Resolution resolution,
-                                      GLuint fbo,
+                                      FrameBuffer::View fbo,
                                       const Options& options) -> Attachments {
     GL_CHECK();
-    RAIIBinding<FrameBuffer> bind{fbo};
+    fbo.bind();
 
     Attachments attachments{
           Texture{resolution, options.mainColorFormat, Texture::Params{}}};
@@ -65,7 +65,7 @@ auto FrameBuffer::Attachments::create(Resolution resolution,
 FrameBuffer::FrameBuffer(Resolution resolution,
                          const Attachments::Options& options)
     : GLObject{create()}
-    , attachments{Attachments::create(resolution, this->handle, options)} {}
+    , attachments{Attachments::create(resolution, *this, options)} {}
 
 namespace {
 GLenum getFilter(GLbitfield mask) {

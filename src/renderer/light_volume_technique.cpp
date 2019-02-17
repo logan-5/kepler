@@ -226,7 +226,7 @@ void LightVolumeInstancedTechnique::drawPointLightsImpl(
       bool stencilPass) {
     Shader& shader =
           stencilPass ? pointLightStencilPassShader : pointLightShader;
-    shader.use();
+    shader.bind();
     shader.setUniform("view", viewTransform);
     shader.setUniform("projection", projectionTransform);
 
