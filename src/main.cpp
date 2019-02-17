@@ -12,7 +12,7 @@
 #include "gl/texture.hpp"
 #include "gl/vertex_array.hpp"
 #include "kepler_config.hpp"
-#include "renderer/postprocessing/postprocessing_pipeline.hpp"
+#include "renderer/postprocessing/postprocessing_step.hpp"
 #include "renderer/postprocessing/simple_postprocessing_step.hpp"
 #include "renderer/renderer.hpp"
 #include "scene/behaviors.hpp"

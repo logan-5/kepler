@@ -5,7 +5,7 @@
 #include "gl/shader.hpp"
 #include "gl/vertex_array.hpp"
 #include "renderer/gbuffer.hpp"
-#include "renderer/postprocessing/postprocessing_pipeline.hpp"
+#include "renderer/postprocessing/postprocessing_step.hpp"
 #include "scene/camera.hpp"
 
 NS_KEPLER_BEGIN

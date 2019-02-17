@@ -50,6 +50,8 @@ struct GroupedPostprocessingStep : PostprocessingStep {
     void setUpPool(Resolution resolution);
 };
 
+using PostprocessingPipeline = std::unique_ptr<PostprocessingStep>;
+
 NS_KEPLER_END
 
 #endif
